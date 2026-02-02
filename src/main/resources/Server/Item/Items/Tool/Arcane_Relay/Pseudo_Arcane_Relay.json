@@ -9,9 +9,9 @@
   },
   "Recipe": {
     "TimeSeconds": 0.5,
-    "Input": [
+   "Input": [
       {
-        "Quantity": 4,
+        "Quantity": 16,
         "ItemId": "Ingredient_Crystal_Cyan"
       },
       {
@@ -19,8 +19,8 @@
         "Quantity": 1
       },
       {
-        "ResourceTypeId": "Rubble",
-        "Quantity": 3
+        "ResourceTypeId": "Rock",
+        "Quantity": 1
       }
     ],
     "OutputQuantity": 1,

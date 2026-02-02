@@ -7,35 +7,7 @@
     "Primary": "Block_Primary",
     "Secondary": "Block_Secondary"
   },
-  "Recipe": {
-    "TimeSeconds": 0.5,
-    "Input": [
-      {
-        "Quantity": 4,
-        "ItemId": "Ingredient_Crystal_Cyan"
-      },
-      {
-        "ItemId": "Ingredient_Bar_Iron",
-        "Quantity": 1
-      },
-      {
-        "ResourceTypeId": "Rubble",
-        "Quantity": 3
-      }
-    ],
-    "OutputQuantity": 1,
-    "BenchRequirement": [
-      {
-        "Id": "Arcanebench",
-        "Type": "Crafting",
-        "Categories": [
-          "Arcane_Artifacts"
-        ]
-      }
-    ]
-  },
   "Categories": [
-    "Items.Tools"
   ],
   "BlockType": {
     "BlockEntity": {
