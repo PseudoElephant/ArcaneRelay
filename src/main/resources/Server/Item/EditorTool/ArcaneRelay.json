@@ -1,0 +1,25 @@
+{
+  "TranslationProperties": {
+    "Name": "Arcane Relay",
+    "Description": "Primary: select Arcane Trigger block. Secondary: add target block as output connection."
+  },
+  "Icon": "Icons/Items/EditorTools/Ruler.png",
+  "Categories": ["Tool.BuilderTool"],
+  "Model": "Items/Tools/Brush/Brush.blockymodel",
+  "Texture": "Items/Tools/Brush/Brush_Texture.png",
+  "MaxStack": 1,
+  "PlayerAnimationsId": "Item",
+  "BuilderTool": {
+  },
+  "Interactions": {
+    "Primary": "Simple",
+    "Secondary": "Simple"
+  },
+  "InteractionConfig": {
+    "UseDistance": {
+      "Adventure": 15,
+      "Creative": 15
+    }
+  },
+  "Quality": "Tool"
+}

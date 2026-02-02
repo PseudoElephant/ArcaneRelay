@@ -1,0 +1,24 @@
+items.Pseudo_Arcane_Button.name = Button
+items.Pseudo_Arcane_Button.description = Used to trigger other interactions remotely within a certain distance.
+items.Pseudo_Arcane_Toggle_Relay.name = Toggle Relay
+items.Pseudo_Arcane_Toggle_Relay.description = Used to block or relay signal depending on state.\n\nWhen a signal is received it always toggles it's state. If active it will relay the signal, if inactive it will stop the relay.\n\nInteract with the block to toggle the starting state.
+items.Pseudo_Arcane_Discharge.name = Discharge
+items.Pseudo_Arcane_Discharge.description = Used to store and stop signals before relaying once fully charged.\n\nWhen a signal is received it is stored, once fully charged the next signal is relayed.\n\nInteract to change the starting number of stored signals, or right click with a block to change the number of stored signals required before relaying.
+items.Pseudo_Arcane_Relay.name = Relay
+items.Pseudo_Arcane_Relay.description = Used to relay signals to trigger other interactions remotely within a certain distance.\n\nInteract to send a signal.
+items.Pseudo_Arcane_Pusher.name = Pusher
+items.Pseudo_Arcane_Pusher.description = Used to push blocks forwards. Blocks will be moved in the direction at which the Pusher is facing.\n\nInteract to activate.
+items.Pseudo_Arcane_Staff.name = Arcane Staff
+items.Pseudo_Arcane_Staff.description = (Required to configure Arcane Artifacts) Used to setup connections within Arcane blocks.
+arcanerelay.activationExecutor.executed=Activation Executed at [{blockX}],[{blockY}],[{blockZ}] with activation: [{activation}]
+arcanerelay.pusher.displaced=You were moved out of the block by the pusher.
+arcanerelay.pusher.pushed=You were pushed by the pusher.
+# === interactionHints ===
+
+interactionHints.button = Press [{key}] to press
+interactionHints.toggle = Press [{key}] to toggle
+interactionHints.cycle = Press [{key}] to cycle
+interactionHints.relay = Press [{key}] to relay
+
+# === bench ===
+benchCategories.artifacts = Artifacts

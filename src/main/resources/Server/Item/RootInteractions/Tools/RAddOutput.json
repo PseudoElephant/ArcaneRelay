@@ -1,0 +1,16 @@
+{
+  "Cooldown": {
+    "Cooldown": 0.05,
+    "ClickBypass": true
+  },
+  "Interactions": [
+    {
+      "Type": "FirstClick",
+      "Click": "Add_Output",
+      "Held": {
+        "Type": "Simple",
+        "RunTime": 0
+      }
+    }
+  ]
+}

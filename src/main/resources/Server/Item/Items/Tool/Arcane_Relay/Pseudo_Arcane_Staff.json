@@ -1,0 +1,68 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Pseudo_Arcane_Staff.name",
+    "Description": "server.items.Pseudo_Arcane_Staff.description"
+  },
+  "Categories": [
+    "Items.Tools"
+  ],
+  "Quality": "Tool",
+  "ItemLevel": 20,
+  "Model": "Items/Tools/Arcane_Staff/Arcane_Staff.blockymodel",
+  "Texture": "Items/Tools/Arcane_Staff/Arcane_Staff_Texture.png",
+  "PlayerAnimationsId": "Staff",
+  "Interactions": {
+    "Primary": "RAddOutput",
+    "Secondary": "RSelectTrigger"
+  },
+  "IconProperties": {
+    "Scale": 0.3,
+    "Rotation": [
+      45,
+      90,
+      0
+    ],
+    "Translation": [
+      -51,
+      -51
+    ]
+  },
+  "Icon": "Icons/ItemsGenerated/Pseudo_Arcane_Staff.png",
+  "DroppedItemAnimation": "Items/Animations/Dropped/Dropped_Diagonal_Left.blockyanim",
+  "Tags": {
+    "Type": [
+      "Tool"
+    ],
+    "Family": [
+      "Tool"
+    ]
+  },
+  "ItemSoundSetId": "ISS_Weapons_Wood",
+  "Recipe": {
+    "TimeSeconds": 0.5,
+    "Input": [
+      {
+        "Quantity": 4,
+        "ItemId": "Ingredient_Crystal_Cyan"
+      },
+      {
+        "ItemId": "Ingredient_Bar_Iron",
+        "Quantity": 15
+      },
+      {
+        "ResourceTypeId": "Ingredient_Bar_Gold",
+        "Quantity": 5
+      }
+    ],
+    "OutputQuantity": 1,
+    "BenchRequirement": [
+      {
+        "Id": "Arcanebench",
+        "Type": "Crafting",
+        "Categories": [
+          "Arcane_Artifacts"
+        ]
+      }
+    ]
+  }
+}

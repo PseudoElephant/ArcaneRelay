@@ -1,0 +1,22 @@
+{
+  "Type": "ArcaneDischarge",
+  "Changes": {
+    "default": "Zero_Inactive_All_Off",
+    "Zero_Inactive_All_Off": "Zero_Inactive_One_On",
+    "Zero_Inactive_One_On": "Zero_Inactive_Two_On",
+    "Zero_Inactive_Two_On": "Zero_Inactive_Three_On",
+    "Zero_Inactive_Three_On": "Zero_Inactive_All_On",
+    "Zero_Inactive_All_On": "Zero_Inactive_All_Off",
+    "One_Inactive_All_Off": "One_Inactive_One_On",
+    "One_Inactive_One_On": "One_Inactive_Two_On",
+    "One_Inactive_Two_On": "One_Inactive_All_On",
+    "One_Inactive_All_On": "One_Inactive_All_Off",
+    "Two_Inactive_All_Off": "Two_Inactive_One_On",
+    "Two_Inactive_One_On": "Two_Inactive_All_On",
+    "Two_Inactive_All_On": "Two_Inactive_All_Off",
+    "Three_Inactive_All_Off": "Three_Inactive_All_On",
+    "Three_Inactive_All_On": "Three_Inactive_All_Off",
+    "All_Inactive_All_On": "Zero_Inactive_All_Off"
+  },
+  "MaxChargeStateSuffix": "_All_On"
+}

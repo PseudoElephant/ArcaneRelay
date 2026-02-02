@@ -1,0 +1,128 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Pseudo_Arcane_Pusher.name",
+    "Description": "server.items.Pseudo_Arcane_Pusher.description"
+  },
+  "Interactions": {
+    "Primary": "Block_Primary",
+    "Secondary": "Block_Secondary"
+  },
+  "Recipe": {
+    "TimeSeconds": 0.5,
+    "Input": [
+      {
+        "Quantity": 4,
+        "ItemId": "Ingredient_Crystal_Cyan"
+      },
+      {
+        "ItemId": "Ingredient_Bar_Iron",
+        "Quantity": 1
+      },
+      {
+        "ResourceTypeId": "Rubble",
+        "Quantity": 3
+      }
+    ],
+    "OutputQuantity": 1,
+    "BenchRequirement": [
+      {
+        "Id": "Arcanebench",
+        "Type": "Crafting",
+        "Categories": [
+          "Arcane_Artifacts"
+        ]
+      }
+    ]
+  },
+  "Categories": [
+    "Items.Tools"
+  ],
+  "BlockType": {
+    "DrawType": "Model",
+    "BlockSoundSetId": "Stone",
+    "Opacity": "Transparent",
+    "CustomModel": "Blocks/Functional/Pusher.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Texture": "Blocks/Functional/Pusher_Texture.png",
+        "Weight": 1
+      }
+    ],
+    "CustomModelScale": 1,
+    "Light": {
+      "Radius": 0,
+      "Color": "#046"
+    },
+    "PlacementSettings": {
+      "AllowRotationKey": false,
+      "PlaceInEmptyBlocks": true,
+      "RotationMode": "Default",
+      "WallPlacementOverrideBlockId": "Pseudo_Arcane_Pusher_Wall"
+    },
+    "BlockParticleSetId": "Crystal",
+    "Material": "Solid",
+    "InteractionHint": "server.interactionHints.generic",
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+            "Type": "Condition",
+            "Crouching": true,
+            "Failed": {
+              "Type": "ArcaneActivator",
+              "Activator": "Pusher_Chain"
+            },
+            "Next": {
+              "Type": "OpenCustomUI",
+              "Page": {
+                "Id": "ArcaneTrigger"
+                }
+              }
+            }
+          ]
+        }
+    },
+    "State": {
+      "Definitions": {
+        "CloseDoorOut": {
+          "InteractionSoundEventId": "SFX_Sticks_Break",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Pusher/Move.blockyanim"
+        },
+        "OpenDoorOut": {
+          "InteractionSoundEventId": "SFX_Sticks_Break",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Pusher/Move.blockyanim"
+        }
+      }
+    },
+    "ParticleColor": "#bbac72",
+    "VariantRotation": "UpDownNESW",
+    "Gathering": {
+      "Breaking": {
+        "ItemId": "Pseudo_Arcane_Pusher",
+        "GatherType": "Rocks"
+      }
+    }
+  },
+  "PlayerAnimationsId": "Block",
+  "IconProperties": {
+    "Scale": 0.445,
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Translation": [
+      0,
+      -17.7
+    ]
+  },
+  "Icon": "Icons/ItemsGenerated/Pseudo_Arcane_Pusher.png",
+  "Scale": 1,
+  "Tags": {
+    "Type": [
+      "Tool"
+    ]
+  },
+  "ItemSoundSetId": "ISS_Blocks_Stone",
+  "Quality": "Tool"
+}

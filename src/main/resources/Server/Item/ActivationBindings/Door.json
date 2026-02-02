@@ -1,0 +1,4 @@
+{
+  "Pattern": "contains:Door",
+  "Activation": "Toggle_Door"
+}

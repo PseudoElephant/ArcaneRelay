@@ -1,0 +1,6 @@
+{
+  "Type": "ToggleState",
+  "OnState": "default",
+  "OffState": "Off",
+  "SendSignalWhen": "Off"
+}

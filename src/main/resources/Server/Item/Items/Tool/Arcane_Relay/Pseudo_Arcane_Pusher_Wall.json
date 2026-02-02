@@ -1,0 +1,94 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Pseudo_Arcane_Pusher.name",
+    "Description": "server.items.Pseudo_Arcane_Pusher.description"
+  },
+  "Interactions": {
+    "Primary": "Block_Primary",
+    "Secondary": "Block_Secondary"
+  },
+  "Categories": [
+  ],
+  "BlockType": {
+    "DrawType": "Model",
+    "BlockSoundSetId": "Stone",
+    "Opacity": "Transparent",
+    "CustomModel": "Blocks/Functional/Pusher_Wall.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Texture": "Blocks/Functional/Pusher_Texture.png",
+        "Weight": 1
+      }
+    ],
+    "CustomModelScale": 1,
+    "Light": {
+      "Radius": 0,
+      "Color": "#046"
+    },
+    "BlockParticleSetId": "Crystal",
+    "Material": "Solid",
+    "InteractionHint": "server.interactionHints.generic",
+    "Interactions": {
+     "Use": {
+        "Interactions": [
+          {
+            "Type": "Condition",
+            "Crouching": true,
+            "Failed": {
+              "Type": "ArcaneActivator",
+              "Activator": "Pusher_Chain_Wall"
+            },
+            "Next": {
+              "Type": "OpenCustomUI",
+              "Page": {
+                "Id": "ArcaneTrigger"
+                }
+              }
+            }
+          ]
+        }
+    },
+    "State": {
+      "Definitions": {
+        "CloseDoorOut": {
+          "InteractionSoundEventId": "SFX_Sticks_Break",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Pusher/Move.blockyanim"
+        },
+        "OpenDoorOut": {
+          "InteractionSoundEventId": "SFX_Sticks_Break",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Pusher/Move.blockyanim"
+        }
+      }
+    },
+    "ParticleColor": "#bbac72",
+    "VariantRotation": "UpDownNESW",
+    "Gathering": {
+      "Breaking": {
+        "ItemId": "Pseudo_Arcane_Pusher",
+        "GatherType": "Rocks"
+      }
+    }
+  },
+  "PlayerAnimationsId": "Block",
+  "IconProperties": {
+    "Scale": 0.445,
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Translation": [
+      0,
+      -17.7
+    ]
+  },
+  "Icon": "Icons/ItemsGenerated/Pseudo_Arcane_Pusher.png",
+  "Scale": 1,
+  "Tags": {
+    "Type": [
+      "Tool"
+    ]
+  },
+  "ItemSoundSetId": "ISS_Blocks_Stone",
+  "Quality": "Tool"
+}

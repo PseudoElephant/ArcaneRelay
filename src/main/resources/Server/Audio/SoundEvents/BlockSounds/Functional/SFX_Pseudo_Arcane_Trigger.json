@@ -1,0 +1,28 @@
+{
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/Blocks/Functional/Arcane_Trigger_1.ogg",
+        "Sounds/Blocks/Functional/Arcane_Trigger_2.ogg",
+        "Sounds/Blocks/Functional/Arcane_Trigger_3.ogg",
+        "Sounds/Blocks/Functional/Arcane_Trigger_4.ogg",
+        "Sounds/Blocks/Functional/Arcane_Trigger_5.ogg",
+        "Sounds/Blocks/Functional/Arcane_Trigger_6.ogg",
+        "Sounds/Blocks/Functional/Arcane_Trigger_7.ogg",
+        "Sounds/Blocks/Functional/Arcane_Trigger_8.ogg"
+      ],
+      "RandomSettings": {
+        "MinVolume": -2,
+        "MinPitch": 0,
+        "MaxPitch": 0
+      },
+      "StartDelay": 0,
+      "Volume": 2.0,
+      "RoundRobinHistorySize": 4
+    }
+  ],
+  "PreventSoundInterruption": true,
+  "Volume": 0,
+  "MaxInstance": 7,
+  "Parent": "SFX_Attn_Quiet"
+}

@@ -1,0 +1,16 @@
+$C = "../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Bottom: 4);
+  Padding: (Full: 4);
+
+  Label #Position {
+    Style: (...$C.@DefaultLabelStyle, FontSize: 14, TextColor: #afc2c3);
+    FlexWeight: 1;
+  }
+
+  $C.@SmallSecondaryTextButton #RemoveButton {
+    @Text = "Remove";
+  }
+}

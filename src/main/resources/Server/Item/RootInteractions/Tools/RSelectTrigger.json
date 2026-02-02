@@ -1,0 +1,17 @@
+{
+  "RequireNewClick": true,
+  "Cooldown": {
+    "Cooldown": 0.05,
+    "ClickBypass": true
+  },
+  "Interactions": [
+    {
+      "Type": "FirstClick",
+      "Click": "Select_Trigger",
+      "Held": {
+        "Type": "Simple",
+        "RunTime": 0
+      }
+    }
+  ]
+}

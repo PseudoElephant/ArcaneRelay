@@ -1,0 +1,5 @@
+{
+  "Type": "MoveBlock",
+  "Range": 15,
+  "IsWall": true
+}

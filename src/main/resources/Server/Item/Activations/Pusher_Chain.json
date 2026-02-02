@@ -1,0 +1,4 @@
+{
+  "Type": "Chain",
+  "Activations": ["Move_Block", "Toggle_Pusher"]
+}

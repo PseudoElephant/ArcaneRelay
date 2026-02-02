@@ -1,0 +1,66 @@
+$C = "../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Left: 16, Bottom: 112, Width: 220);
+  Background: #0d1117(0.88);
+  Padding: (Full: 0);
+
+  Group {
+    LayoutMode: Top;
+    Anchor: (Width: 3);
+    Background: #2dd4bf(0.85);
+  }
+
+  Group {
+    LayoutMode: Top;
+    FlexWeight: 1;
+    Padding: (Left: 10, Right: 10, Top: 8, Bottom: 8);
+
+    Label #Title {
+      Text: "Arcane Staff";
+      Anchor: (Bottom: 6);
+      Style: (...$C.@DefaultLabelStyle, RenderBold: true, FontSize: 12, TextColor: #e6edf3);
+    }
+
+    Group {
+      LayoutMode: Top;
+      Anchor: (Bottom: 5);
+      Padding: (Full: 0);
+
+      Label #PrimaryKey {
+        Text: "Primary";
+        Anchor: (Bottom: 1);
+        Style: (...$C.@DefaultLabelStyle, FontSize: 9, TextColor: #2dd4bf, RenderBold: true);
+      }
+      Label #Primary {
+        Text: "Select Arcane Trigger block";
+        Anchor: (Bottom: 4);
+        Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #b1bac4);
+      }
+
+      Label #SecondaryKey {
+        Text: "Secondary";
+        Anchor: (Bottom: 1);
+        Style: (...$C.@DefaultLabelStyle, FontSize: 9, TextColor: #2dd4bf, RenderBold: true);
+      }
+      Label #Secondary {
+        Text: "Add or remove output connection";
+        Anchor: (Bottom: 0);
+        Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #b1bac4);
+      }
+    }
+
+    Group {
+      LayoutMode: Top;
+      Anchor: (Bottom: 5, Height: 1);
+      Background: #30363d(0.6);
+    }
+
+    Label #Hint {
+      Text: "Shift + click trigger to open connections";
+      Anchor: (Bottom: 0);
+      Style: (...$C.@DefaultLabelStyle, FontSize: 8, TextColor: #6e7681);
+    }
+  }
+}

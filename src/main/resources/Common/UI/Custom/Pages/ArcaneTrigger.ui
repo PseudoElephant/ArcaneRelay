@@ -1,0 +1,73 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {
+  LayoutMode: Middle;
+
+  $C.@DecoratedContainer {
+    Anchor: (Width: 520, Height: 480);
+
+    #Title {
+      $C.@Title {
+        @Text = "Arcane Trigger";
+      }
+    }
+
+    #Content {
+      LayoutMode: Top;
+      Padding: (Full: 16);
+
+      Group #ErrorScreen {
+        LayoutMode: Top;
+        Visible: false;
+
+        Label {
+          Text: "Could not load trigger data.";
+          Anchor: (Bottom: 16);
+          Style: (...$C.@DefaultLabelStyle, RenderBold: true, TextColor: #ff6666);
+        }
+      }
+
+      Group #MainContent {
+        LayoutMode: Top;
+        Visible: true;
+
+        Label {
+          Text: "Output Connections";
+          Anchor: (Bottom: 12);
+          Style: (...$C.@DefaultLabelStyle, RenderBold: true);
+        }
+
+        Group #OutputList {
+          LayoutMode: TopScrolling;
+          Anchor: (Height: 280, Bottom: 16);
+          Background: #000000(0.3);
+          Padding: (Full: 8);
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+        }
+
+        Label #ConnectionCount {
+          Text: "0 connections";
+          Anchor: (Bottom: 16);
+          Style: (...$C.@DefaultLabelStyle, FontSize: 13, TextColor: #6e7da1);
+        }
+
+        Group {
+          Anchor: (Bottom: 16, Height: 1);
+          Background: #5e512c;
+        }
+
+        Group #Buttons {
+          LayoutMode: Left;
+          Anchor: (Height: 44);
+
+          $C.@SmallSecondaryTextButton #ClearButton {
+            @Text = "Clear All";
+            Visible: true;
+          }
+        }
+      }
+    }
+  }
+}
+
+$C.@BackButton {}

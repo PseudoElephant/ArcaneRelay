@@ -1,0 +1,138 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Pseudo_Arcane_Button.name",
+    "Description": "server.items.Pseudo_Arcane_Button.description"
+  },
+  "Interactions": {
+    "Primary": "Block_Primary",
+    "Secondary": "Block_Secondary"
+  },
+  "Recipe": {
+    "TimeSeconds": 0.5,
+    "Input": [
+      {
+        "Quantity": 4,
+        "ItemId": "Ingredient_Crystal_Cyan"
+      },
+      {
+        "ItemId": "Ingredient_Bar_Iron",
+        "Quantity": 1
+      },
+      {
+        "ResourceTypeId": "Rubble",
+        "Quantity": 3
+      }
+    ],
+    "OutputQuantity": 1,
+    "BenchRequirement": [
+      {
+        "Id": "Arcanebench",
+        "Type": "Crafting",
+        "Categories": [
+          "Arcane_Artifacts"
+        ]
+      }
+    ]
+  },
+  "Categories": [
+    "Items.Tools"
+  ],
+  "BlockType": {
+    "BlockEntity": {
+      "Components": {
+        "ArcaneTrigger": {}
+      }
+    },
+    "DrawType": "Model",
+    "BlockSoundSetId": "Stone",
+    "Opacity": "Transparent",
+    "CustomModel": "Blocks/Functional/Button.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Texture": "Blocks/Functional/Button_Texture.png",
+        "Weight": 1
+      }
+    ],
+    "CustomModelScale": 1,
+    "Light": {
+      "Radius": 0,
+      "Color": "#046"
+    },
+    "PlacementSettings": {
+      "AllowRotationKey": false,
+      "PlaceInEmptyBlocks": true,
+      "RotationMode": "Default"
+    },
+    "BlockParticleSetId": "Crystal",
+    "HitboxType": "Pseudo_Arcane_Button",
+    "Material": "Empty",
+    "InteractionHint": "server.interactionHints.generic",
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+            "Type": "Condition",
+            "Crouching": true,
+            "Next": {
+              "Type": "OpenCustomUI",
+              "Page": {
+                "Id": "ArcaneTrigger"
+              }
+            },
+            "Failed": {
+              "Type": "Serial",
+              "Interactions": [
+                "Door_Horizontal",
+                {
+                  "Type": "SendSignal"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "State": {
+      "Definitions": {
+        "CloseDoorOut": {
+          "InteractionSoundEventId": "SFX_Pseudo_Arcane_Trigger",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Button/Button_Click.blockyanim"
+        },
+        "OpenDoorOut": {
+          "InteractionSoundEventId": "SFX_Pseudo_Arcane_Trigger",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Button/Button_Click.blockyanim"
+        }
+      }
+    },
+    "ParticleColor": "#bbac72",
+    "VariantRotation": "DoublePipe",
+    "Gathering": {
+      "Breaking": {
+        "ItemId": "Pseudo_Arcane_Button",
+        "GatherType": "Rocks"
+      }
+    }
+  },
+  "PlayerAnimationsId": "Item",
+  "IconProperties": {
+    "Scale": 0.445,
+    "Translation": [
+      0,
+      -17.7
+    ],
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ]
+  },
+  "Icon": "Icons/ItemsGenerated/Pseudo_Arcane_Button.png",
+  "Scale": 1,
+  "Tags": {
+    "Type": [
+      "Tool"
+    ]
+  },
+  "ItemSoundSetId": "ISS_Blocks_Stone",
+  "Quality": "Tool"
+}

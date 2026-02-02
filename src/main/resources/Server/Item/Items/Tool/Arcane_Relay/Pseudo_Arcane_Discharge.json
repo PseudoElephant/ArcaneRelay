@@ -1,0 +1,424 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Pseudo_Arcane_Discharge.name",
+    "Description": "server.items.Pseudo_Arcane_Discharge.description"
+  },
+  "Interactions": {
+    "Primary": "Block_Primary",
+    "Secondary": "Block_Secondary"
+  },
+  "Recipe": {
+    "TimeSeconds": 0.5,
+    "Input": [
+      {
+        "Quantity": 4,
+        "ItemId": "Ingredient_Crystal_Cyan"
+      },
+      {
+        "ItemId": "Ingredient_Bar_Iron",
+        "Quantity": 1
+      },
+      {
+        "ResourceTypeId": "Rubble",
+        "Quantity": 3
+      }
+    ],
+    "OutputQuantity": 1,
+    "BenchRequirement": [
+      {
+        "Id": "Arcanebench",
+        "Type": "Crafting",
+        "Categories": [
+          "Arcane_Artifacts"
+        ]
+      }
+    ]
+  },
+  "Categories": [
+    "Items.Tools"
+  ],
+  "BlockType": {
+    "BlockEntity": {
+      "Components": {
+        "ArcaneTrigger": {}
+      }
+    },
+    "DrawType": "Model",
+    "BlockSoundSetId": "Stone",
+    "Opacity": "Solid",
+    "CustomModel": "Blocks/Functional/Discharge.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Texture": "Blocks/Functional/Discharge_On_Texture.png",
+        "Weight": 1
+      }
+    ],
+    "CustomModelScale": 1,
+    "BlockParticleSetId": "Crystal",
+    "Material": "Solid",
+    "InteractionHint": "server.interactionHints.cycle",
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+        "Type": "Condition",
+        "Crouching": true,
+        "Next": {
+          "Type": "OpenCustomUI",
+          "Page": {
+            "Id": "ArcaneTrigger"
+          }
+        },
+        "Failed": {
+          "Type": "Serial",
+          "Interactions": [
+          {
+            "Type": "ChangeState",
+            "Changes": {
+              "default": "Zero_Inactive_All_Off",
+              "Zero_Inactive_All_Off": "Zero_Inactive_One_On",
+              "Zero_Inactive_One_On": "Zero_Inactive_Two_On",
+              "Zero_Inactive_Two_On": "Zero_Inactive_Three_On",
+              "Zero_Inactive_Three_On": "Zero_Inactive_All_On",
+              "Zero_Inactive_All_On": "Zero_Inactive_All_Off",
+              "One_Inactive_All_Off": "One_Inactive_One_On",
+              "One_Inactive_One_On": "One_Inactive_Two_On",
+              "One_Inactive_Two_On": "One_Inactive_All_On",
+              "One_Inactive_All_On": "One_Inactive_All_Off",
+              "Two_Inactive_All_Off": "Two_Inactive_One_On",
+              "Two_Inactive_One_On": "Two_Inactive_All_On",
+              "Two_Inactive_All_On": "Two_Inactive_All_Off",
+              "Three_Inactive_All_Off": "Three_Inactive_All_On",
+              "Three_Inactive_All_On": "Three_Inactive_All_Off"
+              }
+              }
+            ]
+          }
+        }
+        ]
+        
+      },
+      "Secondary": {
+        "Interactions": [
+          {
+            "Type": "ChangeState",
+            "Changes": {
+              "default": "Zero_Inactive_All_Off",
+              "Zero_Inactive_All_Off": "One_Inactive_All_Off",
+              "One_Inactive_All_Off": "Two_Inactive_All_Off",
+              "Two_Inactive_All_Off": "Three_Inactive_All_Off",
+              "Three_Inactive_All_Off": "All_Inactive_All_On",
+              "All_Inactive_All_On": "Zero_Inactive_All_Off",
+              "Zero_Inactive_One_On": "One_Inactive_One_On",
+              "One_Inactive_One_On": "Two_Inactive_One_On",
+              "Two_Inactive_One_On": "Three_Inactive_All_On",
+              "Three_Inactive_All_On": "All_Inactive_All_On",
+              "Zero_Inactive_Two_On": "One_Inactive_Two_On",
+              "One_Inactive_Two_On": "Two_Inactive_All_On",
+              "Two_Inactive_All_On": "Three_Inactive_All_On",
+              "Zero_Inactive_Three_On": "One_Inactive_All_On",
+              "One_Inactive_All_On": "Two_Inactive_All_On",
+              "Zero_Inactive_All_On": "Zero_Inactive_All_Off"
+            }
+          }
+        ]
+      }
+    },
+    "State": {
+      "Definitions": {
+        "Zero_Inactive_All_Off": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_Off_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_All_Lights_On.blockyanim",
+          "InteractionSoundEventId": "SFX_Pseudo_Arcane_Trigger"
+        },
+        "Zero_Inactive_One_On": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_1_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_All_Lights_On.blockyanim"
+        },
+        "Zero_Inactive_Two_On": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_2_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_All_Lights_On.blockyanim"
+        },
+        "Zero_Inactive_Three_On": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_3_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_All_Lights_On.blockyanim"
+        },
+        "Zero_Inactive_All_On": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_On_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_All_Lights_On.blockyanim"
+        },
+        "One_Inactive_All_Off": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_1_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_Light_1_Off.blockyanim",
+          "InteractionSoundEventId": "SFX_Pseudo_Arcane_Trigger"
+        },
+        "One_Inactive_One_On": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_2_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_Light_1_Off.blockyanim"
+        },
+        "One_Inactive_Two_On": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_3_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_Light_1_Off.blockyanim"
+        },
+        "One_Inactive_All_On": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_On_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_Light_1_Off.blockyanim"
+        },
+        "Two_Inactive_All_Off": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_2_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_Light_2_Off.blockyanim",
+          "InteractionSoundEventId": "SFX_Pseudo_Arcane_Trigger"
+        },
+        "Two_Inactive_One_On": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_3_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_Light_2_Off.blockyanim"
+        },
+        "Two_Inactive_All_On": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_On_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_Light_2_Off.blockyanim"
+        },
+        "Three_Inactive_All_Off": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_3_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_Light_3_Off.blockyanim",
+          "InteractionSoundEventId": "SFX_Pseudo_Arcane_Trigger"
+        },
+        "Three_Inactive_All_On": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_On_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_Light_3_Off.blockyanim"
+        },
+        "All_Inactive_All_On": {
+          "InteractionHint": "server.interactionHints.cycle",
+          "Light": {
+            "Color": "#034"
+          },
+          "Particles": null,
+          "AmbientSoundEventId": null,
+          "Material": "Solid",
+          "CustomModelTexture": [
+            {
+              "Texture": "Blocks/Functional/Discharge_On_Texture.png"
+            }
+          ],
+          "CubeShadingMode": "Standard",
+          "DrawType": "Model",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Turn_Light_4_Off.blockyanim",
+          "InteractionSoundEventId": "SFX_Pseudo_Arcane_Trigger"
+        }
+      }
+    },
+    "ParticleColor": "#bbac72",
+    "VariantRotation": "DoublePipe",
+    "Gathering": {
+      "Breaking": {
+        "GatherType": "Rocks",
+        "ItemId": "Pseudo_Arcane_Discharge"
+      }
+    },
+    "CubeShadingMode": "Flat",
+    "InteractionSoundEventId": "SFX_Sticks_Break"
+  },
+  "PlayerAnimationsId": "Block",
+  "IconProperties": {
+    "Scale": 0.5,
+    "Rotation": [
+      22.5,
+      47,
+      22.5
+    ],
+    "Translation": [
+      0,
+      -14
+    ]
+  },
+  "Icon": "Icons/ItemsGenerated/Pseudo_Arcane_Discharge.png",
+  "Scale": 1,
+  "Tags": {
+    "Type": [
+      "Tool"
+    ]
+  },
+  "ItemSoundSetId": "ISS_Blocks_Stone",
+  "Quality": "Tool"
+}

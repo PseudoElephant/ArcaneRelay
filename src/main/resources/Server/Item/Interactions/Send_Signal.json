@@ -1,0 +1,5 @@
+{
+  "Type": "SendSignal",
+  "Failed": "Staff_Cast_Fail",
+  "Next": "Staff_Primary"
+}
