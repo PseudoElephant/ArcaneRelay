@@ -1,0 +1,65 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Ingredient_Crystal_Cyan.name"
+  },
+  "Categories": [
+    "Items.Ingredients"
+  ],
+  "Model": "Resources/Crystals/Crystal_Fragment.blockymodel",
+  "Texture": "Resources/Crystals/Crystal_Fragment_Textures/Cyan.png",
+  "Quality": "Common",
+  "ItemLevel": 10,
+  "PlayerAnimationsId": "Item",
+  "IconProperties": {
+    "Scale": 0.75,
+    "Translation": [
+      -0.3,
+      0.3
+    ],
+    "Rotation": [
+      34.315,
+      29.815,
+      22.5
+    ]
+  },
+  "Scale": 1.2,
+  "Icon": "Icons/ItemsGenerated/Ingredient_Crystal_Fragments_Cyan.png",
+  "Tags": {
+    "Type": [
+      "Ingredient"
+    ],
+    "Family": [
+      "Crystal"
+    ]
+  },
+  "ItemEntity": {
+    "ParticleSystemId": null
+  },
+  "ResourceTypes": [
+    {
+      "Id": "Crystal"
+    }
+  ],
+  "ItemSoundSetId": "ISS_Items_Gems",
+  "DropOnDeath": true,
+  "Recipe": {
+    "Input": [
+      {
+        "ResourceTypeId": "Crystal",
+        "Quantity": 1
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "Ingredient_Ice_Essence"
+      }
+    ],
+    "BenchRequirement": [
+      {
+        "Categories": [
+          "Arcane_Artifacts"
+        ],
+        "Id": "Arcanebench"
+      }
+    ]
+  }
+}

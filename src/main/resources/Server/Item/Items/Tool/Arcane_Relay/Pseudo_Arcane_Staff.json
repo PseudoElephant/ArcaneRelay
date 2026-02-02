@@ -50,7 +50,7 @@
         "Quantity": 15
       },
       {
-        "ResourceTypeId": "Ingredient_Bar_Gold",
+        "ItemId": "Ingredient_Bar_Gold",
         "Quantity": 5
       }
     ],

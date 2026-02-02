@@ -10,6 +10,7 @@ items.Pseudo_Arcane_Pusher.name = Pusher
 items.Pseudo_Arcane_Pusher.description = Used to push blocks forwards. Blocks will be moved in the direction at which the Pusher is facing.\n\nInteract to activate.
 items.Pseudo_Arcane_Staff.name = Arcane Staff
 items.Pseudo_Arcane_Staff.description = (Required to configure Arcane Artifacts) Used to setup connections within Arcane blocks.
+items.Ingredient_Crystal_Cyan.name=Any Crystal Shards
 # === interactionHints ===
 
 interactionHints.button = Press [{key}] to press
