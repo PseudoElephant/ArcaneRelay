@@ -57,21 +57,21 @@ public class SendSignalInteraction extends SimpleInstantInteraction {
 
       Vector3i target = TargetUtil.getTargetBlock(ref, TARGET_DISTANCE, cb);
       if (target == null) {
-         NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("No block in range."), NotificationStyle.Warning);
+         NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.noBlockInRange"), NotificationStyle.Warning);
          context.getState().state = InteractionState.Failed;
          return;
       }
 
       World world = cb.getExternalData().getWorld();
       if (BlockModule.get().getComponent(ArcaneTriggerBlock.getComponentType(), world, target.getX(), target.getY(), target.getZ()) == null) {
-         NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Target must be an Arcane Trigger block."), NotificationStyle.Warning);
+         NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.targetMustBeArcaneTrigger"), NotificationStyle.Warning);
          context.getState().state = InteractionState.Failed;
          return;
       }
 
       ArcaneTriggerBlock trigger = BlockModule.get().getComponent(ArcaneTriggerBlock.getComponentType(), world, target.getX(), target.getY(), target.getZ());
       if (trigger == null) {
-         NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Target must be an Arcane Trigger block."), NotificationStyle.Warning);
+         NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.targetMustBeArcaneTrigger"), NotificationStyle.Warning);
          context.getState().state = InteractionState.Failed;
          return;
       }
@@ -79,7 +79,7 @@ public class SendSignalInteraction extends SimpleInstantInteraction {
       
       ArcaneTickSystem.requestSignalNextTick(world, tx, ty, tz, tx, ty, tz);
    
-      NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Signal sent to trigger."), NotificationStyle.Success);
+      NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.signalSentToTrigger"), NotificationStyle.Success);
       context.getState().state = InteractionState.Finished;
    }
 }

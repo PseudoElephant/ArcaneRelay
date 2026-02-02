@@ -50,7 +50,7 @@ public final class UseBlockActivationHandler implements BlockActivationHandler {
                 if (playerRef != null) {
                     NotificationUtil.sendNotification(
                         playerRef.getPacketHandler(),
-                        Message.raw("Block activation not supported for this block."),
+                        Message.translation("server.arcanerelay.notifications.blockActivationNotSupported"),
                         NotificationStyle.Danger
                     );
                     break;

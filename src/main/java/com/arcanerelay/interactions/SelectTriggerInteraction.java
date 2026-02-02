@@ -13,7 +13,6 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.entity.nameplate.Nameplate;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;
 import com.hypixel.hytale.server.core.modules.block.BlockModule;
@@ -64,7 +63,7 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
 
         Vector3i target = TargetUtil.getTargetBlock(ref, TARGET_DISTANCE, cb);
         if (target == null) {
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("No block in range."), NotificationStyle.Warning);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.noBlockInRange"), NotificationStyle.Warning);
             context.getState().state = InteractionState.Failed; 
             return;
         }
@@ -72,7 +71,7 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
 
         World world = cb.getExternalData().getWorld();
         if (BlockModule.get().getComponent(ArcaneTriggerBlock.getComponentType(), world, target.x, target.y, target.z) == null) {
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Target must be an Arcane Trigger block."), NotificationStyle.Warning);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.targetMustBeArcaneTrigger"), NotificationStyle.Warning);
             context.getState().state = InteractionState.Failed; 
             return;
         }
@@ -81,20 +80,10 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
         updated.setConfiguredBlock(target);
         cb.putComponent(ref, ArcaneConfiguratorComponent.getComponentType(), updated);
 
-        String nameplateText = buildTriggerNameplateText(world, target);
         addTriggerToOutputArrows(world, target);
 
-        NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Trigger has been selected."), NotificationStyle.Success);
+        NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.triggerSelected"), NotificationStyle.Success);
         context.getState().state = InteractionState.Finished;
-    }
-
-    private static String buildTriggerNameplateText(World world, Vector3i triggerPos) {
-        ArcaneTriggerBlock triggerBlock = BlockModule.get().getComponent(ArcaneTriggerBlock.getComponentType(), world, triggerPos.x, triggerPos.y, triggerPos.z);
-        String text = "Trigger: " + triggerPos.x + "," + triggerPos.y + "," + triggerPos.z;
-        if (triggerBlock != null && triggerBlock.hasOutputPositions()) {
-            text += " | Outputs: " + triggerBlock.getOutputPositions().size();
-        }
-        return text;
     }
 
     /** Draw debug arrows from trigger to each output; call after updating trigger outputs (e.g. from AddOutputInteraction). */
