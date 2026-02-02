@@ -12,7 +12,6 @@ import javax.annotation.Nonnull;
  * No state change, no toggling - just propagates the signal.
  */
 public class SendSignalActivation extends Activation {
-
     public static final BuilderCodec<SendSignalActivation> CODEC =
         BuilderCodec.builder(
             SendSignalActivation.class,

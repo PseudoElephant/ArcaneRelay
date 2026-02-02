@@ -12,7 +12,6 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.entity.nameplate.Nameplate;
 import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
@@ -20,6 +19,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import javax.annotation.Nonnull;
 
 /**
@@ -51,28 +51,31 @@ public class AddOutputInteraction extends SimpleInstantInteraction {
 
         Ref<EntityStore> ref = context.getEntity();
         Player player = cb.getComponent(ref, Player.getComponentType());
+
+        PlayerRef playerRef = cb.getComponent(ref, PlayerRef.getComponentType());
         ArcaneConfiguratorComponent configurator = cb.getComponent(ref, ArcaneConfiguratorComponent.getComponentType());
         if (player == null || configurator == null) return;
 
         Vector3i triggerPos = configurator.getConfiguredBlock();
         if (triggerPos == null) {
-            NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("Select a trigger first (primary click on Arcane Trigger block)."), NotificationStyle.Warning);
+            
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Select a trigger first (primary click on Arcane Trigger block)."), NotificationStyle.Warning);
             return;
         }
 
         Vector3i target = TargetUtil.getTargetBlock(ref, TARGET_DISTANCE, cb);
         if (target == null) {
-            NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("No block in range."), NotificationStyle.Warning);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("No block in range."), NotificationStyle.Warning);
             return;
         }
 
         if (triggerPos.equals(target)) {
-            NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("Target cannot be the same as the trigger."), NotificationStyle.Warning);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Target cannot be the same as the trigger."), NotificationStyle.Warning);
             return;
         }
 
         if (triggerPos.distanceTo(target) > TRIGGER_DISTANCE) {
-            NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("Target is too far from the trigger."), NotificationStyle.Warning);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Target is too far from the trigger."), NotificationStyle.Warning);
             return;
         }
 
@@ -101,24 +104,10 @@ public class AddOutputInteraction extends SimpleInstantInteraction {
             SelectTriggerInteraction.addTriggerToOutputArrows(world, triggerPos);
         });
 
-        String nameplateText = "Trigger: " + triggerPos.x + "," + triggerPos.y + "," + triggerPos.z + " | Outputs: " + outputCountAfter[0];
-        updatePlayerNameplate(cb, ref, nameplateText);
-
         if (wasRemoved[0]) {
-            NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("Output removed."), NotificationStyle.Success);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Output removed."), NotificationStyle.Success);
         } else {
-            NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("Output has been added."), NotificationStyle.Success);
-        }
-    }
-
-    private static void updatePlayerNameplate(CommandBuffer<EntityStore> cb, Ref<EntityStore> playerRef, String text) {
-        Nameplate nameplate = cb.getComponent(playerRef, Nameplate.getComponentType());
-        if (nameplate != null) {
-            Nameplate updated = (Nameplate) nameplate.clone();
-            updated.setText(text);
-            cb.putComponent(playerRef, Nameplate.getComponentType(), updated);
-        } else {
-            cb.putComponent(playerRef, Nameplate.getComponentType(), new Nameplate(text));
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Output has been added."), NotificationStyle.Success);
         }
     }
 }

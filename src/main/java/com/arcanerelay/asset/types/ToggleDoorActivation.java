@@ -1,7 +1,6 @@
 package com.arcanerelay.asset.types;
 
 import com.arcanerelay.asset.Activation;
-import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.asset.ActivationContext;
 import com.arcanerelay.asset.ActivationExecutor;
 import com.arcanerelay.util.BlockUtil;
@@ -17,7 +16,6 @@ import com.hypixel.hytale.server.core.asset.type.blockhitbox.BlockBoundingBoxes;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.Rotation;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
-import com.hypixel.hytale.server.core.asset.type.blocktype.config.VariantRotation;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.util.FillerBlockUtil;
@@ -227,26 +225,14 @@ public class ToggleDoorActivation extends Activation {
         return newBlockType;
     }
 
-    private static Vector3d getForwardFromBlockType(@Nonnull BlockType blockType, boolean horizontal, boolean isWall) {
-        if (horizontal) {
-            return isWall ? new Vector3d(0, -1, 0) : new Vector3d(0, 0, -1);
-        }
-        return switch (blockType.getVariantRotation()) {
-            case UpDown -> new Vector3d(0, 1, 0);
-            default -> isWall ? new Vector3d(0, -1, 0) : new Vector3d(0, 0, -1);
-        };
-    }
-
     @Override
     public void execute(@Nonnull ActivationContext ctx) {
         World world = ctx.world();
         int px = ctx.blockX();
         int py = ctx.blockY();
         int pz = ctx.blockZ();
-        BlockType doorBlockType = ctx.blockType();
 
         WorldChunk doorChunk = ctx.chunk();
-        int rotationIndex = doorChunk.getRotationIndex(px, py, pz);
 
         // Resolve main block (non-filler) like DoorInteraction / BlockUtil.findMainBlock
         int[] main = BlockUtil.findMainBlock(world, doorChunk, px, py, pz);

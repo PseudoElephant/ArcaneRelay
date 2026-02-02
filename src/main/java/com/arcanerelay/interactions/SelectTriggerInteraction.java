@@ -1,6 +1,5 @@
 package com.arcanerelay.interactions;
 
-import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.components.ArcaneConfiguratorComponent;
 import com.arcanerelay.components.ArcaneTriggerBlock;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -24,6 +23,7 @@ import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Sim
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import javax.annotation.Nonnull;
 
 /**
@@ -54,12 +54,17 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
 
         Ref<EntityStore> ref = context.getEntity();
         Player player = cb.getComponent(ref, Player.getComponentType());
+
+
+        PlayerRef playerRef = cb.getComponent(ref, PlayerRef.getComponentType());
+        if (playerRef == null) return;
+
         ArcaneConfiguratorComponent configurator = cb.getComponent(ref, ArcaneConfiguratorComponent.getComponentType());
         if (player == null || configurator == null) return;
 
         Vector3i target = TargetUtil.getTargetBlock(ref, TARGET_DISTANCE, cb);
         if (target == null) {
-            NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("No block in range."), NotificationStyle.Warning);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("No block in range."), NotificationStyle.Warning);
             context.getState().state = InteractionState.Failed; 
             return;
         }
@@ -67,7 +72,7 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
 
         World world = cb.getExternalData().getWorld();
         if (BlockModule.get().getComponent(ArcaneTriggerBlock.getComponentType(), world, target.x, target.y, target.z) == null) {
-            NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("Target must be an Arcane Trigger block."), NotificationStyle.Warning);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Target must be an Arcane Trigger block."), NotificationStyle.Warning);
             context.getState().state = InteractionState.Failed; 
             return;
         }
@@ -77,11 +82,9 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
         cb.putComponent(ref, ArcaneConfiguratorComponent.getComponentType(), updated);
 
         String nameplateText = buildTriggerNameplateText(world, target);
-        updatePlayerNameplate(cb, ref, nameplateText);
-
         addTriggerToOutputArrows(world, target);
 
-        NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("Trigger has been selected."), NotificationStyle.Success);
+        NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Trigger has been selected."), NotificationStyle.Success);
         context.getState().state = InteractionState.Finished;
     }
 
@@ -108,17 +111,6 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
             Vector3d direction = to.clone().subtract(from);
             if (direction.squaredLength() < 0.01) continue;
             DebugUtils.addArrow(world, from, direction, color, time, true);
-        }
-    }
-
-    private static void updatePlayerNameplate(CommandBuffer<EntityStore> cb, Ref<EntityStore> playerRef, String text) {
-        Nameplate nameplate = cb.getComponent(playerRef, Nameplate.getComponentType());
-        if (nameplate != null) {
-            Nameplate updated = (Nameplate) nameplate.clone();
-            updated.setText(text);
-            cb.putComponent(playerRef, Nameplate.getComponentType(), updated);
-        } else {
-            cb.putComponent(playerRef, Nameplate.getComponentType(), new Nameplate(text));
         }
     }
 }

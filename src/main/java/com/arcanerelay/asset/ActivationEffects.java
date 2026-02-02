@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
  * Kept simple initially; particles can be added later.
  */
 public final class ActivationEffects {
-
     public static final BuilderCodec<ActivationEffects> CODEC = BuilderCodec.builder(ActivationEffects.class, ActivationEffects::new)
         .appendInherited(
             new KeyedCodec<>("WorldSoundEventId", Codec.STRING),

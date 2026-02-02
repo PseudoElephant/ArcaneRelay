@@ -37,6 +37,10 @@ import javax.annotation.Nullable;
  * Arcane tick system: each tick interval, run one level of the graph.
  * Process current state (activate output for each block), collect next outputs, then clear state and set state to next.
  * One level per tick; we always clear before adding.
+ * 
+ * 
+ * Probably a better way to run tick system every x seonds for currently active blocks. Another option would be using tick procedure
+ * on the blocks.
  */
 public class ArcaneTickSystem extends EntityTickingSystem<ChunkStore> {
 

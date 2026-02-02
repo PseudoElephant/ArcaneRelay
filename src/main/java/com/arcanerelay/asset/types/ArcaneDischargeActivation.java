@@ -5,12 +5,12 @@ import com.arcanerelay.asset.Activation;
 import com.arcanerelay.asset.ActivationContext;
 import com.arcanerelay.asset.ActivationExecutor;
 import com.arcanerelay.components.ArcaneTriggerBlock;
-import com.hypixel.hytale.server.core.modules.block.BlockModule;
-import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.map.MapCodec;
+import com.hypixel.hytale.math.vector.Vector3i;
+import com.hypixel.hytale.server.core.modules.block.BlockModule;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,7 +22,6 @@ import java.util.Map;
  * from fully charged to off (discharge), not when reaching max charge. For blocks like Pseudo_Arcane_Discharge.
  */
 public class ArcaneDischargeActivation extends Activation {
-
     public static final BuilderCodec<ArcaneDischargeActivation> CODEC = BuilderCodec.builder(
             ArcaneDischargeActivation.class,
             ArcaneDischargeActivation::new,
