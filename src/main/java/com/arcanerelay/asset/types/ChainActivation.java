@@ -3,7 +3,6 @@ package com.arcanerelay.asset.types;
 import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.asset.Activation;
 import com.arcanerelay.asset.ActivationContext;
-import com.arcanerelay.asset.ActivationExecutor;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -16,7 +15,6 @@ import javax.annotation.Nonnull;
  * Used e.g. for the pusher: ToggleState (extend) then MoveBlock (push).
  */
 public class ChainActivation extends Activation {
-
     public static final BuilderCodec<ChainActivation> CODEC =
         BuilderCodec.builder(
             ChainActivation.class,

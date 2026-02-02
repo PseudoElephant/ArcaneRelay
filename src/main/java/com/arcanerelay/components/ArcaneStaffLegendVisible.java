@@ -9,6 +9,8 @@ import javax.annotation.Nonnull;
 /**
  * Marker component on a player while the Arcane Staff legend HUD is visible.
  * Used to toggle our custom HUD "component" without using HudManager.setCustomHud.
+ * 
+ * There's probably a better way to do this, but this is the only way I could find.
  */
 public final class ArcaneStaffLegendVisible implements Component<EntityStore> {
 

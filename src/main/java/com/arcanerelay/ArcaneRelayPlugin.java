@@ -26,7 +26,6 @@ import com.hypixel.hytale.server.core.event.events.BootEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.arcanerelay.commands.ArcaneRelayCommand;
 import com.arcanerelay.components.ArcaneConfiguratorComponent;
 import com.arcanerelay.components.ArcaneStaffLegendVisible;
 import com.arcanerelay.components.ArcaneTriggerBlock;
@@ -40,7 +39,6 @@ import com.arcanerelay.ui.ArcaneTriggerPageSupplier;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.server.OpenCustomUIInteraction;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
-import com.arcanerelay.state.ArcaneProxyResource;
 import com.arcanerelay.state.ArcaneState;
 import com.arcanerelay.state.CustomHudRestoreState;
 import com.arcanerelay.systems.ArcaneOnPlaceSystem;
@@ -66,7 +64,6 @@ public class ArcaneRelayPlugin extends JavaPlugin {
     private ComponentType<EntityStore, ArcaneConfiguratorComponent> arcaneConfiguratorComponentType;
     private ComponentType<EntityStore, ArcaneStaffLegendVisible> arcaneStaffLegendVisibleComponentType;
     private ResourceType<ChunkStore, ArcaneState> arcaneStateResourceType;
-    private ResourceType<EntityStore, ArcaneProxyResource> arcaneProxyResourceType;
     private ResourceType<EntityStore, CustomHudRestoreState> customHudRestoreStateResourceType;
     private BlockActivationHandler defaultBlockActivationHandler;
     private final ActivationBindingRegistry activationBindingRegistry = new ActivationBindingRegistry();
@@ -104,12 +101,9 @@ public class ArcaneRelayPlugin extends JavaPlugin {
         ComponentRegistryProxy<EntityStore> entityRegistry = this.getEntityStoreRegistry();
         this.arcaneConfiguratorComponentType = entityRegistry.registerComponent(ArcaneConfiguratorComponent.class, ArcaneConfiguratorComponent::new);
         this.arcaneStaffLegendVisibleComponentType = entityRegistry.registerComponent(ArcaneStaffLegendVisible.class, ArcaneStaffLegendVisible::new);
-        this.arcaneProxyResourceType = entityRegistry.registerResource(ArcaneProxyResource.class, ArcaneProxyResource::new);
         this.customHudRestoreStateResourceType = entityRegistry.registerResource(CustomHudRestoreState.class, CustomHudRestoreState::new);
         entityRegistry.registerSystem(new ArcaneConfiguratorAddSystem());
         entityRegistry.registerSystem(new ArcaneStaffHudSystem());
-
-        this.getCommandRegistry().registerCommand(new ArcaneRelayCommand());
 
         Interaction.CODEC.register("SelectTrigger", SelectTriggerInteraction.class, SelectTriggerInteraction.CODEC);
         Interaction.CODEC.register("AddOutput", AddOutputInteraction.class, AddOutputInteraction.CODEC);
@@ -190,11 +184,6 @@ public class ArcaneRelayPlugin extends JavaPlugin {
     @Nonnull
     public ResourceType<ChunkStore, ArcaneState> getArcaneStateResourceType() {
         return this.arcaneStateResourceType;
-    }
-
-    @Nonnull
-    public ResourceType<EntityStore, ArcaneProxyResource> getArcaneProxyResourceType() {
-        return this.arcaneProxyResourceType;
     }
 
     @Nonnull

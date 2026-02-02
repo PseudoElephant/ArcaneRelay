@@ -18,7 +18,6 @@ import javax.annotation.Nullable;
  * Other plugins can register custom activation types via {@link com.arcanerelay.ArcaneRelayPlugin#getCodecRegistry}.
  */
 public abstract class Activation implements JsonAssetWithMap<String, DefaultAssetMap<String, Activation>> {
-
     public static final AssetCodecMapCodec<String, Activation> CODEC = new AssetCodecMapCodec<>(
         Codec.STRING,
         (t, k) -> t.id = k,

@@ -1,6 +1,5 @@
 package com.arcanerelay.interactions;
 
-import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.components.ArcaneTriggerBlock;
 import com.arcanerelay.systems.ArcaneTickSystem;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -20,6 +19,7 @@ import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Sim
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import javax.annotation.Nonnull;
 
 /**
@@ -52,23 +52,26 @@ public class SendSignalInteraction extends SimpleInstantInteraction {
       Player player = cb.getComponent(ref, Player.getComponentType());
       if (player == null) return;
 
+      PlayerRef playerRef = cb.getComponent(ref, PlayerRef.getComponentType());
+      if (playerRef == null) return;
+
       Vector3i target = TargetUtil.getTargetBlock(ref, TARGET_DISTANCE, cb);
       if (target == null) {
-         NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("No block in range."), NotificationStyle.Warning);
+         NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("No block in range."), NotificationStyle.Warning);
          context.getState().state = InteractionState.Failed;
          return;
       }
 
       World world = cb.getExternalData().getWorld();
       if (BlockModule.get().getComponent(ArcaneTriggerBlock.getComponentType(), world, target.getX(), target.getY(), target.getZ()) == null) {
-         NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("Target must be an Arcane Trigger block."), NotificationStyle.Warning);
+         NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Target must be an Arcane Trigger block."), NotificationStyle.Warning);
          context.getState().state = InteractionState.Failed;
          return;
       }
 
       ArcaneTriggerBlock trigger = BlockModule.get().getComponent(ArcaneTriggerBlock.getComponentType(), world, target.getX(), target.getY(), target.getZ());
       if (trigger == null) {
-         NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("Target must be an Arcane Trigger block."), NotificationStyle.Warning);
+         NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Target must be an Arcane Trigger block."), NotificationStyle.Warning);
          context.getState().state = InteractionState.Failed;
          return;
       }
@@ -76,8 +79,7 @@ public class SendSignalInteraction extends SimpleInstantInteraction {
       
       ArcaneTickSystem.requestSignalNextTick(world, tx, ty, tz, tx, ty, tz);
    
-
-      NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("Signal sent to trigger."), NotificationStyle.Success);
+      NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Signal sent to trigger."), NotificationStyle.Success);
       context.getState().state = InteractionState.Finished;
    }
 }

@@ -4,20 +4,18 @@ import com.arcanerelay.asset.Activation;
 import com.arcanerelay.asset.ActivationContext;
 import com.arcanerelay.asset.ActivationEffects;
 import com.arcanerelay.asset.ActivationExecutor;
-import com.hypixel.hytale.math.vector.Vector3i;
-
-import javax.annotation.Nonnull;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.math.vector.Vector3i;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
  * Activation that toggles a block between two states (e.g. On/Off, Open/Close).
  */
 public class ToggleStateActivation extends Activation {
-
     public static final BuilderCodec<ToggleStateActivation> CODEC = BuilderCodec.builder(
             ToggleStateActivation.class,
             ToggleStateActivation::new,
@@ -131,25 +129,17 @@ public class ToggleStateActivation extends Activation {
         ActivationEffects effects = isCurrentlyOff ? onEffects : offEffects;
         if (effects == null) effects = getEffects();
         ActivationExecutor.playEffects(ctx.world(), ctx.blockX(), ctx.blockY(), ctx.blockZ(), effects);
-        ActivationExecutor.playBlockInteractionSound(ctx.world(), ctx.blockX(), ctx.blockY(), ctx.blockZ(), ctx.blockType());
         if (shouldSendSignal(state, newState)) {
             ActivationExecutor.sendSignals(ctx);
         }
     }
 
     private boolean shouldSendSignal(String currentState, String newState) {
-        // if current signal is on and we are toggling to off, send signal
-        if (currentState.equalsIgnoreCase(onState) && newState.equalsIgnoreCase(offState) && sendSignalWhen.equalsIgnoreCase("Off")) {
-            return true;
-        }
-        // if current signal is off and we are toggling to on, send signal
-        if (currentState.equalsIgnoreCase(offState) && newState.equalsIgnoreCase(onState) && sendSignalWhen.equalsIgnoreCase("On")) {
-            return true;
-        }
-        if (sendSignalWhen.equalsIgnoreCase("Both")) {
-            return true;
-        }
-
-        return false;
+        String when = sendSignalWhen != null ? sendSignalWhen.toLowerCase() : "off";
+        return switch (when) {
+            case "on" -> currentState.equalsIgnoreCase(offState) && newState.equalsIgnoreCase(onState);
+            case "both" -> true;
+            default -> currentState.equalsIgnoreCase(onState) && newState.equalsIgnoreCase(offState);
+        };
     }
 }
