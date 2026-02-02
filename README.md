@@ -36,3 +36,81 @@ Like a relay but with two states! This one is hard to explain without being tech
 This item is kind of broken and extra complicated, and it will be sort of hidden in the mod, but you should still be able to search for it if you want to use it. This block is supposed to hold on from anywhere of 1-4 signals from different sources before discharging (sending) the signal. So once a signal is sent it will activate and store it, at which point it will only store other, different, incomming signals (not from the same source). Once it reaches the discharge amount it will
 
 ![Arcane Toggle Discharge](src/main/resources/Common/Icons/ItemsGenerated/Pseudo_Arcane_Discharge.png)
+
+
+### Plugin Development
+
+#### Activations
+
+When an arcane signal reaches a block, the mod looks up which **activation** to run. Activations live under `Server/Item/Activations/` as JSON; the **filename** (without `.json`) is the activation ID (e.g. `Arcane_Relay`, `Toggle_Pusher`).
+
+**Using existing types:** Add a JSON file and set `Type` to one of the built-in types. Example for a simple on/off relay:
+
+```json
+{
+  "Type": "ToggleState",
+  "OnState": "default",
+  "OffState": "Off",
+  "SendSignalWhen": "Off"
+}
+```
+
+**Chaining activations:** Use type `Chain` and list activation IDs to run in order:
+
+```json
+{
+  "Type": "Chain",
+  "Activations": ["Move_Block", "Toggle_Pusher"]
+}
+```
+
+**Creating a new activation type (Java):** Implement a class that extends `Activation`, register its codec in your plugin's `setup()`, then add JSON assets that use your `Type`:
+
+```java
+// In setup():
+ArcaneRelayPlugin.get().getCodecRegistry(Activation.CODEC)
+    .register("MyCustom", MyCustomActivation.class, MyCustomActivation.CODEC);
+
+// Your class:
+public class MyCustomActivation extends Activation {
+    public static final BuilderCodec<MyCustomActivation> CODEC = BuilderCodec.builder(
+            MyCustomActivation.class, MyCustomActivation::new, Activation.ABSTRACT_CODEC)
+        // .appendInherited(...) for your fields, then .add() and .build()
+        .build();
+
+    @Override
+    public void execute(@Nonnull ActivationContext ctx) {
+        // ctx.world(), ctx.chunk(), ctx.blockX/Y/Z(), ctx.blockType(), ctx.sources()
+        // Use ActivationExecutor.playEffects(), playBlockInteractionSound(), sendSignals(ctx) as needed.
+    }
+}
+```
+
+#### Existing activation types
+
+| Type | Description |
+|------|-------------|
+| **ToggleState** | Toggles block between two states (e.g. On/Off). Options: `OnState`, `OffState`, `SendSignalWhen`, `OnEffects`, `OffEffects`. |
+| **SendSignal** | Forwards the signal to connected outputs. No state change. |
+| **ArcaneDischarge** | Cycles charge states; sends signal when going from fully charged to off. Options: `Changes` (state map), `MaxChargeState`, `MaxChargeStateSuffix`. |
+| **MoveBlock** | Pushes blocks in the facing direction (e.g. piston). Options: `Range`, `IsWall`. |
+| **ToggleDoor** | Toggles a door block in front. Options: `Horizontal`, `OpenIn`, `IsWall`. |
+| **Chain** | Runs several activations in sequence. Option: `Activations` (array of activation IDs). |
+
+#### Bindings
+
+Bindings decide **which activation runs for which block**. They live under `Server/Item/ActivationBindings/` as JSON. Each file has:
+
+- **Pattern** – How to match block type keys (e.g. `Hytale:Pseudo_Arcane_Relay`). Syntax: `exact:key`, `contains:sub`, `startsWith:prefix`, `endsWith:suffix`, `regex:pattern`. First match wins.
+- **Activation** – Activation ID (filename of an activation under `Item/Activations/`).
+- **Priority** (optional) – If `true`, this binding is checked before others.
+
+Example: any block whose key contains `Pseudo_Arcane_Relay` uses the `Arcane_Relay` activation:
+
+```json
+{
+  "Pattern": "contains:Pseudo_Arcane_Relay",
+  "Activation": "Arcane_Relay",
+  "Priority": true
+}
+```

@@ -23,10 +23,9 @@ import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHa
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
-import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
-
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
@@ -73,6 +72,9 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
         Player player = cb.getComponent(ref, Player.getComponentType());
         if (player == null) return;
 
+        PlayerRef playerRef = cb.getComponent(ref, PlayerRef.getComponentType());
+        if (playerRef == null) return;
+
         int blockX, blockY, blockZ;
         BlockPosition targetRaw = context.getMetaStore().getMetaObject(Interaction.TARGET_BLOCK_RAW);
         if (targetRaw != null) {
@@ -82,7 +84,7 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
         } else {
             var target = TargetUtil.getTargetBlock(ref, TARGET_DISTANCE, cb);
             if (target == null) {
-                NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("No block in range."), NotificationStyle.Warning);
+                NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.noBlockInRange"), NotificationStyle.Warning);
                 context.getState().state = InteractionState.Failed;
                 return;
             }
@@ -94,7 +96,7 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
         World world = cb.getExternalData().getWorld();
         var blockType = world.getBlockType(blockX, blockY, blockZ);
         if (blockType == null) {
-            NotificationUtil.sendNotification(player.getPlayerRef().getPacketHandler(), Message.raw("No block at target."), NotificationStyle.Warning);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.noBlockAtTarget"), NotificationStyle.Warning);
             context.getState().state = InteractionState.Failed;
             return;
         }

@@ -10,9 +10,6 @@ items.Pseudo_Arcane_Pusher.name = Pusher
 items.Pseudo_Arcane_Pusher.description = Used to push blocks forwards. Blocks will be moved in the direction at which the Pusher is facing.\n\nInteract to activate.
 items.Pseudo_Arcane_Staff.name = Arcane Staff
 items.Pseudo_Arcane_Staff.description = (Required to configure Arcane Artifacts) Used to setup connections within Arcane blocks.
-arcanerelay.activationExecutor.executed=Activation Executed at [{blockX}],[{blockY}],[{blockZ}] with activation: [{activation}]
-arcanerelay.pusher.displaced=You were moved out of the block by the pusher.
-arcanerelay.pusher.pushed=You were pushed by the pusher.
 # === interactionHints ===
 
 interactionHints.button = Press [{key}] to press
@@ -22,3 +19,19 @@ interactionHints.relay = Press [{key}] to relay
 
 # === bench ===
 benchCategories.artifacts = Artifacts
+
+# === Arcane Relay notifications (interactions / activation) ===
+arcanerelay.activationExecutor.executed=Activation Executed at [{blockX}],[{blockY}],[{blockZ}] with activation: [{activation}]
+arcanerelay.pusher.displaced=You were moved out of the block by the pusher.
+arcanerelay.pusher.pushed=You were pushed by the pusher.
+arcanerelay.notifications.noBlockInRange = No block in range.
+arcanerelay.notifications.targetMustBeArcaneTrigger = Target must be an Arcane Trigger block.
+arcanerelay.notifications.triggerSelected = Trigger has been selected.
+arcanerelay.notifications.noBlockAtTarget = No block at target.
+arcanerelay.notifications.selectTriggerFirst = Select a trigger first (primary click on Arcane Trigger block).
+arcanerelay.notifications.targetSameAsTrigger = Target cannot be the same as the trigger.
+arcanerelay.notifications.targetTooFarFromTrigger = Target is too far from the trigger.
+arcanerelay.notifications.outputRemoved = Output removed.
+arcanerelay.notifications.outputAdded = Output has been added.
+arcanerelay.notifications.signalSentToTrigger = Signal sent to trigger.
+arcanerelay.notifications.blockActivationNotSupported = Block activation not supported for this block.

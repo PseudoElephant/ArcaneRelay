@@ -6,6 +6,7 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.math.vector.Vector3i;
+import com.hypixel.hytale.protocol.InteractionState;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
 import com.hypixel.hytale.server.core.Message;
@@ -59,55 +60,56 @@ public class AddOutputInteraction extends SimpleInstantInteraction {
         Vector3i triggerPos = configurator.getConfiguredBlock();
         if (triggerPos == null) {
             
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Select a trigger first (primary click on Arcane Trigger block)."), NotificationStyle.Warning);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.selectTriggerFirst"), NotificationStyle.Warning);
             return;
         }
 
         Vector3i target = TargetUtil.getTargetBlock(ref, TARGET_DISTANCE, cb);
         if (target == null) {
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("No block in range."), NotificationStyle.Warning);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.noBlockInRange"), NotificationStyle.Warning);
             return;
         }
 
         if (triggerPos.equals(target)) {
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Target cannot be the same as the trigger."), NotificationStyle.Warning);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.targetSameAsTrigger"), NotificationStyle.Warning);
             return;
         }
 
         if (triggerPos.distanceTo(target) > TRIGGER_DISTANCE) {
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Target is too far from the trigger."), NotificationStyle.Warning);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.targetTooFarFromTrigger"), NotificationStyle.Warning);
             return;
         }
 
         Vector3i outputPos = target.clone();
         World world = cb.getExternalData().getWorld();
-        boolean[] wasRemoved = new boolean[1];
-        int[] outputCountAfter = new int[1];
+        
+        var chunkStore = world.getChunkStore();
+        var store = chunkStore.getStore();
+        Ref<ChunkStore> blockRef = BlockModule.getBlockEntity(world, triggerPos.x, triggerPos.y, triggerPos.z);
+        if (blockRef == null || !blockRef.isValid()) return;
+
+        ArcaneTriggerBlock comp = store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
+        if (comp == null) return;
+
+        if (comp.getOutputPositions().contains(outputPos)) {
+            world.execute(() -> {
+                comp.removeOutputPosition(outputPos.x, outputPos.y, outputPos.z);
+                store.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), comp);
+            });
+
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.outputRemoved"), NotificationStyle.Success);
+            context.getState().state = InteractionState.Finished;
+            return;
+        }
+
         world.execute(() -> {
-            var chunkStore = world.getChunkStore();
-            var store = chunkStore.getStore();
-            Ref<ChunkStore> blockRef = BlockModule.getBlockEntity(world, triggerPos.x, triggerPos.y, triggerPos.z);
-            if (blockRef == null || !blockRef.isValid()) return;
-
-            ArcaneTriggerBlock comp = store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
-            if (comp == null) return;
-
-            ArcaneTriggerBlock updated = (ArcaneTriggerBlock) comp.clone();
-            boolean alreadyOutput = updated.removeOutputPosition(outputPos.x, outputPos.y, outputPos.z);
-            if (alreadyOutput) {
-                wasRemoved[0] = true;
-            } else {
-                updated.addOutputPosition(outputPos);
-            }
-            store.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), updated);
-            outputCountAfter[0] = updated.getOutputPositions().size();
+            comp.addOutputPosition(outputPos);
+            store.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), comp);
             SelectTriggerInteraction.addTriggerToOutputArrows(world, triggerPos);
         });
 
-        if (wasRemoved[0]) {
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Output removed."), NotificationStyle.Success);
-        } else {
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.raw("Output has been added."), NotificationStyle.Success);
-        }
+        NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.outputAdded"), NotificationStyle.Success);
+        context.getState().state = InteractionState.Finished;
+        return;
     }
 }
