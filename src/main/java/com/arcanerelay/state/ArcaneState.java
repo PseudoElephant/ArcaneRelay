@@ -9,6 +9,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Per-world state for arcane block ticking: trigger positions with sources, and last run tick.
@@ -28,6 +29,13 @@ public class ArcaneState implements Resource<ChunkStore> {
    public void addPendingNextTick(int x, int y, int z, int sourceX, int sourceY, int sourceZ) {
       synchronized (pendingNextTick) {
          pendingNextTick.addLast(TriggerEntry.of(x, y, z, sourceX, sourceY, sourceZ, true));
+      }
+   }
+
+   /** Adds a trigger for the next interval with a specific activator (skip=false). Runs that activation in the tick system. */
+   public void addPendingNextTickWithActivator(int x, int y, int z, int sourceX, int sourceY, int sourceZ, @Nullable String activatorId) {
+      synchronized (pendingNextTick) {
+         pendingNextTick.addLast(TriggerEntry.of(x, y, z, sourceX, sourceY, sourceZ, false, activatorId));
       }
    }
 

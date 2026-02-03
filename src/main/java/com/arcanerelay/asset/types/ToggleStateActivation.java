@@ -1,5 +1,6 @@
 package com.arcanerelay.asset.types;
 
+import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.asset.Activation;
 import com.arcanerelay.asset.ActivationContext;
 import com.arcanerelay.asset.ActivationEffects;
@@ -130,14 +131,18 @@ public class ToggleStateActivation extends Activation {
         if (effects == null) effects = getEffects();
         ActivationExecutor.playEffects(ctx.world(), ctx.blockX(), ctx.blockY(), ctx.blockZ(), effects);
         if (shouldSendSignal(state, newState)) {
+            ArcaneRelayPlugin.get().getLogger().atInfo().log("sending signal");
             ActivationExecutor.sendSignals(ctx);
         }
     }
 
     private boolean shouldSendSignal(String currentState, String newState) {
+        ArcaneRelayPlugin.get().getLogger().atInfo().log("currentState: " + currentState + ", newState: " + newState +" sendSignalWhen: " + sendSignalWhen);
+
         String when = sendSignalWhen != null ? sendSignalWhen.toLowerCase() : "off";
         return switch (when) {
             case "on" -> currentState.equalsIgnoreCase(offState) && newState.equalsIgnoreCase(onState);
+            case "off" -> currentState.equalsIgnoreCase(onState) && newState.equalsIgnoreCase(offState);
             case "both" -> true;
             default -> currentState.equalsIgnoreCase(onState) && newState.equalsIgnoreCase(offState);
         };

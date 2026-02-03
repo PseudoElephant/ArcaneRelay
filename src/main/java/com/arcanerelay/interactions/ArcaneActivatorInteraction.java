@@ -2,8 +2,8 @@ package com.arcanerelay.interactions;
 
 import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.asset.Activation;
-import com.arcanerelay.asset.ActivationExecutor;
 import com.arcanerelay.asset.ActivationRegistry;
+import com.arcanerelay.systems.ArcaneTickSystem;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -27,8 +27,6 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import javax.annotation.Nonnull;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Runs the arcane Activation for the target block (from bindings).
@@ -110,7 +108,6 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        var chunkStore = world.getChunkStore().getStore();
         long chunkIndex = ChunkUtil.indexChunkFromBlock(blockX, blockZ);
         WorldChunk chunk = world.getChunk(chunkIndex);
         if (chunk == null) {
@@ -118,10 +115,7 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        List<int[]> sources = Collections.singletonList(new int[]{blockX, blockY, blockZ});
-        world.execute(() ->
-                ActivationExecutor.execute(world, chunkStore, chunk, blockX, blockY, blockZ, blockType, activation, sources)
-        );
+        ArcaneTickSystem.requestSignalNextTick(world, blockX, blockY, blockZ, blockX, blockY, blockZ, activation.getId());
 
         context.getState().state = InteractionState.Finished;
     }

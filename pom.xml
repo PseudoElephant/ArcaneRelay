@@ -39,11 +39,6 @@
             <!-- Replace with latest version, we provide jars for the last five releases -->
             <version>2026.01.22-6f8bdbdc4</version>
         </dependency>
-        <dependency>
-    <groupId>com.redstone</groupId>
-        <artifactId>redstone</artifactId>
-        <version>0.0.6</version>
-    </dependency>
     </dependencies>
 
     <build>

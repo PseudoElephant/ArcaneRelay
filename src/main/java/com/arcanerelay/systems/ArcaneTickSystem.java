@@ -79,6 +79,14 @@ public class ArcaneTickSystem extends EntityTickingSystem<ChunkStore> {
       }
    }
 
+   /** Enqueue an arcane trigger for the next tick with a specific activator ID (runs that activation in the tick system, no skip). */
+   public static void requestSignalNextTick(@Nonnull World world, int x, int y, int z, int sourceX, int sourceY, int sourceZ, @Nullable String activatorId) {
+      ArcaneState state = world.getChunkStore().getStore().getResource(ArcaneState.getResourceType());
+      if (state != null) {
+         state.addPendingNextTickWithActivator(x, y, z, sourceX, sourceY, sourceZ, activatorId);
+      }
+   }
+
    @Nonnull
    private static final Query<ChunkStore> QUERY = Query.and(
       ChunkColumn.getComponentType(),
@@ -129,6 +137,7 @@ public class ArcaneTickSystem extends EntityTickingSystem<ChunkStore> {
          TargetInfo info = targets.computeIfAbsent(key, k -> new TargetInfo());
          info.sources.add(e.source());
          if (e.skip()) info.skip = true;
+         if (e.activatorId() != null && info.activatorId == null) info.activatorId = e.activatorId();
       }
 
       for (Map.Entry<PosKey, TargetInfo> entry : targets.entrySet()) {
@@ -159,7 +168,7 @@ public class ArcaneTickSystem extends EntityTickingSystem<ChunkStore> {
             for (Vector3i s : info.sources) {
                sourcesAsInts.add(new int[]{s.getX(), s.getY(), s.getZ()});
             }
-            activateOutput(world, store, commandBuffer, chunk, x, y, z, blockId, blockType, sourcesAsInts);
+            activateOutput(world, store, commandBuffer, chunk, x, y, z, blockId, blockType, sourcesAsInts, info.activatorId);
          }
       }
    }
@@ -167,6 +176,7 @@ public class ArcaneTickSystem extends EntityTickingSystem<ChunkStore> {
    private static final class TargetInfo {
       final List<Vector3i> sources = new ArrayList<>();
       boolean skip;
+      @Nullable String activatorId;
    }
 
    /** When skip=true: only propagate to outputs, do not activate the block. */
@@ -188,11 +198,11 @@ public class ArcaneTickSystem extends EntityTickingSystem<ChunkStore> {
 
    /**
     * Activate the output of this arcane block.
-    * First tries asset-based Activation from {@link com.arcanerelay.asset.ActivationRegistry};
-    * if none, dispatches to the handler registered via
-    * {@link ArcaneRelayPlugin#registerBlockActivationHandler}.
+    * When activatorId is non-null, uses that activation; otherwise uses block binding from {@link com.arcanerelay.asset.ActivationRegistry}.
+    * If no activation, dispatches to the handler registered via {@link ArcaneRelayPlugin#registerBlockActivationHandler}.
     *
     * @param sources list of [sx,sy,sz] positions that triggered this block (for unique-source logic)
+    * @param activatorId optional activation ID to run (e.g. from ArcaneActivatorInteraction); when null, use block's binding
     */
    protected static void activateOutput(
       @Nonnull World world,
@@ -204,10 +214,13 @@ public class ArcaneTickSystem extends EntityTickingSystem<ChunkStore> {
       int blockZ,
       int blockId,
       @Nonnull BlockType blockType,
-      @Nonnull List<int[]> sources
+      @Nonnull List<int[]> sources,
+      @Nullable String activatorId
    ) {
       String blockTypeKey = blockType.getId();
-      Activation activation = ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(blockTypeKey);
+      Activation activation = activatorId != null && !activatorId.isEmpty()
+         ? ArcaneRelayPlugin.get().getActivationRegistry().getActivation(activatorId)
+         : ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(blockTypeKey);
       if (activation != null) {
          world.execute(
             () -> ActivationExecutor.execute(world, store, chunk, blockX, blockY, blockZ, blockType, activation, sources)

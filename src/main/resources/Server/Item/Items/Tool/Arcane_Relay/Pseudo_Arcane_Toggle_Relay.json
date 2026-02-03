@@ -49,7 +49,7 @@
     "CustomModel": "Blocks/Functional/Toggle_Relay.blockymodel",
     "CustomModelTexture": [
       {
-        "Texture": "Blocks/Functional/Toggle_Relay_Off_Texture.png",
+        "Texture": "Blocks/Functional/Toggle_Relay_On_Texture.png",
         "Weight": 1
       }
     ],
@@ -67,14 +67,8 @@
               "Type": "Serial",
               "Interactions": [
                 {
-                  "Type": "ChangeState",
-                  "Changes": {
-                    "default": "Off",
-                    "Off": "default"
-                  }
-                },
-                {
-                  "Type": "SendSignal"
+                  "Type": "ArcaneActivator",
+                  "Activator": "Toggle_Arcane_Relay"
                 }
               ]
             },
@@ -100,13 +94,13 @@
           "Material": "Solid",
           "CustomModelTexture": [
             {
-              "Texture": "Blocks/Functional/Toggle_Relay_On_Texture.png"
+              "Texture": "Blocks/Functional/Toggle_Relay_Off_Texture.png"
             }
           ],
+          "InteractionSoundEventId": "SFX_Pseudo_Arcane_Trigger",
+           "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Toggle_Relay.blockyanim",
           "CubeShadingMode": "Standard",
-          "DrawType": "Model",
-          "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Toggle_Relay_On.blockyanim",
-          "InteractionSoundEventId": "SFX_Sticks_Break"
+          "DrawType": "Model"
         }
       }
     },
@@ -119,8 +113,8 @@
       }
     },
     "CubeShadingMode": "Flat",
-    "InteractionSoundEventId": "SFX_Pseudo_Arcane_Trigger",
-    "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Toggle_Relay.blockyanim"
+    "CustomModelAnimation": "Blocks/Animations/Functional/Toggle_Relay/Toggle_Relay_On.blockyanim",
+    "InteractionSoundEventId": "SFX_Sticks_Break"
   },
   "PlayerAnimationsId": "Block",
   "IconProperties": {
