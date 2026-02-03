@@ -326,7 +326,7 @@ public class MoveBlockActivation extends Activation {
         }
         final List<Ref<EntityStore>> playersOnTopList = new ArrayList<>(playersOnTop);
 
-        world.execute(() -> {
+        // world.execute(() -> {
             Store<EntityStore> entityStore = world.getEntityStore().getStore();
 
             // 1) Move players we found on top (in chain direction), then move any others in boxes (excluding already moved)
@@ -361,12 +361,12 @@ public class MoveBlockActivation extends Activation {
                 }
             }
 
-            world.execute(() -> {
+           // world.execute(() -> {
             dirtyChunks.forEach(chunkIndex -> world.getNotificationHandler().updateChunk(chunkIndex));
                 ActivationExecutor.playEffects(world, frontPx + pdx + pux, frontPy + pdy + puy, frontPz + pdz + puz, getEffects());
                 ActivationExecutor.sendSignals(ctx);
-            });
-        });
+          //  });
+        //});
     }
 
     private static final double FEET_Y_OFFSET = -0.5;

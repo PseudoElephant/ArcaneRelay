@@ -3,7 +3,6 @@ package com.arcanerelay.systems;
 import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.asset.Activation;
 import com.arcanerelay.asset.ActivationExecutor;
-import com.arcanerelay.asset.types.MoveBlockActivation;
 import com.arcanerelay.components.ArcaneTriggerBlock;
 import com.arcanerelay.state.ArcaneState;
 import com.arcanerelay.state.TriggerEntry;
@@ -27,7 +26,6 @@ import com.arcanerelay.api.BlockActivationHandler;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,8 +140,6 @@ public class ArcaneTickSystem extends EntityTickingSystem<ChunkStore> {
          if (e.activatorId() != null && info.activatorId == null) info.activatorId = e.activatorId();
       }
 
-      // Build run list: detect pusher chains, keep only first pusher per chain, sort chains front-to-back
-      List<RunEntry> runList = new ArrayList<>();
       for (Map.Entry<PosKey, TargetInfo> entry : targets.entrySet()) {
          int x = entry.getKey().x;
          int y = entry.getKey().y;
@@ -159,35 +155,6 @@ public class ArcaneTickSystem extends EntityTickingSystem<ChunkStore> {
             ArcaneRelayPlugin.get().getLogger().atWarning().log("ArcaneTickSystem: block type not found at " + x + ", " + y + ", " + z);
             continue;
          }
-
-         Activation activation = info.activatorId != null && !info.activatorId.isEmpty()
-            ? ArcaneRelayPlugin.get().getActivationRegistry().getActivation(info.activatorId)
-            : ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(blockType.getId());
-         boolean isPusher = activation instanceof MoveBlockActivation;
-
-         if (isPusher && !MoveBlockActivation.isFirstPusherInChain(world, chunk, x, y, z, blockType)) {
-            continue; // skip non-first pushers in the same chain
-         }
-
-         int[] frontPos = isPusher ? MoveBlockActivation.getFrontPusherPosition(world, chunk, x, y, z, blockType) : null;
-         int[] forwardDir = isPusher ? MoveBlockActivation.getForwardDirection(chunk, x, y, z, blockType) : null;
-         runList.add(new RunEntry(entry.getKey(), info, blockId, blockType, frontPos, forwardDir));
-      }
-
-      // Run chains back to front: order by distance along each chain's forward direction (smaller = back, run first)
-      runList.sort(RunEntry.BACK_TO_FRONT);
-
-      for (RunEntry run : runList) {
-         PosKey key = run.key;
-         int x = key.x;
-         int y = key.y;
-         int z = key.z;
-         TargetInfo info = run.info;
-         int blockId = run.blockId;
-         BlockType blockType = run.blockType;
-
-         long chunkIndex = ChunkUtil.indexChunkFromBlock(x, z);
-         WorldChunk chunk = world.getChunk(chunkIndex);
 
          if (info.skip) {
             ArcaneRelayPlugin.get().getLogger().atFine().log(String.format("ArcaneTickSystem: propagateOnly at (%d,%d,%d)", x, y, z));
@@ -211,41 +178,6 @@ public class ArcaneTickSystem extends EntityTickingSystem<ChunkStore> {
       final List<Vector3i> sources = new ArrayList<>();
       boolean skip;
       @Nullable String activatorId;
-   }
-
-   /** One target to run; frontPos and forwardDir are the chain front and push direction for pushers (for ordering), null for non-pushers. */
-   private static final class RunEntry {
-      final PosKey key;
-      final TargetInfo info;
-      final int blockId;
-      final BlockType blockType;
-      @Nullable final int[] frontPos;
-      @Nullable final int[] forwardDir;
-
-      RunEntry(PosKey key, TargetInfo info, int blockId, BlockType blockType, @Nullable int[] frontPos, @Nullable int[] forwardDir) {
-         this.key = key;
-         this.info = info;
-         this.blockId = blockId;
-         this.blockType = blockType;
-         this.frontPos = frontPos;
-         this.forwardDir = forwardDir;
-      }
-
-      /** Distance of front position along this chain's forward direction (dot product). */
-      private static int forwardDistance(int[] frontPos, int[] forwardDir) {
-         return frontPos[0] * forwardDir[0] + frontPos[1] * forwardDir[1] + frontPos[2] * forwardDir[2];
-      }
-
-      /** Order: pusher chains first, back to front by distance along each chain's forward (smaller = back, run first); non-pushers after. */
-      static final Comparator<RunEntry> BACK_TO_FRONT = (a, b) -> {
-         if (a.frontPos == null && b.frontPos == null) return 0;
-         if (a.frontPos == null) return 1;
-         if (b.frontPos == null) return -1;
-         if (a.forwardDir == null || b.forwardDir == null) return 0;
-         int distA = forwardDistance(a.frontPos, a.forwardDir);
-         int distB = forwardDistance(b.frontPos, b.forwardDir);
-         return Integer.compare(distA, distB); // smaller distance along forward = back, run first
-      };
    }
 
    /** When skip=true: only propagate to outputs, do not activate the block. */

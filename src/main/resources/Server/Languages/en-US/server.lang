@@ -39,7 +39,6 @@ arcanerelay.notifications.outputRemoved = Output removed.
 arcanerelay.notifications.outputAdded = Output has been added.
 arcanerelay.notifications.signalSentToTrigger = Signal sent to trigger.
 arcanerelay.notifications.blockActivationNotSupported = Block activation not supported for this block.
-
 # === UI ===
 
 customUI.ArcaneStaffLegend.title = Arcane Staff

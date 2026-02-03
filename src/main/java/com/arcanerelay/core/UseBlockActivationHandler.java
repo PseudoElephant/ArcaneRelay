@@ -48,11 +48,6 @@ public final class UseBlockActivationHandler implements BlockActivationHandler {
                 if (ref == null || !ref.isValid()) continue;
                 PlayerRef playerRef = entityStore.getComponent(ref, PlayerRef.getComponentType());
                 if (playerRef != null) {
-                    NotificationUtil.sendNotification(
-                        playerRef.getPacketHandler(),
-                        Message.translation("server.arcanerelay.notifications.blockActivationNotSupported"),
-                        NotificationStyle.Danger
-                    );
                     break;
                 }
             }
