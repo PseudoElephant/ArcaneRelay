@@ -30,7 +30,7 @@ public final class ActivationBinding implements JsonAssetWithMap<String, Default
         .add()
         .append(new KeyedCodec<>("Activation", Codec.STRING, true), (b, a) -> b.activation = a, b -> b.activation)
         .add()
-        .append(new KeyedCodec<>("Priority", Codec.BOOLEAN, false), (b, p) -> b.priority = p, b -> b.priority)
+        .append(new KeyedCodec<>("Priority", Codec.INTEGER, false), (b, p) -> b.priority = p, b -> b.priority)
         .add()
         .build();
 
@@ -39,7 +39,7 @@ public final class ActivationBinding implements JsonAssetWithMap<String, Default
     private String pattern;
     private String activation;
     private AssetExtraInfo.Data data;
-    private boolean priority;
+    private int priority = 0;
     public ActivationBinding() {
     }
 
@@ -64,7 +64,8 @@ public final class ActivationBinding implements JsonAssetWithMap<String, Default
         return "Default".equals(id) && (pattern == null || pattern.isBlank());
     }
 
-    public boolean isPriority() {
+    /** Priority for registration order: higher value = registered first = checked first. Default 0. */
+    public int getPriority() {
         return priority;
     }
 }

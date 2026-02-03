@@ -1,5 +1,5 @@
 {
   "Pattern": "contains:Pseudo_Arcane_Button",
-  "Activation": "Toggle_Door",
-  "Priority": true
+  "Activation": "Arcane_Button",
+  "Priority": 10
 }

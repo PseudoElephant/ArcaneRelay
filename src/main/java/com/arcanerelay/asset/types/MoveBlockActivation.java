@@ -1,5 +1,6 @@
 package com.arcanerelay.asset.types;
 
+import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.asset.Activation;
 import com.arcanerelay.asset.ActivationContext;
 import com.arcanerelay.asset.ActivationExecutor;
@@ -35,6 +36,10 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Activation that moves the block in the "up" direction (relative to this block)
@@ -122,8 +127,109 @@ public class MoveBlockActivation extends Activation {
         return id != null && id.toLowerCase().contains("wall");
     }
 
+    private static boolean isWallForBlockType(@Nonnull BlockType blockType) {
+        return blockType.getVariantRotation() == VariantRotation.Wall
+            || (blockType.getId() != null && blockType.getId().toLowerCase().contains("wall"));
+    }
+
+    /**
+     * Returns true if this block is the first pusher in a contiguous chain (no pusher behind it in the push direction).
+     */
+    public static boolean isFirstPusherInChain(
+        @Nonnull World world,
+        @Nonnull WorldChunk chunk,
+        int blockX, int blockY, int blockZ,
+        @Nonnull BlockType blockType
+    ) {
+        Activation activation = ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(blockType.getId());
+        if (activation == null || !(activation instanceof MoveBlockActivation)) return true;
+        boolean wall = isWallForBlockType(blockType);
+        int rotationIndex = chunk.getRotationIndex(blockX, blockY, blockZ);
+        Vector3d localForward = getForwardFromBlockType(blockType, wall);
+        Vector3d forward = RotationTuple.get(rotationIndex).rotate(localForward.clone());
+        int dx = (int) Math.round(forward.getX());
+        int dy = (int) Math.round(forward.getY());
+        int dz = (int) Math.round(forward.getZ());
+        if (dx == 0 && dy == 0 && dz == 0) return true;
+        int backX = blockX - dx, backY = blockY - dy, backZ = blockZ - dz;
+        WorldChunk backChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(backX, backZ));
+        if (backChunk == null) return true;
+        int backBlockId = backChunk.getBlock(backX, backY, backZ);
+        BlockType backBlockType = BlockType.getAssetMap().getAsset(backBlockId);
+        if (backBlockId == 0 || backBlockType == null) return true;
+        if (!blockType.getId().equals(backBlockType.getId())) return true;
+        Activation backActivation = ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(backBlockType.getId());
+        if (backActivation == null || !(backActivation instanceof MoveBlockActivation)) return true;
+        return false;
+    }
+
+    /** Walks forward from (px,py,pz) through contiguous same-type MoveBlockActivation pushers; returns [x,y,z] of the front pusher. */
+    private static int[] findFrontPusherInChain(
+        @Nonnull World world,
+        int px, int py, int pz,
+        int dx, int dy, int dz,
+        @Nonnull BlockType pusherBlockType
+    ) {
+        int fx = px, fy = py, fz = pz;
+        int nx = px + dx, ny = py + dy, nz = pz + dz;
+        String pusherId = pusherBlockType.getId();
+        if (pusherId == null) return new int[] { fx, fy, fz };
+        while (true) {
+            WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(nx, nz));
+            if (chunk == null) break;
+            int blockId = chunk.getBlock(nx, ny, nz);
+            BlockType blockType = BlockType.getAssetMap().getAsset(blockId);
+            if (blockId == 0 || blockType == null) break;
+            if (!pusherId.equals(blockType.getId())) break;
+            Activation act = ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(blockType.getId());
+            if (act == null || !(act instanceof MoveBlockActivation)) break;
+            fx = nx; fy = ny; fz = nz;
+            nx += dx; ny += dy; nz += dz;
+        }
+        return new int[] { fx, fy, fz };
+    }
+
+    /** Returns [dx, dy, dz] push direction for this block (world-space forward). For non-pushers returns [0,0,0]. */
+    public static int[] getForwardDirection(
+        @Nonnull WorldChunk chunk,
+        int blockX, int blockY, int blockZ,
+        @Nonnull BlockType blockType
+    ) {
+        Activation activation = ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(blockType.getId());
+        if (activation == null || !(activation instanceof MoveBlockActivation)) return new int[] { 0, 0, 0 };
+        boolean wall = isWallForBlockType(blockType);
+        int rotationIndex = chunk.getRotationIndex(blockX, blockY, blockZ);
+        Vector3d localForward = getForwardFromBlockType(blockType, wall);
+        Vector3d forward = RotationTuple.get(rotationIndex).rotate(localForward.clone());
+        int dx = (int) Math.round(forward.getX());
+        int dy = (int) Math.round(forward.getY());
+        int dz = (int) Math.round(forward.getZ());
+        return new int[] { dx, dy, dz };
+    }
+
+    /** Returns [frontX, frontY, frontZ] of the front pusher in the chain containing (blockX, blockY, blockZ). For non-pushers or single pusher, returns the block position. */
+    public static int[] getFrontPusherPosition(
+        @Nonnull World world,
+        @Nonnull WorldChunk chunk,
+        int blockX, int blockY, int blockZ,
+        @Nonnull BlockType blockType
+    ) {
+        Activation activation = ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(blockType.getId());
+        if (activation == null || !(activation instanceof MoveBlockActivation)) return new int[] { blockX, blockY, blockZ };
+        boolean wall = isWallForBlockType(blockType);
+        int rotationIndex = chunk.getRotationIndex(blockX, blockY, blockZ);
+        Vector3d localForward = getForwardFromBlockType(blockType, wall);
+        Vector3d forward = RotationTuple.get(rotationIndex).rotate(localForward.clone());
+        int dx = (int) Math.round(forward.getX());
+        int dy = (int) Math.round(forward.getY());
+        int dz = (int) Math.round(forward.getZ());
+        if (dx == 0 && dy == 0 && dz == 0) return new int[] { blockX, blockY, blockZ };
+        return findFrontPusherInChain(world, blockX, blockY, blockZ, dx, dy, dz, blockType);
+    }
+
     @Override
     public void execute(@Nonnull ActivationContext ctx) {
+        ArcaneRelayPlugin.get().getLogger().atInfo().log("MoveBlockActivation: executing move block activation at " + ctx.blockX() + ", " + ctx.blockY() + ", " + ctx.blockZ());
         World world = ctx.world();
         int px = ctx.blockX();
         int py = ctx.blockY();
@@ -135,13 +241,15 @@ public class MoveBlockActivation extends Activation {
         int rotationIndex = pusherChunk.getRotationIndex(px, py, pz);
 
         Vector3d localForward = getForwardFromBlockType(pusherBlockType, wall);
-        Vector3d forward = RotationTuple.get(rotationIndex).rotate(localForward.clone());
+        RotationTuple rotationTuple = RotationTuple.get(rotationIndex);
+        Vector3d forward = rotationTuple.rotate(localForward.clone());
         int dx = (int) Math.round(forward.getX());
         int dy = (int) Math.round(forward.getY());
         int dz = (int) Math.round(forward.getZ());
 
         Vector3d up = getUpFromBlockType(pusherBlockType, wall);
-        Vector3d upDirection = RotationTuple.get(rotationIndex).rotate(up.clone());
+        RotationTuple upRotationTuple = RotationTuple.get(rotationIndex);
+        Vector3d upDirection = upRotationTuple.rotate(up.clone());
         int ux = (int) Math.round(upDirection.getX());
         int uy = (int) Math.round(upDirection.getY());
         int uz = (int) Math.round(upDirection.getZ());
@@ -153,6 +261,9 @@ public class MoveBlockActivation extends Activation {
         int puy = upAmount * uy;
         int puz = upAmount * uz;
 
+        int[] frontPos = findFrontPusherInChain(world, px, py, pz, dx, dy, dz, pusherBlockType);
+        int frontPx = frontPos[0], frontPy = frontPos[1], frontPz = frontPos[2];
+
         int[] chainBlockIds = new int[maxRange];
         int[] chainRotations = new int[maxRange];
         int[] chainFillers = new int[maxRange];
@@ -162,9 +273,9 @@ public class MoveBlockActivation extends Activation {
         int chainLength = 0;
 
         for (int i = 0; i < maxRange; i++) {
-            int cx = px + i * dx + pux;
-            int cy = py + i * dy + puy;
-            int cz = pz + i * dz + puz;
+            int cx = frontPx + i * dx + pux;
+            int cy = frontPy + i * dy + puy;
+            int cz = frontPz + i * dz + puz;
 
             WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(cx, cz));
             if (chunk == null) break;
@@ -184,9 +295,9 @@ public class MoveBlockActivation extends Activation {
 
         if (chainLength == 0) return;
 
-        int emptyX = px + chainLength * dx + pux;
-        int emptyY = py + chainLength * dy + puy;
-        int emptyZ = pz + chainLength * dz + puz;
+        int emptyX = frontPx + chainLength * dx + pux;
+        int emptyY = frontPy + chainLength * dy + puy;
+        int emptyZ = frontPz + chainLength * dz + puz;
 
         WorldChunk emptyChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(emptyX, emptyZ));
         if (emptyChunk == null) return;
@@ -203,27 +314,38 @@ public class MoveBlockActivation extends Activation {
         final Holder<ChunkStore>[] holders = chainHolders;
         final int pdx = dx, pdy = dy, pdz = dz;
 
+        // Collision check before move (same tick): collect player refs on top of empty block or any chain block
+        Store<EntityStore> entityStoreForCheck = world.getEntityStore().getStore();
+        Set<Ref<EntityStore>> playersOnTop = new HashSet<>();
+        collectPlayersOnTopOfBlock(entityStoreForCheck, emptyX, emptyY, emptyZ, playersOnTop);
+        for (int i = 0; i < len; i++) {
+            int fromX = frontPx + i * pdx + pux;
+            int fromY = frontPy + i * pdy + puy;
+            int fromZ = frontPz + i * pdz + puz;
+            collectPlayersOnTopOfBlock(entityStoreForCheck, fromX, fromY, fromZ, playersOnTop);
+        }
+        final List<Ref<EntityStore>> playersOnTopList = new ArrayList<>(playersOnTop);
+
         world.execute(() -> {
             Store<EntityStore> entityStore = world.getEntityStore().getStore();
 
-            // 1) Move players before blocks: at end of chain → pushed; on top of chain block → remain on top.
-            for (int i = 0; i < len; i++) {
-                int fromX = px + i * pdx + pux;
-                int fromY = py + i * pdy + puy;
-                int fromZ = pz + i * pdz + puz;
-                movePlayersOnTopOfBlock(world, entityStore, fromX, fromY, fromZ, pdx, pdy, pdz);
+            // 1) Move players we found on top (in chain direction), then move any others in boxes (excluding already moved)
+            for (Ref<EntityStore> ref : playersOnTopList) {
+                if (ref == null || !ref.isValid()) continue;
+                TransformComponent transform = entityStore.getComponent(ref, TransformComponent.getComponentType());
+                if (transform == null) continue;
+                movePlayerWithBlock(world, entityStore, ref, transform, pdx, pdy, pdz);
             }
-            movePlayersInBlock(world, entityStore, emptyX, emptyY, emptyZ, pdx, pdy, pdz);
-
-            // 2) Move blocks
+        
+            // 2) Move blocks (back to front: block closest to pusher first)
             LongSet dirtyChunks = new LongOpenHashSet();
             for (int i = len - 1; i >= 0; i--) {
-                int fromX = px + i * pdx + pux;
-                int fromY = py + i * pdy + puy;
-                int fromZ = pz + i * pdz + puz;
-                int toX = px + (i + 1) * pdx + pux;
-                int toY = py + (i + 1) * pdy + puy;
-                int toZ = pz + (i + 1) * pdz + puz;
+                int fromX = frontPx + i * pdx + pux;
+                int fromY = frontPy + i * pdy + puy;
+                int fromZ = frontPz + i * pdz + puz;
+                int toX = frontPx + (i + 1) * pdx + pux;
+                int toY = frontPy + (i + 1) * pdy + puy;
+                int toZ = frontPz + (i + 1) * pdz + puz;
 
                 WorldChunk fromChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(fromX, fromZ));
                 WorldChunk toChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(toX, toZ));
@@ -239,9 +361,11 @@ public class MoveBlockActivation extends Activation {
                 }
             }
 
+            world.execute(() -> {
             dirtyChunks.forEach(chunkIndex -> world.getNotificationHandler().updateChunk(chunkIndex));
-            ActivationExecutor.playEffects(world, px + pdx + pux, py + pdy + puy, pz + pdz + puz, getEffects());
-            ActivationExecutor.sendSignals(ctx);
+                ActivationExecutor.playEffects(world, frontPx + pdx + pux, frontPy + pdy + puy, frontPz + pdz + puz, getEffects());
+                ActivationExecutor.sendSignals(ctx);
+            });
         });
     }
 
@@ -259,6 +383,26 @@ public class MoveBlockActivation extends Activation {
     private static boolean isFeetOnTopOfBlock(double fx, double fy, double fz, int blockX, int blockY, int blockZ) {
         return fy >= blockY + 0.95 && fy <= blockY + 1.1
             && fx >= blockX && fx <= blockX + 1 && fz >= blockZ && fz <= blockZ + 1;
+    }
+
+    /** Collects player refs whose feet are on top of the block at (blockX, blockY, blockZ) into the given set. */
+    private static void collectPlayersOnTopOfBlock(
+        @Nonnull Store<EntityStore> entityStore,
+        int blockX, int blockY, int blockZ,
+        @Nonnull Set<Ref<EntityStore>> out
+    ) {
+        Vector3d min = new Vector3d(blockX - 0.1, blockY + 0.9, blockZ - 0.1);
+        Vector3d max = new Vector3d(blockX + 1.1, blockY + 2.1, blockZ + 1.1);
+        Vector3d feet = new Vector3d();
+        for (var ref : TargetUtil.getAllEntitiesInBox(min, max, entityStore)) {
+            if (ref == null || !ref.isValid()) continue;
+            if (entityStore.getComponent(ref, PlayerRef.getComponentType()) == null) continue;
+            TransformComponent transform = entityStore.getComponent(ref, TransformComponent.getComponentType());
+            if (transform == null) continue;
+            BoundingBox boundingBox = entityStore.getComponent(ref, BoundingBox.getComponentType());
+            getFeetPosition(feet, transform, boundingBox);
+            if (isFeetOnTopOfBlock(feet.getX(), feet.getY(), feet.getZ(), blockX, blockY, blockZ)) out.add(ref);
+        }
     }
 
     private static boolean isFeetInsideBlock(double fx, double fy, double fz, int blockX, int blockY, int blockZ) {
@@ -326,12 +470,13 @@ public class MoveBlockActivation extends Activation {
         entityStore.addComponent(ref, Teleport.getComponentType(), teleport);
     }
 
-    /** Move players standing on top of block (bx, by, bz) by (dx, dy, dz) so they remain on top. */
+    /** Move players standing on top of block (bx, by, bz) by (dx, dy, dz), excluding refs in excludeRefs (already moved). */
     private static void movePlayersOnTopOfBlock(
         @Nonnull World world,
         @Nonnull Store<EntityStore> entityStore,
         int blockX, int blockY, int blockZ,
-        int dx, int dy, int dz
+        int dx, int dy, int dz,
+        @Nonnull List<Ref<EntityStore>> excludeRefs
     ) {
         Vector3d min = new Vector3d(blockX - 0.1, blockY + 0.9, blockZ - 0.1);
         Vector3d max = new Vector3d(blockX + 1.1, blockY + 2.1, blockZ + 1.1);
@@ -339,6 +484,7 @@ public class MoveBlockActivation extends Activation {
 
         for (var ref : TargetUtil.getAllEntitiesInBox(min, max, entityStore)) {
             if (ref == null || !ref.isValid()) continue;
+            if (excludeRefs.contains(ref)) continue;
             if (entityStore.getComponent(ref, PlayerRef.getComponentType()) == null) continue;
 
             TransformComponent transform = entityStore.getComponent(ref, TransformComponent.getComponentType());
@@ -352,12 +498,13 @@ public class MoveBlockActivation extends Activation {
         }
     }
 
-    /** Move players whose feet are inside block (bx, by, bz) by (dx, dy, dz) — they get pushed. */
+    /** Move players whose feet are inside block (bx, by, bz) by (dx, dy, dz), excluding refs in excludeRefs (already moved). */
     private static void movePlayersInBlock(
         @Nonnull World world,
         @Nonnull Store<EntityStore> entityStore,
         int blockX, int blockY, int blockZ,
-        int dx, int dy, int dz
+        int dx, int dy, int dz,
+        @Nonnull List<Ref<EntityStore>> excludeRefs
     ) {
         Vector3d min = new Vector3d(blockX - 0.1, blockY - 0.1, blockZ - 0.1);
         Vector3d max = new Vector3d(blockX + 1.1, blockY + 2.1, blockZ + 1.1);
@@ -365,6 +512,7 @@ public class MoveBlockActivation extends Activation {
 
         for (var ref : TargetUtil.getAllEntitiesInBox(min, max, entityStore)) {
             if (ref == null || !ref.isValid()) continue;
+            if (excludeRefs.contains(ref)) continue;
             if (entityStore.getComponent(ref, PlayerRef.getComponentType()) == null) continue;
 
             TransformComponent transform = entityStore.getComponent(ref, TransformComponent.getComponentType());

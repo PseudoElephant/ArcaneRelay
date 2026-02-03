@@ -101,6 +101,14 @@
         "OpenDoorOut": {
           "InteractionSoundEventId": "SFX_Pseudo_Arcane_Trigger",
           "CustomModelAnimation": "Blocks/Animations/Functional/Button/Button_Click.blockyanim"
+        },
+        "OpenDoorIn": {
+          "InteractionSoundEventId": "SFX_Pseudo_Arcane_Trigger",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Button/Button_Click.blockyanim"
+        },
+        "CloseDoorIn": {
+          "InteractionSoundEventId": "SFX_Pseudo_Arcane_Trigger",
+          "CustomModelAnimation": "Blocks/Animations/Functional/Button/Button_Click.blockyanim"
         }
       }
     },

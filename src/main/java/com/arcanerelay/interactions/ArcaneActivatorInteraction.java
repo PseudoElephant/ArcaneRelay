@@ -104,6 +104,7 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
                 ? registry.getActivation(activator)
                 : registry.getActivationForBlock(blockType.getId());
         if (activation == null) {
+            ArcaneRelayPlugin.get().getLogger().atFine().log(String.format("ArcaneActivator: no activation for block %s at (%d,%d,%d)", blockType.getId(), blockX, blockY, blockZ));
             context.getState().state = InteractionState.Finished;
             return;
         }
@@ -111,11 +112,14 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
         long chunkIndex = ChunkUtil.indexChunkFromBlock(blockX, blockZ);
         WorldChunk chunk = world.getChunk(chunkIndex);
         if (chunk == null) {
+            ArcaneRelayPlugin.get().getLogger().atWarning().log(String.format("ArcaneActivator: chunk not loaded at (%d,%d,%d)", blockX, blockY, blockZ));
             context.getState().state = InteractionState.Finished;
             return;
         }
 
-        ArcaneTickSystem.requestSignalNextTick(world, blockX, blockY, blockZ, blockX, blockY, blockZ, activation.getId());
+        String activationId = activation.getId();
+        ArcaneRelayPlugin.get().getLogger().atInfo().log(String.format("ArcaneActivator: request next tick block=(%d,%d,%d) activation=%s", blockX, blockY, blockZ, activationId));
+        ArcaneTickSystem.requestSignalNextTick(world, blockX, blockY, blockZ, blockX, blockY, blockZ, activationId);
 
         context.getState().state = InteractionState.Finished;
     }

@@ -1,0 +1,7 @@
+{
+    "Type": "ToggleDoor",
+    "OpenIn": false,
+    "Horizontal": true,
+    "IsWall": false
+  }
+  

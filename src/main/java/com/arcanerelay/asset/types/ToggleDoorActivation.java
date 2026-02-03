@@ -3,6 +3,7 @@ package com.arcanerelay.asset.types;
 import com.arcanerelay.asset.Activation;
 import com.arcanerelay.asset.ActivationContext;
 import com.arcanerelay.asset.ActivationExecutor;
+import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.util.BlockUtil;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -142,7 +143,7 @@ public class ToggleDoorActivation extends Activation {
         WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(x, z));
         if (chunk == null) return null;
         BlockType blockType = chunk.getBlockType(x, y, z);
-        if (blockType == null || !blockType.isDoor()) return null;
+        if (blockType == null) return null; // we don't check isdoor as it could be a door imitator
         int rotationIndex = chunk.getRotationIndex(x, y, z);
         RotationTuple blockRotation = RotationTuple.get(rotationIndex);
         String blockState = blockType.getStateForBlock(blockType);
@@ -241,7 +242,10 @@ public class ToggleDoorActivation extends Activation {
         WorldChunk mainChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(mainX, mainZ));
         if (mainChunk == null) return;
         BlockType mainBlockType = mainChunk.getBlockType(mainX, mainY, mainZ);
-        if (mainBlockType == null || !mainBlockType.isDoor()) return;
+        if (mainBlockType == null) { // we don't check isdoor as it could be a door imitator
+            ArcaneRelayPlugin.get().getLogger().atInfo().log("mainBlockType is not a door: " + mainBlockType.getId());
+            return;
+        }
 
         Vector3i mainPos = new Vector3i(mainX, mainY, mainZ);
         String blockState = mainBlockType.getStateForBlock(mainBlockType);
@@ -255,6 +259,7 @@ public class ToggleDoorActivation extends Activation {
             // Open direction from source position (like DoorInteraction: in front -> open out, else open in)
             if (horizontal) {
                 newState = openIn ? DoorState.OPENED_IN : DoorState.OPENED_OUT;
+                ArcaneRelayPlugin.get().getLogger().atInfo().log("newState: " + newState);
             } else {
                 int sourceX = px;
                 int sourceY = py;
@@ -272,6 +277,7 @@ public class ToggleDoorActivation extends Activation {
                     : DoorState.OPENED_IN;
             }
         } else {
+            ArcaneRelayPlugin.get().getLogger().atInfo().log("currentState is not CLOSED: " + currentState);
             newState = DoorState.CLOSED;
         }
         BlockType resultType = activateDoor(world, mainBlockType, mainPos, currentState, newState);

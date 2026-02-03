@@ -52,6 +52,7 @@ public class ChainActivation extends Activation {
             if (id == null || id.isEmpty()) continue;
             Activation activation = registry.getActivation(id);
             if (activation != null) {
+                ArcaneRelayPlugin.get().getLogger().atInfo().log("executing chain activation: " + id);
                 activation.execute(ctx);
             }
         }

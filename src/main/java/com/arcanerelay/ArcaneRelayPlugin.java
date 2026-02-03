@@ -154,22 +154,20 @@ public class ArcaneRelayPlugin extends JavaPlugin {
         if (store == null) return;
         AssetMap<String, ActivationBinding> map = store.getAssetMap();
         if (map == null) return;
-        // Process in deterministic order: default last, others sorted by id
+        // Process default binding last; others sorted by priority (higher first), then by id for stability
         var bindings = new ArrayList<>(map.getAssetMap().values());
         bindings.sort((a, b) -> {
             if (a.isDefaultBinding()) return 1;
             if (b.isDefaultBinding()) return -1;
+            int cmp = Integer.compare(b.getPriority(), a.getPriority());
+            if (cmp != 0) return cmp;
             return a.getId().compareTo(b.getId());
         });
         for (ActivationBinding binding : bindings) {
             if (binding.isDefaultBinding()) {
                 registry.setDefaultActivationId(binding.getActivation());
             } else if (binding.getPattern() != null && !binding.getPattern().isBlank()) {
-                if (binding.isPriority()) {
-                    registry.registerBindingWithPriority(binding.getPattern(), binding.getActivation());
-                } else {
-                    registry.registerBinding(binding.getPattern(), binding.getActivation());
-                }
+                registry.registerBinding(binding.getPattern(), binding.getActivation());
             }
         }
     }
