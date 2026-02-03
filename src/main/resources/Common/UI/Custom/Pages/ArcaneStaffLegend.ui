@@ -1,66 +1,123 @@
 $C = "../Common.ui";
+$Sounds = "../Sounds.ui";
+$ActionButton = "../ActionButton.ui";
 
-Group {
+Group #FormContainer {
   LayoutMode: Left;
-  Anchor: (Left: 16, Bottom: 112, Width: 220);
-  Background: #0d1117(0.88);
-  Padding: (Full: 0);
 
-  Group {
-    LayoutMode: Top;
-    Anchor: (Width: 3);
-    Background: #2dd4bf(0.85);
-  }
+  $C.@DecoratedContainer {
+    Anchor: (Left: 20, Top: 130, Width: 280, Bottom: 170);
 
-  Group {
-    LayoutMode: Top;
-    FlexWeight: 1;
-    Padding: (Left: 10, Right: 10, Top: 8, Bottom: 8);
-
-    Label #Title {
-      Text: "Arcane Staff";
-      Anchor: (Bottom: 6);
-      Style: (...$C.@DefaultLabelStyle, RenderBold: true, FontSize: 12, TextColor: #e6edf3);
+    #Title {
+      $C.@Title {
+        @Text = %server.customUI.ArcaneStaffLegend.title;
+      }
     }
 
-    Group {
+    #Content {
       LayoutMode: Top;
-      Anchor: (Bottom: 5);
-      Padding: (Full: 0);
+      Padding: (Horizontal: 20, Top: 15);
+      
+      Group {
+        LayoutMode: Top;
 
-      Label #PrimaryKey {
-        Text: "Primary";
-        Anchor: (Bottom: 1);
-        Style: (...$C.@DefaultLabelStyle, FontSize: 9, TextColor: #2dd4bf, RenderBold: true);
-      }
-      Label #Primary {
-        Text: "Select Arcane Trigger block";
-        Anchor: (Bottom: 4);
-        Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #b1bac4);
+        Label {
+          Anchor: (Bottom: 5);
+          Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 16, TextColor: #94969a, RenderBold: true);
+          Text: "Setting Up Connections";
+        }
+
+        Label {
+          Anchor: (Bottom: 10);
+          Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
+          Text: "1. Left click on a target arcane block to set the active source block (sender).";
+        }
+
+        Label {
+          Anchor: (Bottom: 20);
+          Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
+          Text: "2. Right click on a target position to add that location as a destination for the selected source block.";
+        }
+
+        Label {
+          Anchor: (Bottom: 15);
+          Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
+          Text: "Note: You can add many destinations without having to reselect the source block. ";
+        }
       }
 
-      Label #SecondaryKey {
-        Text: "Secondary";
-        Anchor: (Bottom: 1);
-        Style: (...$C.@DefaultLabelStyle, FontSize: 9, TextColor: #2dd4bf, RenderBold: true);
-      }
-      Label #Secondary {
-        Text: "Add or remove output connection";
-        Anchor: (Bottom: 0);
-        Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #b1bac4);
-      }
-    }
+      $C.@ContentSeparator { }
 
-    Group {
-      LayoutMode: Top;
-      Anchor: (Bottom: 5, Height: 1);
-      Background: #30363d(0.6);
-    }
+      Group {
+        LayoutMode: Top;
 
-    Label #Hint {
-      Text: "Shift + click trigger to open connections";
-      Anchor: (Bottom: 0);
-      Style: (...$C.@DefaultLabelStyle, FontSize: 8, TextColor: #6e7681);
+        Label {
+          Padding: (Top: 15);
+          Anchor: (Bottom: 5);
+          Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 16, TextColor: #94969a, RenderBold: true);
+          Text: "Removing a Connection";
+        }
+
+        Label {
+          Anchor: (Bottom: 10);
+          Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
+          Text: "1. Left click on a target arcane block to set the active source block (sender).";
+        }
+
+        Label {
+          Anchor: (Bottom: 15);
+          Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
+          Text: "2. Right click on an already targetted position to remove that location as a destination for the selected source block.";
+        }
+      }
+
+      $C.@ContentSeparator { }
+
+      Group {
+        LayoutMode: Top;
+        
+        Label {
+          Padding: (Top: 15);
+          Anchor: (Bottom: 5);
+          Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 16, TextColor: #94969a, RenderBold: true);
+          Text: "View Connections";
+        }
+
+        Label {
+          Anchor: (Bottom: 15);
+          Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
+          Text: "Left click on a previously selected source block to view it's destinations.";
+        }
+      }
+
+      $C.@ContentSeparator { }
+
+      Group {
+        LayoutMode: Top;
+
+        Label {
+          Padding: (Top: 15);
+          Anchor: (Bottom: 5);
+          Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 16, TextColor: #94969a, RenderBold: true);
+          Text: "List Connections";
+        }
+
+        Label {
+          Anchor: (Bottom: 15);
+          Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
+          Text: "Press Ctrl + 'Block Interaction Key' on an Arcane block to view it's connections.";
+        }
+      }
+
+      // $C.@ContentSeparator { }
+
+      // Group {
+      //   Label {
+      //     Anchor: (Bottom: 15);
+      //     Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
+      //     Text: "Press L to toggle this menu";
+      //   }
+      // }
     }
   }
 }

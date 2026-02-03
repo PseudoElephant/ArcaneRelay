@@ -38,9 +38,9 @@ This item is kind of broken and extra complicated, and it will be sort of hidden
 ![Arcane Toggle Discharge](src/main/resources/Common/Icons/ItemsGenerated/Pseudo_Arcane_Discharge.png)
 
 
-### Plugin Development
+## Plugin Development
 
-#### Activations
+### Activations
 
 When an arcane signal reaches a block, the mod looks up which **activation** to run. Activations live under `Server/Item/Activations/` as JSON; the **filename** (without `.json`) is the activation ID (e.g. `Arcane_Relay`, `Toggle_Pusher`).
 
@@ -114,3 +114,23 @@ Example: any block whose key contains `Pseudo_Arcane_Relay` uses the `Arcane_Rel
   "Priority": true
 }
 ```
+
+
+## Building the Project 
+You will need to have Maven installed on your machine. 
+
+### Dependencies
+To build the project make sure to go to `./pom.xml` and under dependencies ensure that the com.hypixel.hytale `<version>{hytale_version}</version>` has the latest release version of the game. 
+
+Then you can run the following: 
+```
+mvn -U -X dependency:resolve
+```
+
+### Building and Installing
+The process is a little bit manual at the moment, but you can run the following command to generate the `arcanerelay-X.Y.Z.jar` file:
+```
+mvn clean install
+```
+
+You will then need to move the .jar from `./tagert` to your Hytale mods folder yourself. 

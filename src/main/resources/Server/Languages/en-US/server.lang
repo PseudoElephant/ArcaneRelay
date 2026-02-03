@@ -11,6 +11,7 @@ items.Pseudo_Arcane_Pusher.description = Used to push blocks forwards. Blocks wi
 items.Pseudo_Arcane_Staff.name = Arcane Staff
 items.Pseudo_Arcane_Staff.description = (Required to configure Arcane Artifacts) Used to setup connections within Arcane blocks.
 items.Ingredient_Crystal_Cyan.name=Any Crystal Shards
+
 # === interactionHints ===
 
 interactionHints.button = Press [{key}] to press
@@ -19,9 +20,11 @@ interactionHints.cycle = Press [{key}] to cycle
 interactionHints.relay = Press [{key}] to relay
 
 # === bench ===
+
 benchCategories.artifacts = Artifacts
 
 # === Arcane Relay notifications (interactions / activation) ===
+
 arcanerelay.activationExecutor.executed=Activation Executed at [{blockX}],[{blockY}],[{blockZ}] with activation: [{activation}]
 arcanerelay.pusher.displaced=You were moved out of the block by the pusher.
 arcanerelay.pusher.pushed=You were pushed by the pusher.
@@ -36,3 +39,7 @@ arcanerelay.notifications.outputRemoved = Output removed.
 arcanerelay.notifications.outputAdded = Output has been added.
 arcanerelay.notifications.signalSentToTrigger = Signal sent to trigger.
 arcanerelay.notifications.blockActivationNotSupported = Block activation not supported for this block.
+
+# === UI ===
+
+customUI.ArcaneStaffLegend.title = Arcane Staff

@@ -4,7 +4,7 @@ $C.@PageOverlay {
   LayoutMode: Middle;
 
   $C.@DecoratedContainer {
-    Anchor: (Width: 520, Height: 480);
+    Anchor: (Width: 520, Height: 475);
 
     #Title {
       $C.@Title {
@@ -39,20 +39,24 @@ $C.@PageOverlay {
 
         Group #OutputList {
           LayoutMode: TopScrolling;
-          Anchor: (Height: 280, Bottom: 16);
+          Anchor: (Height: 280, Bottom: 10);
           Background: #000000(0.3);
           Padding: (Full: 8);
           ScrollbarStyle: $C.@DefaultScrollbarStyle;
         }
 
-        Label #ConnectionCount {
-          Text: "0 connections";
-          Anchor: (Bottom: 16);
-          Style: (...$C.@DefaultLabelStyle, FontSize: 13, TextColor: #6e7da1);
+        Group {
+          LayoutMode: Right;
+
+          Label #ConnectionCount {
+            Text: "0 connections";
+            Anchor: (Bottom: 10);
+            Style: (...$C.@DefaultLabelStyle, FontSize: 13, TextColor: #6e7da1);
+          }
         }
 
         Group {
-          Anchor: (Bottom: 16, Height: 1);
+          Anchor: (Bottom: 10, Height: 1);
           Background: #5e512c;
         }
 

@@ -32,7 +32,6 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         this.blockRef = blockRef;
     }
 
-
     @Override
     public void build(
             @Nonnull Ref<EntityStore> ref,
@@ -70,8 +69,11 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
                 String posText = p.getX() + ", " + p.getY() + ", " + p.getZ();
                 String posKey = p.getX() + "," + p.getY() + "," + p.getZ();
                 commandBuilder.set(selector + " #Position.Text", posText);
-                eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, selector + " #RemoveButton",
-                        EventData.of("RemovePosition", posKey), false);
+
+                EventData eventData = EventData.of("RemovePosition", posKey);
+                eventData.put("Selector", selector);
+
+                eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, selector + " #RemoveButton", eventData, false);
             }
         }
         
@@ -101,15 +103,18 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         ArcaneTriggerBlock comp = chunkStore.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
         if (comp == null) return;
 
+        ArcaneTriggerBlock updated = (ArcaneTriggerBlock) comp.clone();
+
         if ("Clear".equals(data.action)) {
-            ArcaneTriggerBlock updated = (ArcaneTriggerBlock) comp.clone();
             updated.clearOutputPositions();
             chunkStore.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), updated);
+            java.util.List<Vector3i> outputs = updated.getOutputPositions();
+
             // Refresh page so list and count update (do not close)
-            UICommandBuilder cb = new UICommandBuilder();
-            UIEventBuilder eb = new UIEventBuilder();
-            build(ref, cb, eb, store);
-            sendUpdate(cb, eb, false);
+            UICommandBuilder commandBuilder = new UICommandBuilder();
+            commandBuilder.clear("#OutputList");
+            commandBuilder.set("#ConnectionCount.Text", outputs.size() + " connections");
+            sendUpdate(commandBuilder);
         } else if (data.removePosition != null && !data.removePosition.isEmpty()) {
             String[] parts = data.removePosition.split(",");
             if (parts.length == 3) {
@@ -117,19 +122,14 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
                     int x = Integer.parseInt(parts[0].trim());
                     int y = Integer.parseInt(parts[1].trim());
                     int z = Integer.parseInt(parts[2].trim());
-                    ArcaneTriggerBlock updated = (ArcaneTriggerBlock) comp.clone();
+                    
                     if (updated.removeOutputPosition(x, y, z)) {
                         chunkStore.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), updated);
-                        // Refresh page to show updated list
-                        UICommandBuilder cb = new UICommandBuilder();
-                        UIEventBuilder eb = new UIEventBuilder();
-                        build(ref, cb, eb, store);
-                        sendUpdate(cb, eb, false);
+                        rebuild();
                     }
                 } catch (NumberFormatException ignored) { }
             }
         }
-        
     }
 
     public static final class PageEventData {
@@ -145,9 +145,15 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
                         (d, v) -> d.removePosition = v,
                         d -> d.removePosition)
                 .add()
+                .append(
+                        new KeyedCodec<>("Selector", Codec.STRING),
+                        (d, v) -> d.selector = v,
+                        d -> d.selector)
+                .add()
                 .build();
         public String action;
         public String removePosition;
+        public String selector;
 
         public PageEventData() {
         }
