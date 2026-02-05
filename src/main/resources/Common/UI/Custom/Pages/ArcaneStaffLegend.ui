@@ -108,16 +108,6 @@ Group #FormContainer {
           Text: "Press Ctrl + 'Block Interaction Key' on an Arcane block to view it's connections.";
         }
       }
-
-      // $C.@ContentSeparator { }
-
-      // Group {
-      //   Label {
-      //     Anchor: (Bottom: 15);
-      //     Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-      //     Text: "Press L to toggle this menu";
-      //   }
-      // }
     }
   }
 }

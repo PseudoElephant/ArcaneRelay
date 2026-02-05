@@ -37,12 +37,22 @@ $C.@PageOverlay {
           Style: (...$C.@DefaultLabelStyle, RenderBold: true);
         }
 
-        Group #OutputList {
-          LayoutMode: TopScrolling;
+        Group #OutputListContainer {
+          LayoutMode: Top;
           Anchor: (Height: 280, Bottom: 10);
           Background: #000000(0.3);
           Padding: (Full: 8);
-          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          
+          Label #NoConnections { 
+            Text: "(No connections)";
+            Style: (FontSize: 14, TextColor: #afc2c3); 
+            Visible: false;
+          }
+
+          Group #OutputList {
+            LayoutMode: TopScrolling;
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          }
         }
 
         Group {

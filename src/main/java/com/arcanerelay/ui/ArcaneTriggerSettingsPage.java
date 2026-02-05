@@ -16,7 +16,10 @@ import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
+
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Custom UI page for Arcane Trigger block: view and clear output connection positions.
@@ -43,49 +46,23 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         Store<ChunkStore> chunkStore = blockRef.getStore();
         ArcaneTriggerBlock trigger = chunkStore.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
         
-        if (trigger == null) {
-            commandBuilder.set("#ErrorScreen.Visible", true);
-            commandBuilder.set("#MainContent.Visible", false);
-            return;
-        }
-        
-        commandBuilder.set("#ErrorScreen.Visible", false);
-        commandBuilder.set("#MainContent.Visible", true);
-        
-        // Build output positions list with per-row remove buttons
-        java.util.List<Vector3i> outputs = trigger.getOutputPositions();
-        commandBuilder.clear("#OutputList");
-        if (outputs.isEmpty()) {
-            commandBuilder.appendInline("#OutputList",
-                    "Label { Text: \"(no connections)\"; Style: (FontSize: 14, TextColor: #afc2c3); }");
-        } else {
-            // Append all rows first so client has stable indices, then set properties and bind events
-            for (int i = 0; i < outputs.size(); i++) {
-                commandBuilder.append("#OutputList", "Pages/ConnectionRow.ui");
-            }
-            for (int i = 0; i < outputs.size(); i++) {
-                Vector3i p = outputs.get(i);
-                String selector = "#OutputList[" + i + "]";
-                String posText = p.getX() + ", " + p.getY() + ", " + p.getZ();
-                String posKey = p.getX() + "," + p.getY() + "," + p.getZ();
-                commandBuilder.set(selector + " #Position.Text", posText);
+        boolean isTriggerBlock = trigger != null;
+        commandBuilder.set("#ErrorScreen.Visible", !isTriggerBlock);
+        commandBuilder.set("#MainContent.Visible", isTriggerBlock);
 
-                EventData eventData = EventData.of("RemovePosition", posKey);
-                eventData.put("Selector", selector);
-
-                eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, selector + " #RemoveButton", eventData, false);
-            }
-        }
+        if (!isTriggerBlock) return;
         
+        List<Vector3i> outputs = trigger.getOutputPositions();
+        AddOutputDestinationList(commandBuilder, eventBuilder, trigger, outputs);
+
         // Update connection count
         int count = outputs.size();
         String countText = count == 1 ? "1 connection" : count + " connections";
         commandBuilder.set("#ConnectionCount.Text", countText);
         
-        // Show/hide clear button based on whether there are connections
+        // Show/hide clear button
         commandBuilder.set("#ClearButton.Visible", trigger.hasOutputPositions());
         
-        // Bind clear button event (use "Action" key, not "@Action" - literal value)
         eventBuilder.addEventBinding(
                 CustomUIEventBindingType.Activating,
                 "#ClearButton",
@@ -93,11 +70,32 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         );
     }
 
+    @NonNullDecl
+    private static void AddOutputDestinationList(@NonNullDecl UICommandBuilder commandBuilder, @NonNullDecl UIEventBuilder eventBuilder, ArcaneTriggerBlock trigger, List<Vector3i> outputs) {        
+        boolean isEmpty = outputs.isEmpty();
+        commandBuilder.set("#NoConnections.Visible", isEmpty);
+
+        if (isEmpty) return;
+
+        for (int i = 0; i < outputs.size(); i++) {
+            Vector3i destination = outputs.get(i);
+            commandBuilder.append("#OutputList", "Pages/ConnectionRow.ui");
+
+            String selector = "#OutputList[" + i + "]";
+            String posText = destination.getX() + ", " + destination.getY() + ", " + destination.getZ();
+            String posKey = destination.getX() + "," + destination.getY() + "," + destination.getZ();
+            commandBuilder.set(selector + " #Position.Text", posText);
+
+            EventData eventData = EventData.of("RemovePosition", posKey);
+            eventData.put("Selector", selector);
+
+            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, selector + " #RemoveButton", eventData, false);
+        }
+    }
+
     @Override
     public void handleDataEvent(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store, @Nonnull PageEventData data) {
-        if (!blockRef.isValid()) {
-            return;
-        }
+        if (!blockRef.isValid()) return;
 
         Store<ChunkStore> chunkStore = blockRef.getStore();
         ArcaneTriggerBlock comp = chunkStore.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
@@ -108,33 +106,35 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         if ("Clear".equals(data.action)) {
             updated.clearOutputPositions();
             chunkStore.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), updated);
-            java.util.List<Vector3i> outputs = updated.getOutputPositions();
+            rebuild();
+            
+            return;
+        } 
+        
+        if (data.removePosition == null || data.removePosition.isEmpty()) return;
 
-            // Refresh page so list and count update (do not close)
-            UICommandBuilder commandBuilder = new UICommandBuilder();
-            commandBuilder.clear("#OutputList");
-            commandBuilder.set("#ConnectionCount.Text", outputs.size() + " connections");
-            sendUpdate(commandBuilder);
-        } else if (data.removePosition != null && !data.removePosition.isEmpty()) {
-            String[] parts = data.removePosition.split(",");
-            if (parts.length == 3) {
-                try {
-                    int x = Integer.parseInt(parts[0].trim());
-                    int y = Integer.parseInt(parts[1].trim());
-                    int z = Integer.parseInt(parts[2].trim());
-                    
-                    if (updated.removeOutputPosition(x, y, z)) {
-                        chunkStore.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), updated);
-                        rebuild();
-                    }
-                } catch (NumberFormatException ignored) { }
+        String[] parts = data.removePosition.split(",");
+        if (parts.length != 3) return;
+
+        try {
+            int x = Integer.parseInt(parts[0].trim());
+            int y = Integer.parseInt(parts[1].trim());
+            int z = Integer.parseInt(parts[2].trim());
+            
+            if (updated.removeOutputPosition(x, y, z)) {
+                chunkStore.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), updated);
+                rebuild();
             }
-        }
+        } catch (NumberFormatException ignored) { }
     }
 
     public static final class PageEventData {
-        public static final BuilderCodec<PageEventData> CODEC = BuilderCodec.builder(
-                        PageEventData.class, PageEventData::new)
+        public String action;
+        public String removePosition;
+        public String selector;
+
+        public static final BuilderCodec<PageEventData> CODEC = 
+            BuilderCodec.builder(PageEventData.class, PageEventData::new)
                 .append(
                         new KeyedCodec<>("Action", Codec.STRING),
                         (d, v) -> d.action = v,
@@ -151,11 +151,5 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
                         d -> d.selector)
                 .add()
                 .build();
-        public String action;
-        public String removePosition;
-        public String selector;
-
-        public PageEventData() {
-        }
     }
 }
