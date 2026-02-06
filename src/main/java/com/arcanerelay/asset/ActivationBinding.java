@@ -16,32 +16,33 @@ import javax.annotation.Nullable;
  * Files with id "default" set the default activation; others register pattern → activation.
  */
 public final class ActivationBinding implements JsonAssetWithMap<String, DefaultAssetMap<String, ActivationBinding>> {
-
-    public static final AssetBuilderCodec<String, ActivationBinding> CODEC = AssetBuilderCodec.builder(
-            ActivationBinding.class,
-            ActivationBinding::new,
-            Codec.STRING,
-            (b, id) -> b.id = id,
-            b -> b.id,
-            (b, data) -> b.data = data,
-            b -> b.data
-        )
-        .append(new KeyedCodec<>("Pattern", Codec.STRING, false), (b, p) -> b.pattern = p, b -> b.pattern)
-        .add()
-        .append(new KeyedCodec<>("Activation", Codec.STRING, true), (b, a) -> b.activation = a, b -> b.activation)
-        .add()
-        .append(new KeyedCodec<>("Priority", Codec.INTEGER, false), (b, p) -> b.priority = p, b -> b.priority)
-        .add()
-        .build();
-
-    private String id;
     @Nullable
     private String pattern;
+    private int priority = 0;
     private String activation;
     private AssetExtraInfo.Data data;
-    private int priority = 0;
-    public ActivationBinding() {
-    }
+    private String id;
+
+    public static final AssetBuilderCodec<String, ActivationBinding> CODEC = 
+        AssetBuilderCodec.builder(ActivationBinding.class, ActivationBinding::new, Codec.STRING,
+            (obj, id) -> obj.id = id, obj -> obj.id,
+            (obj, data) -> obj.data = data, obj -> obj.data)
+        .append(
+            new KeyedCodec<>("Pattern", Codec.STRING, false), 
+                (obj, pattern) -> obj.pattern = pattern, 
+                obj -> obj.pattern)
+        .add()
+        .append(
+            new KeyedCodec<>("Activation", Codec.STRING, true), 
+                (obj, activation) -> obj.activation = activation, 
+                obj -> obj.activation)
+        .add()
+        .append(
+            new KeyedCodec<>("Priority", Codec.INTEGER, false), 
+                (obj, pattern) -> obj.priority = pattern, 
+                obj -> obj.priority)
+        .add()
+        .build();
 
     @Nonnull
     @Override

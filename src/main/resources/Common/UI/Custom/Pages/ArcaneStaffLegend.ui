@@ -105,7 +105,7 @@ Group #FormContainer {
         Label {
           Anchor: (Bottom: 15);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-          Text: "Press Ctrl + 'Block Interaction Key' on an Arcane block to view it's connections.";
+          Text: "Press 'Crouch Key' + 'Block Interaction Key' on an Arcane block to view it's connections.";
         }
       }
     }
