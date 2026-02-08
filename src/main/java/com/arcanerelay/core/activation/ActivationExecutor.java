@@ -1,7 +1,10 @@
-package com.arcanerelay.asset;
+package com.arcanerelay.core.activation;
 
 import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.components.ArcaneTriggerBlock;
+import com.arcanerelay.config.Activation;
+import com.arcanerelay.config.ActivationContext;
+import com.arcanerelay.config.ActivationEffects;
 import com.arcanerelay.systems.ArcaneTickSystem;
 import com.arcanerelay.util.BlockUtil;
 import com.hypixel.hytale.component.ComponentAccessor;
@@ -13,7 +16,6 @@ import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.math.vector.Vector3i;
-import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -23,16 +25,8 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-/**
- * Executes an Activation at a block position. Resolves the main block (for multi-block structures),
- * creates an {@link ActivationContext}, and delegates to {@link Activation#execute}.
- */
 public final class ActivationExecutor {
 
-    /**
-     * Executes the given activation at the block position.
-     * Finds the main block, builds context, and calls {@link Activation#execute}.
-     */
     public static void execute(
         @Nonnull World world,
         @Nonnull Store<ChunkStore> store,
@@ -59,10 +53,6 @@ public final class ActivationExecutor {
         activation.execute(ctx);
     }
 
-    /**
-     * Sends arcane signals from the block at the given position to all its output positions.
-     * Call from {@link Activation#execute} when the block should propagate signals.
-     */
     public static void sendSignals(@Nonnull ActivationContext ctx) {
         World world = ctx.world();
         Store<ChunkStore> store = ctx.store();
@@ -72,9 +62,6 @@ public final class ActivationExecutor {
         int blockZ = ctx.blockZ();
 
         Ref<ChunkStore> blockRef = chunk.getBlockComponentEntity(blockX, blockY, blockZ);
-        if (blockRef == null) {
-            //blockRef = BlockModule.ensureBlockEntity(chunk, blockX, blockY, blockZ);
-        }
         if (blockRef == null) return;
 
         ArcaneTriggerBlock trigger = store.getComponent(blockRef, ArcaneRelayPlugin.get().getArcaneTriggerBlockComponentType());
@@ -85,9 +72,6 @@ public final class ActivationExecutor {
         }
     }
 
-    /**
-     * Plays the block type's interaction sound at the block center.
-     */
     public static void playBlockInteractionSound(
         @Nonnull World world,
         int blockX,
@@ -102,9 +86,6 @@ public final class ActivationExecutor {
         }
     }
 
-    /**
-     * Plays activation effects (e.g. 3D sound) at the block center.
-     */
     public static void playEffects(
         @Nonnull World world,
         int blockX,

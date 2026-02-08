@@ -1,9 +1,9 @@
-package com.arcanerelay.asset.types;
+package com.arcanerelay.config.types;
 
-import com.arcanerelay.asset.Activation;
-import com.arcanerelay.asset.ActivationContext;
-import com.arcanerelay.asset.ActivationExecutor;
 import com.arcanerelay.ArcaneRelayPlugin;
+import com.arcanerelay.config.Activation;
+import com.arcanerelay.config.ActivationContext;
+import com.arcanerelay.core.activation.ActivationExecutor;
 import com.arcanerelay.util.BlockUtil;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -24,11 +24,6 @@ import com.hypixel.hytale.server.core.util.FillerBlockUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-/**
- * Activation that toggles a door block in front of the arcane block.
- * Uses the same door state logic as {@link com.hypixel.hytale.server.core.modules.interaction.interaction.config.server.DoorInteraction}:
- * states CLOSED, OPENED_IN, OPENED_OUT and interaction state strings OpenDoorIn, OpenDoorOut, CloseDoorIn, CloseDoorOut.
- */
 public class ToggleDoorActivation extends Activation {
 
     public static final BuilderCodec<ToggleDoorActivation> CODEC =
@@ -71,7 +66,6 @@ public class ToggleDoorActivation extends Activation {
     public ToggleDoorActivation() {
     }
 
-    /** Door states matching DoorInteraction.DoorState. */
     private enum DoorState {
         CLOSED,
         OPENED_IN,
@@ -88,7 +82,6 @@ public class ToggleDoorActivation extends Activation {
         }
     }
 
-    /** Interaction state string for transition from -> to (same as DoorInteraction.getInteractionState). */
     @Nonnull
     private static String getInteractionState(@Nonnull DoorState fromState, @Nonnull DoorState doorState) {
         if (doorState == DoorState.CLOSED && fromState == DoorState.OPENED_IN) {
@@ -109,10 +102,6 @@ public class ToggleDoorActivation extends Activation {
             : (doorState == DoorState.OPENED_IN ? DoorState.OPENED_OUT : DoorState.CLOSED);
     }
 
-    /**
-     * True if the source (activator) is in front of the door (same logic as DoorInteraction.isInFrontOfDoor).
-     * When true, door opens OUT; when false, door opens IN.
-     */
     private static boolean isSourceInFrontOfDoor(
         @Nonnull Vector3i doorBlockPosition,
         @Nullable Rotation doorRotationYaw,
@@ -125,7 +114,6 @@ public class ToggleDoorActivation extends Activation {
         return direction.dot(doorRotationVector) < 0.0;
     }
 
-    /** Info for a door at a position (same as DoorInteraction.DoorInfo). */
     private record DoorInfo(
         @Nonnull BlockType blockType,
         int filler,
@@ -133,7 +121,6 @@ public class ToggleDoorActivation extends Activation {
         @Nonnull DoorState doorState
     ) {}
 
-    /** Door at (x,y,z) with given yaw to check; returns null if not a door or rotation doesn't match. */
     @Nullable
     private static DoorInfo getDoorAtPosition(
         @Nonnull World world,
@@ -143,7 +130,7 @@ public class ToggleDoorActivation extends Activation {
         WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(x, z));
         if (chunk == null) return null;
         BlockType blockType = chunk.getBlockType(x, y, z);
-        if (blockType == null) return null; // we don't check isdoor as it could be a door imitator
+        if (blockType == null) return null;
         int rotationIndex = chunk.getRotationIndex(x, y, z);
         RotationTuple blockRotation = RotationTuple.get(rotationIndex);
         String blockState = blockType.getStateForBlock(blockType);
@@ -154,7 +141,6 @@ public class ToggleDoorActivation extends Activation {
         return new DoorInfo(blockType, filler, new Vector3i(x, y, z), doorState);
     }
 
-    /** Finds the other half of a double door (same logic as DoorInteraction.getDoubleDoor). */
     @Nullable
     private static DoorInfo getDoubleDoor(
         @Nonnull World world,
@@ -183,7 +169,6 @@ public class ToggleDoorActivation extends Activation {
         return matchingHitboxIndex == hitboxTypeIndex ? matchingDoor : null;
     }
 
-    /** Activates a door to the new state (set state + block updates like DoorInteraction.activateDoor). */
     @Nullable
     private static BlockType activateDoor(
         @Nonnull World world,
@@ -235,17 +220,13 @@ public class ToggleDoorActivation extends Activation {
 
         WorldChunk doorChunk = ctx.chunk();
 
-        // Resolve main block (non-filler) like DoorInteraction / BlockUtil.findMainBlock
         int[] main = BlockUtil.findMainBlock(world, doorChunk, px, py, pz);
         if (main == null) return;
         int mainX = main[0], mainY = main[1], mainZ = main[2];
         WorldChunk mainChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(mainX, mainZ));
         if (mainChunk == null) return;
         BlockType mainBlockType = mainChunk.getBlockType(mainX, mainY, mainZ);
-        if (mainBlockType == null) { // we don't check isdoor as it could be a door imitator
-            ArcaneRelayPlugin.get().getLogger().atInfo().log("mainBlockType is not a door: " + mainBlockType.getId());
-            return;
-        }
+        if (mainBlockType == null) return;
 
         Vector3i mainPos = new Vector3i(mainX, mainY, mainZ);
         String blockState = mainBlockType.getStateForBlock(mainBlockType);
@@ -256,10 +237,8 @@ public class ToggleDoorActivation extends Activation {
 
         DoorState newState;
         if (currentState == DoorState.CLOSED) {
-            // Open direction from source position (like DoorInteraction: in front -> open out, else open in)
             if (horizontal) {
                 newState = openIn ? DoorState.OPENED_IN : DoorState.OPENED_OUT;
-                ArcaneRelayPlugin.get().getLogger().atInfo().log("newState: " + newState);
             } else {
                 int sourceX = px;
                 int sourceY = py;
@@ -277,13 +256,11 @@ public class ToggleDoorActivation extends Activation {
                     : DoorState.OPENED_IN;
             }
         } else {
-            ArcaneRelayPlugin.get().getLogger().atInfo().log("currentState is not CLOSED: " + currentState);
             newState = DoorState.CLOSED;
         }
         BlockType resultType = activateDoor(world, mainBlockType, mainPos, currentState, newState);
         if (resultType == null) return;
 
-        // Double door: activate the other half (same logic as DoorInteraction.checkForDoubleDoor)
         DoorState stateDoubleDoor = getOppositeDoorState(currentState);
         DoorInfo doubleDoor = getDoubleDoor(world, mainPos, mainBlockType, rotation, stateDoubleDoor);
         if (doubleDoor != null) {

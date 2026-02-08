@@ -1,16 +1,12 @@
-package com.arcanerelay.asset.types;
+package com.arcanerelay.config.types;
 
-import com.arcanerelay.asset.Activation;
-import com.arcanerelay.asset.ActivationContext;
-import com.arcanerelay.asset.ActivationExecutor;
+import com.arcanerelay.config.Activation;
+import com.arcanerelay.config.ActivationContext;
+import com.arcanerelay.core.activation.ActivationExecutor;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 
 import javax.annotation.Nonnull;
 
-/**
- * Activation that simply sends arcane signals to connected outputs.
- * No state change, no toggling - just propagates the signal.
- */
 public class SendSignalActivation extends Activation {
     public static final BuilderCodec<SendSignalActivation> CODEC =
         BuilderCodec.builder(

@@ -1,4 +1,4 @@
-package com.arcanerelay.asset;
+package com.arcanerelay.config;
 
 import com.hypixel.hytale.assetstore.AssetExtraInfo;
 import com.hypixel.hytale.assetstore.codec.AssetCodecMapCodec;
@@ -11,12 +11,6 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-/**
- * Base type for arcane block activations (asset-driven, similar to Interactions).
- * Each activation type implements {@link #execute} to define its behavior.
- * Supports effects (sounds) and polymorphic activation types (e.g. ToggleState).
- * Other plugins can register custom activation types via {@link com.arcanerelay.ArcaneRelayPlugin#getCodecRegistry}.
- */
 public abstract class Activation implements JsonAssetWithMap<String, DefaultAssetMap<String, Activation>> {
     public static final AssetCodecMapCodec<String, Activation> CODEC = new AssetCodecMapCodec<>(
         Codec.STRING,
@@ -57,11 +51,5 @@ public abstract class Activation implements JsonAssetWithMap<String, DefaultAsse
         this.effects = effects;
     }
 
-    /**
-     * Executes this activation at the given block position.
-     * Subclasses implement the activation-specific logic.
-     *
-     * @param ctx the activation context (world, block position, sources, etc.)
-     */
     public abstract void execute(@Nonnull ActivationContext ctx);
 }

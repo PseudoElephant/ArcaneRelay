@@ -1,8 +1,8 @@
-package com.arcanerelay.asset.types;
+package com.arcanerelay.config.types;
 
 import com.arcanerelay.ArcaneRelayPlugin;
-import com.arcanerelay.asset.Activation;
-import com.arcanerelay.asset.ActivationContext;
+import com.arcanerelay.config.Activation;
+import com.arcanerelay.config.ActivationContext;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -10,10 +10,6 @@ import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
 
 import javax.annotation.Nonnull;
 
-/**
- * Activation that runs a sequence of other activations in order.
- * Used e.g. for the pusher: ToggleState (extend) then MoveBlock (push).
- */
 public class ChainActivation extends Activation {
     public static final BuilderCodec<ChainActivation> CODEC =
         BuilderCodec.builder(
