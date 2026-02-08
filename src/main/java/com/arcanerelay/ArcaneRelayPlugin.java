@@ -35,7 +35,6 @@ import com.arcanerelay.interactions.ArcaneActivatorInteraction;
 import com.arcanerelay.interactions.SelectTriggerInteraction;
 import com.arcanerelay.interactions.SendSignalInteraction;
 import com.arcanerelay.systems.ArcaneConfiguratorAddSystem;
-import com.arcanerelay.systems.ArcaneMoveBlockResolutionSystem;
 import com.arcanerelay.systems.ArcaneStaffHudSystem;
 import com.arcanerelay.ui.ArcaneTriggerPageSupplier;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
@@ -104,7 +103,6 @@ public class ArcaneRelayPlugin extends JavaPlugin {
         this.arcaneMoveBlockComponentType = chunkRegistry.registerComponent(ArcaneMoveBlock.class, "ArcaneMove", ArcaneMoveBlock.CODEC);
         chunkRegistry.registerSystem(new ArcaneTickSystem());
         chunkRegistry.registerSystem(new ArcaneOnPlaceSystem());
-        chunkRegistry.registerSystem(new ArcaneMoveBlockResolutionSystem());
 
         ComponentRegistryProxy<EntityStore> entityRegistry = this.getEntityStoreRegistry();
         this.arcaneConfiguratorComponentType = entityRegistry.registerComponent(ArcaneConfiguratorComponent.class, ArcaneConfiguratorComponent::new);

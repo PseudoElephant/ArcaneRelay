@@ -115,8 +115,8 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
 
         ActivationRegistry registry = ArcaneRelayPlugin.get().getActivationRegistry();
         Activation activation = (activator != null && !activator.isEmpty())
-            ? registry.getActivation(activator)
-            : registry.getActivationForBlock(blockType.getId());
+                ? registry.getActivation(activator)
+                : registry.getActivationForBlock(blockType.getId());
         if (activation == null) {
             ArcaneRelayPlugin.get().getLogger().atFine().log(String.format("ArcaneActivator: no activation for block %s at (%d,%d,%d)", blockType.getId(), blockX, blockY, blockZ));
             context.getState().state = InteractionState.Finished;
@@ -133,17 +133,8 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
 
         String activationId = activation.getId();
         ArcaneRelayPlugin.get().getLogger().atInfo().log(String.format("ArcaneActivator: request next tick block=(%d,%d,%d) activation=%s", blockX, blockY, blockZ, activationId));
-        //ArcaneTickSystem.requestSignalNextTick(world, blockX, blockY, blockZ, blockX, blockY, blockZ, activationId);
-        world.execute(() -> {
-            ArcaneRelayPlugin.get().getLogger().atFine().log(String.format("ArcaneTickSystem: scheduling activation %s at (%d,%d,%d)", activation.getId(), blockX, blockY, blockZ));
-            ChunkStore chunkStore = world.getChunkStore();
-            Store<ChunkStore> store = chunkStore.getStore();
-            List<int[]> sources = new ArrayList<int[]>();
-            sources.add(new int[]{(int)playerPosition.x,(int) playerPosition.y, (int)playerPosition.z});
-            
-            ActivationExecutor.execute(world, store, chunk, blockX, blockY, blockZ, blockType, activation, sources);
-            return;
-        });
+      
+        ArcaneTickSystem.requestSignalNextTick(world, blockX, blockY, blockZ, blockX, blockY, blockZ, activationId);
 
         context.getState().state = InteractionState.Finished;
     }

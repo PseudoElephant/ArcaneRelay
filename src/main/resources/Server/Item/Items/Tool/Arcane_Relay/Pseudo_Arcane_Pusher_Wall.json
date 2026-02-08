@@ -37,13 +37,7 @@
             "Failed": {
               "Type": "ArcaneActivator",
               "Activator": "Pusher_Chain_Wall"
-            },
-            "Next": {
-              "Type": "OpenCustomUI",
-              "Page": {
-                "Id": "ArcaneTrigger"
-                }
-              }
+            }
             }
           ]
         }

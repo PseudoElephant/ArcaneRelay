@@ -3,6 +3,9 @@ package com.arcanerelay.state;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nullable;
+
+import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Resource;
 import com.hypixel.hytale.component.ResourceType;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
@@ -20,14 +23,14 @@ public class ArcaneMoveState implements Resource<ChunkStore> {
         this.moveEntries = new ConcurrentHashMap<>();
     }
 
-    public void addMoveEntry(Vector3i blockPosition, Vector3i moveDirection, BlockType blockType, int blockId, int blockRotation, int filler, int settings) {
+    public void addMoveEntry(Vector3i blockPosition, Vector3i moveDirection, BlockType blockType, int blockId, int blockRotation, int filler, int settings, Holder<ChunkStore> componentHolder) {
         synchronized (this.moveEntries) {
         if (this.moveEntries.containsKey(blockPosition)) {
             this.moveEntries.get(blockPosition).updateDirection(moveDirection);
             return;
         }
         
-            this.moveEntries.put(blockPosition, new MoveEntry(blockPosition, moveDirection, blockType, blockId, blockRotation, filler, settings));
+            this.moveEntries.put(blockPosition, new MoveEntry(blockPosition, moveDirection, blockType, blockId, blockRotation, filler, settings, componentHolder));
         }
     }
 
@@ -58,8 +61,9 @@ public class ArcaneMoveState implements Resource<ChunkStore> {
         public final int blockRotation;
         public final int blockFiller;
         public final int blockSettings;
+        public final Holder<ChunkStore> componentHolder;
 
-        public MoveEntry(Vector3i blockPosition, Vector3i moveDirection, BlockType blockType, int blockId, int blockRotation, int filler, int settings) {
+        public MoveEntry(Vector3i blockPosition, Vector3i moveDirection, BlockType blockType, int blockId, int blockRotation, int filler, int settings, Holder<ChunkStore> componentHolder) {
             this.blockPosition = blockPosition;
             this.moveDirection = moveDirection;
             this.blockType = blockType;
@@ -67,6 +71,7 @@ public class ArcaneMoveState implements Resource<ChunkStore> {
             this.blockRotation = blockRotation;
             this.blockFiller = filler;
             this.blockSettings = settings;
+            this.componentHolder = componentHolder;
         }
 
         public void updateDirection(Vector3i moveDirection) {

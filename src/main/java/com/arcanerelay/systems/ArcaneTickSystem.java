@@ -49,7 +49,7 @@ import javax.annotation.Nullable;
  * on the blocks.
  */
 public class ArcaneTickSystem extends DelayedSystem<ChunkStore> {
-   private static final float DEFAULT_TICK_INTERVAL_SECONDS = 0.5f;
+   private static final float DEFAULT_TICK_INTERVAL_SECONDS = 0.25f;
 
    public ArcaneTickSystem() {
       super(DEFAULT_TICK_INTERVAL_SECONDS);
@@ -229,26 +229,35 @@ public class ArcaneTickSystem extends DelayedSystem<ChunkStore> {
 
             if (targetPositionGraph.get(blockPosition) == null || targetPositionGraph.get(blockPosition).size() == 0) {
                fromChunk.breakBlock(
-                     blockPosition.x,
-                     blockPosition.y,
-                     blockPosition.z,
-                     moveEntry.blockFiller,
-                     moveEntry.blockSettings);
+                  blockPosition.x,
+                  blockPosition.y,
+                  blockPosition.z,
+                  moveEntry.blockFiller,
+                  moveEntry.blockSettings);
+
+                  //??
+                  world.getNotificationHandler().updateChunk(fromChunk.getIndex());
             }
 
             world.execute(() -> {
                // if current position has no target block, break the block
                futureChunk.setBlock(
-                     blockPosition.x + moveEntry.moveDirection.x,
-                     blockPosition.y + moveEntry.moveDirection.y,
-                     blockPosition.z + moveEntry.moveDirection.z,
-                     moveEntry.blockId,
-                     moveEntry.blockType,
-                     moveEntry.blockRotation,
-                     moveEntry.blockFiller,
-                     moveEntry.blockSettings);
+                  blockPosition.x + moveEntry.moveDirection.x,
+                  blockPosition.y + moveEntry.moveDirection.y,
+                  blockPosition.z + moveEntry.moveDirection.z,
+                  moveEntry.blockId,
+                  moveEntry.blockType,
+                  moveEntry.blockRotation,
+                  moveEntry.blockFiller,
+                  moveEntry.blockSettings);
 
+               // find better wat to set components on new block???
+               futureChunk.setState(blockPosition.x + moveEntry.moveDirection.x,blockPosition.y + moveEntry.moveDirection.y , blockPosition.z + moveEntry.moveDirection.z, moveEntry.componentHolder);
+                         //??
+               world.getNotificationHandler().updateChunk(futureChunk.getIndex());
             });
+
+           
          }
       }
       
