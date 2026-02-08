@@ -13,8 +13,7 @@ import javax.annotation.Nullable;
  */
 public final class BlockUtil {
 
-    private BlockUtil() {
-    }
+    private BlockUtil() { }
 
     /**
      * For a position that may be part of a multi-block structure (e.g. door filler), finds the main block.
@@ -32,24 +31,30 @@ public final class BlockUtil {
         if (chunk.getFiller(x, y, z) == 0) {
             return new int[]{x, y, z};
         }
+
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -2; dy <= 2; dy++) {
                 for (int dz = -1; dz <= 1; dz++) {
                     if (dx == 0 && dy == 0 && dz == 0) continue;
+
                     int tx = x + dx;
                     int ty = y + dy;
                     int tz = z + dz;
                     WorldChunk tChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(tx, tz));
+
                     if (tChunk == null) continue;
                     if (tChunk.getFiller(tx, ty, tz) != 0) continue;
+
                     BlockType tBt = tChunk.getBlockType(tx, ty, tz);
                     if (tBt == null) continue;
+
                     if (tBt.isDoor() || tBt.getStateForBlock(tBt) != null) {
                         return new int[]{tx, ty, tz};
                     }
                 }
             }
         }
+
         return null;
     }
 }

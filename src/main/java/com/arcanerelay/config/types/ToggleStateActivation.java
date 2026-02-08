@@ -1,10 +1,10 @@
-package com.arcanerelay.asset.types;
+package com.arcanerelay.config.types;
 
 import com.arcanerelay.ArcaneRelayPlugin;
-import com.arcanerelay.asset.Activation;
-import com.arcanerelay.asset.ActivationContext;
-import com.arcanerelay.asset.ActivationEffects;
-import com.arcanerelay.asset.ActivationExecutor;
+import com.arcanerelay.config.Activation;
+import com.arcanerelay.config.ActivationContext;
+import com.arcanerelay.config.ActivationEffects;
+import com.arcanerelay.core.activation.ActivationExecutor;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -13,9 +13,6 @@ import com.hypixel.hytale.math.vector.Vector3i;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-/**
- * Activation that toggles a block between two states (e.g. On/Off, Open/Close).
- */
 public class ToggleStateActivation extends Activation {
     public static final BuilderCodec<ToggleStateActivation> CODEC = BuilderCodec.builder(
             ToggleStateActivation.class,
@@ -137,8 +134,6 @@ public class ToggleStateActivation extends Activation {
     }
 
     private boolean shouldSendSignal(String currentState, String newState) {
-        ArcaneRelayPlugin.get().getLogger().atInfo().log("currentState: " + currentState + ", newState: " + newState +" sendSignalWhen: " + sendSignalWhen);
-
         String when = sendSignalWhen != null ? sendSignalWhen.toLowerCase() : "off";
         return switch (when) {
             case "on" -> currentState.equalsIgnoreCase(offState) && newState.equalsIgnoreCase(onState);

@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.arcanerelay.ArcaneRelayPlugin;
-import com.arcanerelay.asset.Activation;
-import com.arcanerelay.asset.ActivationExecutor;
-import com.arcanerelay.asset.ActivationRegistry;
+import com.arcanerelay.config.Activation;
+import com.arcanerelay.config.ActivationRegistry;
 import com.arcanerelay.systems.ArcaneTickSystem;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -124,7 +123,7 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
         }
 
         long chunkIndex = ChunkUtil.indexChunkFromBlock(blockX, blockZ);
-        WorldChunk chunk = world.getChunk(chunkIndex);
+        WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
         if (chunk == null) {
             ArcaneRelayPlugin.get().getLogger().atWarning().log(String.format("ArcaneActivator: chunk not loaded at (%d,%d,%d)", blockX, blockY, blockZ));
             context.getState().state = InteractionState.Finished;

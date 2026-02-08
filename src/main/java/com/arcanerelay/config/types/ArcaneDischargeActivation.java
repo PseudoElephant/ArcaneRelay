@@ -1,26 +1,21 @@
-package com.arcanerelay.asset.types;
+package com.arcanerelay.config.types;
 
 import com.arcanerelay.ArcaneRelayPlugin;
-import com.arcanerelay.asset.Activation;
-import com.arcanerelay.asset.ActivationContext;
-import com.arcanerelay.asset.ActivationExecutor;
 import com.arcanerelay.components.ArcaneTriggerBlock;
+import com.arcanerelay.config.Activation;
+import com.arcanerelay.config.ActivationContext;
+import com.arcanerelay.core.activation.ActivationExecutor;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.map.MapCodec;
 import com.hypixel.hytale.math.vector.Vector3i;
-import com.hypixel.hytale.server.core.modules.block.BlockModule;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Activation that cycles through charge states and sends signals when transitioning
- * from fully charged to off (discharge), not when reaching max charge. For blocks like Pseudo_Arcane_Discharge.
- */
 public class ArcaneDischargeActivation extends Activation {
     public static final BuilderCodec<ArcaneDischargeActivation> CODEC = BuilderCodec.builder(
             ArcaneDischargeActivation.class,
@@ -98,9 +93,6 @@ public class ArcaneDischargeActivation extends Activation {
     @Override
     public void execute(@Nonnull ActivationContext ctx) {
         var blockRef = ctx.chunk().getBlockComponentEntity(ctx.blockX(), ctx.blockY(), ctx.blockZ());
-        if (blockRef == null) {
-           // blockRef = BlockModule.ensureBlockEntity(ctx.chunk(), ctx.blockX(), ctx.blockY(), ctx.blockZ());
-        }
         if (blockRef == null) return;
 
         ArcaneTriggerBlock trigger = ctx.store().getComponent(blockRef, ArcaneRelayPlugin.get().getArcaneTriggerBlockComponentType());
@@ -140,7 +132,6 @@ public class ArcaneDischargeActivation extends Activation {
         }
         ActivationExecutor.playEffects(ctx.world(), ctx.blockX(), ctx.blockY(), ctx.blockZ(), getEffects());
 
-        // Send signal when transitioning from fully charged to off (discharge), not when reaching max charge
         if (isMaxChargeState(currentStateStr) && isResetState) {
             ActivationExecutor.sendSignals(ctx);
         }

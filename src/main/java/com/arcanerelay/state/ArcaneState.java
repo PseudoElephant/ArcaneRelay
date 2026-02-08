@@ -33,7 +33,7 @@ public class ArcaneState implements Resource<ChunkStore> {
    }
 
    /** Adds a trigger for the next interval with a specific activator (skip=false). Runs that activation in the tick system. */
-   public void addPendingNextTickWithActivator(int x, int y, int z, int sourceX, int sourceY, int sourceZ, @Nullable String activatorId) {
+   public void addPendingNextTick(int x, int y, int z, int sourceX, int sourceY, int sourceZ, @Nullable String activatorId) {
       synchronized (pendingNextTick) {
          pendingNextTick.addLast(TriggerEntry.of(x, y, z, sourceX, sourceY, sourceZ, false, activatorId));
       }
