@@ -1,7 +1,11 @@
 package com.arcanerelay.interactions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.asset.Activation;
+import com.arcanerelay.asset.ActivationExecutor;
 import com.arcanerelay.asset.ActivationRegistry;
 import com.arcanerelay.systems.ArcaneTickSystem;
 import com.hypixel.hytale.codec.Codec;
@@ -9,7 +13,10 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.ChunkUtil;
+import com.hypixel.hytale.math.vector.Vector3d;
+import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.protocol.BlockPosition;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.InteractionState;
@@ -19,10 +26,12 @@ import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
+import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -73,6 +82,11 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
         PlayerRef playerRef = cb.getComponent(ref, PlayerRef.getComponentType());
         if (playerRef == null) return;
 
+        TransformComponent playerTransform = cb.getComponent(ref, TransformComponent.getComponentType());
+        if (playerTransform == null) return;
+
+        Vector3d playerPosition = playerTransform.getPosition();
+ 
         int blockX, blockY, blockZ;
         BlockPosition targetRaw = context.getMetaStore().getMetaObject(Interaction.TARGET_BLOCK_RAW);
         if (targetRaw != null) {
@@ -101,8 +115,8 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
 
         ActivationRegistry registry = ArcaneRelayPlugin.get().getActivationRegistry();
         Activation activation = (activator != null && !activator.isEmpty())
-                ? registry.getActivation(activator)
-                : registry.getActivationForBlock(blockType.getId());
+            ? registry.getActivation(activator)
+            : registry.getActivationForBlock(blockType.getId());
         if (activation == null) {
             ArcaneRelayPlugin.get().getLogger().atFine().log(String.format("ArcaneActivator: no activation for block %s at (%d,%d,%d)", blockType.getId(), blockX, blockY, blockZ));
             context.getState().state = InteractionState.Finished;
@@ -119,7 +133,17 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
 
         String activationId = activation.getId();
         ArcaneRelayPlugin.get().getLogger().atInfo().log(String.format("ArcaneActivator: request next tick block=(%d,%d,%d) activation=%s", blockX, blockY, blockZ, activationId));
-        ArcaneTickSystem.requestSignalNextTick(world, blockX, blockY, blockZ, blockX, blockY, blockZ, activationId);
+        //ArcaneTickSystem.requestSignalNextTick(world, blockX, blockY, blockZ, blockX, blockY, blockZ, activationId);
+        world.execute(() -> {
+            ArcaneRelayPlugin.get().getLogger().atFine().log(String.format("ArcaneTickSystem: scheduling activation %s at (%d,%d,%d)", activation.getId(), blockX, blockY, blockZ));
+            ChunkStore chunkStore = world.getChunkStore();
+            Store<ChunkStore> store = chunkStore.getStore();
+            List<int[]> sources = new ArrayList<int[]>();
+            sources.add(new int[]{(int)playerPosition.x,(int) playerPosition.y, (int)playerPosition.z});
+            
+            ActivationExecutor.execute(world, store, chunk, blockX, blockY, blockZ, blockType, activation, sources);
+            return;
+        });
 
         context.getState().state = InteractionState.Finished;
     }

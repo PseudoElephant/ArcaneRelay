@@ -110,3 +110,5 @@ hs_err_pid*
 *.hytale
 *.hytalemod
 
+/scripts/
+/local-server/

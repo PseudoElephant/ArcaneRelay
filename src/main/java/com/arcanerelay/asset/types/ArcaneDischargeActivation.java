@@ -99,7 +99,7 @@ public class ArcaneDischargeActivation extends Activation {
     public void execute(@Nonnull ActivationContext ctx) {
         var blockRef = ctx.chunk().getBlockComponentEntity(ctx.blockX(), ctx.blockY(), ctx.blockZ());
         if (blockRef == null) {
-            blockRef = BlockModule.ensureBlockEntity(ctx.chunk(), ctx.blockX(), ctx.blockY(), ctx.blockZ());
+           // blockRef = BlockModule.ensureBlockEntity(ctx.chunk(), ctx.blockX(), ctx.blockY(), ctx.blockZ());
         }
         if (blockRef == null) return;
 

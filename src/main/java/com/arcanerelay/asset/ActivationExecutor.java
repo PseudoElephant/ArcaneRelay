@@ -73,7 +73,7 @@ public final class ActivationExecutor {
 
         Ref<ChunkStore> blockRef = chunk.getBlockComponentEntity(blockX, blockY, blockZ);
         if (blockRef == null) {
-            blockRef = BlockModule.ensureBlockEntity(chunk, blockX, blockY, blockZ);
+            //blockRef = BlockModule.ensureBlockEntity(chunk, blockX, blockY, blockZ);
         }
         if (blockRef == null) return;
 

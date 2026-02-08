@@ -4,6 +4,8 @@ import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.asset.Activation;
 import com.arcanerelay.asset.ActivationContext;
 import com.arcanerelay.asset.ActivationExecutor;
+import com.arcanerelay.components.ArcaneMoveBlock;
+import com.arcanerelay.state.ArcaneMoveState;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -13,12 +15,14 @@ import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.util.MathUtil;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;
+import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.protocol.BlockMaterial;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.VariantRotation;
 import com.hypixel.hytale.protocol.ChangeVelocityType;
 import com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent;
+import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.modules.entity.component.BoundingBox;
 import com.hypixel.hytale.server.core.modules.entity.component.HeadRotation;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
@@ -52,6 +56,9 @@ import java.util.Set;
  * When the block moves in another direction: limited knockback (speed capped).
  */
 public class MoveBlockActivation extends Activation {
+    private int range = 1;
+    private int upAmount = 1;
+    private boolean isWall = false;
 
     public static final BuilderCodec<MoveBlockActivation> CODEC =
         BuilderCodec.builder(
@@ -77,13 +84,6 @@ public class MoveBlockActivation extends Activation {
         .documentation("Whether the block is a wall (default: false).")
         .add()
         .build();
-
-    private int range = 1;
-    private int upAmount = 1;
-    private boolean isWall = false;
-
-    public MoveBlockActivation() {
-    }
 
     public int getRange() {
         return range;
@@ -127,42 +127,6 @@ public class MoveBlockActivation extends Activation {
         return id != null && id.toLowerCase().contains("wall");
     }
 
-    private static boolean isWallForBlockType(@Nonnull BlockType blockType) {
-        return blockType.getVariantRotation() == VariantRotation.Wall
-            || (blockType.getId() != null && blockType.getId().toLowerCase().contains("wall"));
-    }
-
-    /**
-     * Returns true if this block is the first pusher in a contiguous chain (no pusher behind it in the push direction).
-     */
-    public static boolean isFirstPusherInChain(
-        @Nonnull World world,
-        @Nonnull WorldChunk chunk,
-        int blockX, int blockY, int blockZ,
-        @Nonnull BlockType blockType
-    ) {
-        Activation activation = ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(blockType.getId());
-        if (activation == null || !(activation instanceof MoveBlockActivation)) return true;
-        boolean wall = isWallForBlockType(blockType);
-        int rotationIndex = chunk.getRotationIndex(blockX, blockY, blockZ);
-        Vector3d localForward = getForwardFromBlockType(blockType, wall);
-        Vector3d forward = RotationTuple.get(rotationIndex).rotate(localForward.clone());
-        int dx = (int) Math.round(forward.getX());
-        int dy = (int) Math.round(forward.getY());
-        int dz = (int) Math.round(forward.getZ());
-        if (dx == 0 && dy == 0 && dz == 0) return true;
-        int backX = blockX - dx, backY = blockY - dy, backZ = blockZ - dz;
-        WorldChunk backChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(backX, backZ));
-        if (backChunk == null) return true;
-        int backBlockId = backChunk.getBlock(backX, backY, backZ);
-        BlockType backBlockType = BlockType.getAssetMap().getAsset(backBlockId);
-        if (backBlockId == 0 || backBlockType == null) return true;
-        if (!blockType.getId().equals(backBlockType.getId())) return true;
-        Activation backActivation = ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(backBlockType.getId());
-        if (backActivation == null || !(backActivation instanceof MoveBlockActivation)) return true;
-        return false;
-    }
-
     /** Walks forward from (px,py,pz) through contiguous same-type MoveBlockActivation pushers; returns [x,y,z] of the front pusher. */
     private static int[] findFrontPusherInChain(
         @Nonnull World world,
@@ -187,44 +151,6 @@ public class MoveBlockActivation extends Activation {
             nx += dx; ny += dy; nz += dz;
         }
         return new int[] { fx, fy, fz };
-    }
-
-    /** Returns [dx, dy, dz] push direction for this block (world-space forward). For non-pushers returns [0,0,0]. */
-    public static int[] getForwardDirection(
-        @Nonnull WorldChunk chunk,
-        int blockX, int blockY, int blockZ,
-        @Nonnull BlockType blockType
-    ) {
-        Activation activation = ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(blockType.getId());
-        if (activation == null || !(activation instanceof MoveBlockActivation)) return new int[] { 0, 0, 0 };
-        boolean wall = isWallForBlockType(blockType);
-        int rotationIndex = chunk.getRotationIndex(blockX, blockY, blockZ);
-        Vector3d localForward = getForwardFromBlockType(blockType, wall);
-        Vector3d forward = RotationTuple.get(rotationIndex).rotate(localForward.clone());
-        int dx = (int) Math.round(forward.getX());
-        int dy = (int) Math.round(forward.getY());
-        int dz = (int) Math.round(forward.getZ());
-        return new int[] { dx, dy, dz };
-    }
-
-    /** Returns [frontX, frontY, frontZ] of the front pusher in the chain containing (blockX, blockY, blockZ). For non-pushers or single pusher, returns the block position. */
-    public static int[] getFrontPusherPosition(
-        @Nonnull World world,
-        @Nonnull WorldChunk chunk,
-        int blockX, int blockY, int blockZ,
-        @Nonnull BlockType blockType
-    ) {
-        Activation activation = ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(blockType.getId());
-        if (activation == null || !(activation instanceof MoveBlockActivation)) return new int[] { blockX, blockY, blockZ };
-        boolean wall = isWallForBlockType(blockType);
-        int rotationIndex = chunk.getRotationIndex(blockX, blockY, blockZ);
-        Vector3d localForward = getForwardFromBlockType(blockType, wall);
-        Vector3d forward = RotationTuple.get(rotationIndex).rotate(localForward.clone());
-        int dx = (int) Math.round(forward.getX());
-        int dy = (int) Math.round(forward.getY());
-        int dz = (int) Math.round(forward.getZ());
-        if (dx == 0 && dy == 0 && dz == 0) return new int[] { blockX, blockY, blockZ };
-        return findFrontPusherInChain(world, blockX, blockY, blockZ, dx, dy, dz, blockType);
     }
 
     @Override
@@ -307,11 +233,11 @@ public class MoveBlockActivation extends Activation {
         if (!isEmpty(emptyBlockType, emptyBlockId)) return;
 
         final int len = chainLength;
-        final int[] ids = chainBlockIds;
-        final int[] rots = chainRotations;
-        final int[] fills = chainFillers;
-        final BlockType[] types = chainBlockTypes;
-        final Holder<ChunkStore>[] holders = chainHolders;
+        // final int[] ids = chainBlockIds;
+        // final int[] rots = chainRotations;
+        // final int[] fills = chainFillers;
+        // final BlockType[] types = chainBlockTypes;
+        // final Holder<ChunkStore>[] holders = chainHolders;
         final int pdx = dx, pdy = dy, pdz = dz;
 
         // Collision check before move (same tick): collect player refs on top of empty block or any chain block
@@ -339,13 +265,13 @@ public class MoveBlockActivation extends Activation {
         
             // 2) Move blocks (back to front: block closest to pusher first)
             LongSet dirtyChunks = new LongOpenHashSet();
-            for (int i = len - 1; i >= 0; i--) {
-                int fromX = frontPx + i * pdx + pux;
-                int fromY = frontPy + i * pdy + puy;
-                int fromZ = frontPz + i * pdz + puz;
-                int toX = frontPx + (i + 1) * pdx + pux;
-                int toY = frontPy + (i + 1) * pdy + puy;
-                int toZ = frontPz + (i + 1) * pdz + puz;
+            for (int j = len - 1; j >= 0; j--) {
+                int fromX = frontPx + j * pdx + pux;
+                int fromY = frontPy + j * pdy + puy;
+                int fromZ = frontPz + j * pdz + puz;
+                int toX = frontPx + (j + 1) * pdx + pux;
+                int toY = frontPy + (j + 1) * pdy + puy;
+                int toZ = frontPz + (j + 1) * pdz + puz;
 
                 WorldChunk fromChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(fromX, fromZ));
                 WorldChunk toChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(toX, toZ));
@@ -354,17 +280,50 @@ public class MoveBlockActivation extends Activation {
                 dirtyChunks.add(fromChunk.getIndex());
                 dirtyChunks.add(toChunk.getIndex());
 
-                world.breakBlock(fromX, fromY, fromZ, 0);
-                toChunk.setBlock(toX, toY, toZ, ids[i], types[i], rots[i], fills[i], 0);
-                if (holders[i] != null) {
-                    toChunk.setState(toX, toY, toZ, holders[i]);
-                }
+                final int idx = j;
+                world.execute(() -> {
+                    // Store<ChunkStore> store = world.getChunkStore().getStore();
+                    // Ref<ChunkStore> blockRef = fromChunk.getBlockComponentEntity(fromX, fromY, fromZ);
+                    // if (blockRef == null) {
+                    //     blockRef = BlockModule.ensureBlockEntity(fromChunk, fromX, fromY, fromZ);
+                    // }
+                    
+                    // if (blockRef == null) {
+                    //     ArcaneRelayPlugin.get().getLogger().atInfo().log("NO BLOCK REFFFF!!");
+                    //     return;
+                    // }
+                    
+                    // ArcaneMoveBlock moveBlock = store.ensureAndGetComponent(blockRef, ArcaneMoveBlock.getComponentType());
+                    
+                    // Vector3i direction = new Vector3i(fromX - toX, fromY - toY, fromZ - toZ);
+                    // moveBlock.addDirection(direction);
+
+                    // store.putComponent(blockRef, ArcaneMoveBlock.getComponentType(), moveBlock);
+
+                    // ArcaneRelayPlugin.get().getLogger().atInfo().log("SET TICKING");
+                    // fromChunk.setTicking(fromX, fromY, fromZ, true);
+
+                    ArcaneMoveState arcaneMoveState = world.getChunkStore().getStore().getResource(ArcaneMoveState.getResourceType());
+                    if (arcaneMoveState == null) {
+                        ArcaneRelayPlugin.get().getLogger().atInfo().log("ArcaneTickSystem: no arcane move state");
+                        return;
+                    }
+                    arcaneMoveState.addMoveEntry(new Vector3i(fromX, fromY, fromZ), new Vector3i(toX - fromX, toY - fromY, toZ - fromZ), chainBlockTypes[idx], chainBlockIds[idx], chainRotations[idx], chainFillers[idx], 0);
+                    ActivationExecutor.playEffects(world, frontPx + pdx + pux, frontPy + pdy + puy, frontPz + pdz + puz, getEffects());
+                    ActivationExecutor.sendSignals(ctx);
+                });
+
+                // world.getChunkStore().getStore().getResource(ArcaneMoveState.getResourceType()).addMoveEntry(new Vector3i(toX, toY, toZ), direction, chainBlockTypes[i], chainBlockIds[i], chainRotations[i], chainFillers[i], 0);
+                // world.breakBlock(fromX, fromY, fromZ, 0);
+                // toChunk.setBlock(toX, toY, toZ, ids[i], types[i], rots[i], fills[i], 0);
+                // if (holders[i] != null) {
+                //     toChunk.setState(toX, toY, toZ, holders[i]);
+                // }
             }
 
-           // world.execute(() -> {
-            dirtyChunks.forEach(chunkIndex -> world.getNotificationHandler().updateChunk(chunkIndex));
-                ActivationExecutor.playEffects(world, frontPx + pdx + pux, frontPy + pdy + puy, frontPz + pdz + puz, getEffects());
-                ActivationExecutor.sendSignals(ctx);
+            // world.execute(() -> {
+            // dirtyChunks.forEach(chunkIndex -> world.getNotificationHandler().updateChunk(chunkIndex));
+   
           //  });
         //});
     }

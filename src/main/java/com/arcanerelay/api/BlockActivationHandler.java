@@ -33,7 +33,6 @@ public interface BlockActivationHandler {
    void onActivate(
       @Nonnull World world,
       @Nonnull Store<ChunkStore> store,
-      @Nonnull CommandBuffer<ChunkStore> commandBuffer,
       @Nonnull WorldChunk chunk,
       int blockX,
       int blockY,

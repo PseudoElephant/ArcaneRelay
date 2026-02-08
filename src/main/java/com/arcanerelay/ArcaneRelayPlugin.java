@@ -27,6 +27,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.arcanerelay.components.ArcaneConfiguratorComponent;
+import com.arcanerelay.components.ArcaneMoveBlock;
 import com.arcanerelay.components.ArcaneStaffLegendVisible;
 import com.arcanerelay.components.ArcaneTriggerBlock;
 import com.arcanerelay.interactions.AddOutputInteraction;
@@ -34,12 +35,14 @@ import com.arcanerelay.interactions.ArcaneActivatorInteraction;
 import com.arcanerelay.interactions.SelectTriggerInteraction;
 import com.arcanerelay.interactions.SendSignalInteraction;
 import com.arcanerelay.systems.ArcaneConfiguratorAddSystem;
+import com.arcanerelay.systems.ArcaneMoveBlockResolutionSystem;
 import com.arcanerelay.systems.ArcaneStaffHudSystem;
 import com.arcanerelay.ui.ArcaneTriggerPageSupplier;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.server.OpenCustomUIInteraction;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.arcanerelay.state.ArcaneState;
+import com.arcanerelay.state.ArcaneMoveState;
 import com.arcanerelay.state.CustomHudRestoreState;
 import com.arcanerelay.systems.ArcaneOnPlaceSystem;
 import com.arcanerelay.systems.ArcaneTickSystem;
@@ -61,10 +64,12 @@ public class ArcaneRelayPlugin extends JavaPlugin {
     private final Map<Integer, BlockActivationHandler> blockActivationHandlers = new ConcurrentHashMap<>();
     private final List<MatcherEntry> matcherHandlers = new CopyOnWriteArrayList<>();
     private ComponentType<ChunkStore, ArcaneTriggerBlock> arcaneTriggerBlockComponentType;
+    private ComponentType<ChunkStore, ArcaneMoveBlock> arcaneMoveBlockComponentType;
     private ComponentType<EntityStore, ArcaneConfiguratorComponent> arcaneConfiguratorComponentType;
     private ComponentType<EntityStore, ArcaneStaffLegendVisible> arcaneStaffLegendVisibleComponentType;
     private ResourceType<ChunkStore, ArcaneState> arcaneStateResourceType;
     private ResourceType<EntityStore, CustomHudRestoreState> customHudRestoreStateResourceType;
+    private ResourceType<ChunkStore, ArcaneMoveState> arcaneMoveStateResourceType;
     private BlockActivationHandler defaultBlockActivationHandler;
     private final ActivationBindingRegistry activationBindingRegistry = new ActivationBindingRegistry();
     private final ActivationRegistry activationRegistry = new ActivationRegistry(activationBindingRegistry);
@@ -94,9 +99,12 @@ public class ArcaneRelayPlugin extends JavaPlugin {
 
         ComponentRegistryProxy<ChunkStore> chunkRegistry = this.getChunkStoreRegistry();
         this.arcaneStateResourceType = chunkRegistry.registerResource(ArcaneState.class, ArcaneState::new);
+        this.arcaneMoveStateResourceType = chunkRegistry.registerResource(ArcaneMoveState.class, ArcaneMoveState::new);
         this.arcaneTriggerBlockComponentType = chunkRegistry.registerComponent(ArcaneTriggerBlock.class, "ArcaneTrigger", ArcaneTriggerBlock.CODEC);
+        this.arcaneMoveBlockComponentType = chunkRegistry.registerComponent(ArcaneMoveBlock.class, "ArcaneMove", ArcaneMoveBlock.CODEC);
         chunkRegistry.registerSystem(new ArcaneTickSystem());
         chunkRegistry.registerSystem(new ArcaneOnPlaceSystem());
+        chunkRegistry.registerSystem(new ArcaneMoveBlockResolutionSystem());
 
         ComponentRegistryProxy<EntityStore> entityRegistry = this.getEntityStoreRegistry();
         this.arcaneConfiguratorComponentType = entityRegistry.registerComponent(ArcaneConfiguratorComponent.class, ArcaneConfiguratorComponent::new);
@@ -179,6 +187,10 @@ public class ArcaneRelayPlugin extends JavaPlugin {
         return this.arcaneTriggerBlockComponentType;
     }
 
+    public ComponentType<ChunkStore, ArcaneMoveBlock> getArcaneMoveBlockComponentType()  {
+        return this.arcaneMoveBlockComponentType;
+    }
+
     @Nonnull
     public ResourceType<ChunkStore, ArcaneState> getArcaneStateResourceType() {
         return this.arcaneStateResourceType;
@@ -187,6 +199,11 @@ public class ArcaneRelayPlugin extends JavaPlugin {
     @Nonnull
     public ResourceType<EntityStore, CustomHudRestoreState> getCustomHudRestoreStateResourceType() {
         return customHudRestoreStateResourceType;
+    }
+
+    @Nonnull
+    public ResourceType<ChunkStore, ArcaneMoveState> getArcaneMoveStateResourceType() {
+        return this.arcaneMoveStateResourceType;
     }
 
     // ─── Block Activation API (for other plugins) ───────────────────────────────────────────────
