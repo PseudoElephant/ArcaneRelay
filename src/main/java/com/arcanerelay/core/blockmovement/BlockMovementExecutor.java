@@ -19,7 +19,8 @@ import java.util.Map;
  */
 public final class BlockMovementExecutor {
 
-    private BlockMovementExecutor() {}
+    private BlockMovementExecutor() {
+    }
 
     /**
      * Runs all moves for the given move entries: computes order, breaks source
@@ -29,7 +30,8 @@ public final class BlockMovementExecutor {
     public static void execute(
             @Nonnull World world,
             @Nonnull Map<Vector3i, MoveEntry> moveEntries) {
-        if (moveEntries.isEmpty()) return;
+        if (moveEntries.isEmpty())
+            return;
 
         ArcaneRelayPlugin.get().getLogger().atInfo().log("BlockMovementExecutor: moving blocks");
         List<List<Vector3i>> executionOrder = BlockMovementGraph.getExecutionOrder(moveEntries);
@@ -39,54 +41,58 @@ public final class BlockMovementExecutor {
                 .log("BlockMovementExecutor: execution steps: " + executionOrder.size());
 
         LongSet dirtyChunks = new LongOpenHashSet();
-
         for (List<Vector3i> step : executionOrder) {
             for (Vector3i blockPosition : step) {
                 MoveEntry moveEntry = moveEntries.get(blockPosition);
-                if (moveEntry == null) continue;
+                if (moveEntry == null)
+                    continue;
 
                 int tx = blockPosition.x + moveEntry.moveDirection.x;
                 int ty = blockPosition.y + moveEntry.moveDirection.y;
                 int tz = blockPosition.z + moveEntry.moveDirection.z;
 
                 long futureChunkIndex = ChunkUtil.indexChunkFromBlock(tx, tz);
-                WorldChunk futureChunk = world.getChunk(futureChunkIndex);
-                if (futureChunk == null) continue;
+                WorldChunk futureChunk = world.getChunkIfInMemory(futureChunkIndex);
+                if (futureChunk == null)
+                    continue;
 
                 long fromChunkIndex = ChunkUtil.indexChunkFromBlock(blockPosition.x, blockPosition.z);
-                WorldChunk fromChunk = world.getChunk(fromChunkIndex);
-                if (fromChunk == null) continue;
+                WorldChunk fromChunk = world.getChunkIfInMemory(fromChunkIndex);
+                if (fromChunk == null)
+                    continue;
 
-                List<Vector3i> targetsAtSource = targetPositionGraph.get(blockPosition);
-                boolean noOneMovingHere = targetsAtSource == null || targetsAtSource.isEmpty();
-                if (noOneMovingHere) {
-                    fromChunk.breakBlock(
+                world.execute(() -> {
+                    List<Vector3i> targetsAtSource = targetPositionGraph.get(blockPosition);
+                    boolean noOneMovingHere = targetsAtSource == null || targetsAtSource.isEmpty();
+                    if (noOneMovingHere) {
+                        fromChunk.breakBlock(
                             blockPosition.x,
                             blockPosition.y,
                             blockPosition.z,
                             moveEntry.blockFiller,
                             moveEntry.blockSettings);
-                    dirtyChunks.add(fromChunkIndex);
-                }
+                        dirtyChunks.add(fromChunkIndex);
+                    }
 
-                world.execute(() -> {
                     futureChunk.setBlock(
-                            tx, ty, tz,
-                            moveEntry.blockId,
-                            moveEntry.blockType,
-                            moveEntry.blockRotation,
-                            moveEntry.blockFiller,
-                            moveEntry.blockSettings);
+                        tx, ty, tz,
+                        moveEntry.blockId,
+                        moveEntry.blockType,
+                        moveEntry.blockRotation,
+                        moveEntry.blockFiller,
+                        moveEntry.blockSettings);
                     dirtyChunks.add(futureChunkIndex);
                 });
             }
         }
 
-        ArcaneRelayPlugin.get().getLogger().atInfo()
-                .log("BlockMovementExecutor: invalidating light for " + dirtyChunks.size() + " chunks");
-        dirtyChunks.forEach(idx -> world.getChunkLighting().invalidateLightInChunk(world.getChunkIfInMemory(idx)));
-        dirtyChunks.forEach(idx -> world.getNotificationHandler().updateChunk(idx));
-
+        world.execute(() ->{
+            ArcaneRelayPlugin.get().getLogger().atInfo()
+            .log("BlockMovementExecutor: invalidating light for " + dirtyChunks.size() + " chunks");
+            dirtyChunks.forEach(idx -> world.getChunkLighting().invalidateLightInChunk(world.getChunkIfInMemory(idx)));
+            dirtyChunks.forEach(idx -> world.getNotificationHandler().updateChunk(idx));
+        });
+                
         ArcaneRelayPlugin.get().getLogger().atInfo().log("BlockMovementExecutor: finished moving blocks");
     }
 }

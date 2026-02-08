@@ -31,10 +31,6 @@ public class ArcaneConfiguratorComponent implements Component<EntityStore> {
         this.configuredBlock = null;
     }
 
-    public boolean hasConfiguredBlock() {
-        return configuredBlock != null;
-    }
-
     @Nonnull
     @Override
     public Component<EntityStore> clone() {

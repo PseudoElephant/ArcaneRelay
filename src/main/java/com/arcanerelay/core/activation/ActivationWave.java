@@ -5,6 +5,7 @@ import com.arcanerelay.components.ArcaneTriggerBlock;
 import com.arcanerelay.config.Activation;
 import com.arcanerelay.state.ArcaneState;
 import com.arcanerelay.state.TriggerEntry;
+import com.hypixel.hytale.assetstore.map.BlockTypeAssetMap;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.ChunkUtil;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -28,53 +31,56 @@ public final class ActivationWave {
         @Nonnull Store<ChunkStore> store,
         @Nonnull ArcaneState state
     ) {
+        Map<Vector3i, TargetInfo> targets = new HashMap<>();
         List<TriggerEntry> entries = state.copyTriggerEntries();
         state.clearTriggers();
-        Map<PosKey, TargetInfo> targets = new HashMap<>();
-        for (TriggerEntry e : entries) {
-            PosKey key = new PosKey(e.target().getX(), e.target().getY(), e.target().getZ());
-            TargetInfo info = targets.computeIfAbsent(key, k -> new TargetInfo());
-            info.sources.add(e.source());
-            if (e.skip())
+
+        for (TriggerEntry entry : entries) {
+            TargetInfo info = targets.computeIfAbsent(entry.target(), k -> new TargetInfo());
+            info.sources.add(entry.source());
+
+            if (entry.skip())
                 info.skip = true;
-            if (e.activatorId() != null && info.activatorId == null)
-                info.activatorId = e.activatorId();
+
+            if (entry.activatorId() != null && info.activatorId == null)
+                info.activatorId = entry.activatorId();
         }
 
-        for (Map.Entry<PosKey, TargetInfo> entry : targets.entrySet()) {
+        BlockTypeAssetMap<String, BlockType> blockTypeMap = BlockType.getAssetMap();
+        for (Map.Entry<Vector3i, TargetInfo> entry : targets.entrySet()) {
             int x = entry.getKey().x;
             int y = entry.getKey().y;
             int z = entry.getKey().z;
             TargetInfo info = entry.getValue();
 
             long chunkIndex = ChunkUtil.indexChunkFromBlock(x, z);
-            WorldChunk chunk = world.getChunk(chunkIndex);
+            WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
 
             int blockId = chunk.getBlock(x, y, z);
-            BlockType blockType = BlockType.getAssetMap().getAsset(blockId);
+            BlockType blockType = blockTypeMap.getAsset(blockId);
             if (blockType == null) {
-                ArcaneRelayPlugin.get().getLogger().atWarning()
-                    .log("ActivationWave: block type not found at " + x + ", " + y + ", " + z);
+                ArcaneRelayPlugin.get().getLogger().atWarning().log("ActivationWave: block type not found at " + x + ", " + y + ", " + z);
                 continue;
             }
 
             if (info.skip) {
-                ArcaneRelayPlugin.get().getLogger().atFine()
-                    .log(String.format("ActivationWave: propagateOnly at (%d,%d,%d)", x, y, z));
+                ArcaneRelayPlugin.get().getLogger().atFine().log(String.format("ActivationWave: propagateOnly at (%d, %d, %d)", x, y, z));
+
                 Ref<ChunkStore> blockRef = chunk.getBlockComponentEntity(x, y, z);
                 if (blockRef != null) {
                     propagateOnly(world, store, chunk, blockRef, new Vector3i(x, y, z));
                 }
-            } else {
-                List<int[]> sourcesAsInts = new ArrayList<>(info.sources.size());
-                for (Vector3i s : info.sources) {
-                    sourcesAsInts.add(new int[] { s.getX(), s.getY(), s.getZ() });
-                }
-                ArcaneRelayPlugin.get().getLogger().atInfo()
-                    .log(String.format("ActivationWave: activate block=(%d,%d,%d) blockType=%s activatorId=%s", x, y, z,
-                        blockType.getId(), info.activatorId));
-                activateOutput(world, store, chunk, x, y, z, blockId, blockType, sourcesAsInts, info.activatorId);
+                
+                continue;
+            } 
+
+            List<int[]> sourcesAsInts = new ArrayList<>(info.sources.size());
+            for (Vector3i s : info.sources) {
+                sourcesAsInts.add(new int[] { s.getX(), s.getY(), s.getZ() });
             }
+
+            ArcaneRelayPlugin.get().getLogger().atInfo().log(String.format("ActivationWave: activate block=(%d,%d,%d) blockType=%s activatorId=%s", x, y, z, blockType.getId(), info.activatorId));
+            activateOutput(world, store, chunk, x, y, z, blockId, blockType, sourcesAsInts, info.activatorId);
         }
     }
 
@@ -94,6 +100,7 @@ public final class ActivationWave {
         Activation activation = activatorId != null && !activatorId.isEmpty()
             ? ArcaneRelayPlugin.get().getActivationRegistry().getActivation(activatorId)
             : ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(blockTypeKey);
+        
         if (activation != null) {
             ArcaneRelayPlugin.get().getLogger().atFine().log(String.format(
                 "ActivationWave: scheduling activation %s at (%d,%d,%d)", activation.getId(), blockX, blockY, blockZ));
@@ -114,11 +121,14 @@ public final class ActivationWave {
     ) {
         ArcaneTriggerBlock trigger = store.getComponent(blockRef,
             ArcaneRelayPlugin.get().getArcaneTriggerBlockComponentType());
+
         if (trigger == null)
             return;
+
         ArcaneState state = world.getChunkStore().getStore().getResource(ArcaneState.getResourceType());
         if (state == null)
             return;
+
         for (Vector3i out : trigger.getOutputPositions()) {
             state.addTrigger(TriggerEntry.of(out, blockPos));
         }
@@ -129,29 +139,5 @@ public final class ActivationWave {
         boolean skip;
         @Nullable
         String activatorId;
-    }
-
-    private static final class PosKey {
-        final int x, y, z;
-
-        PosKey(int x, int y, int z) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-
-        @Override
-        public int hashCode() {
-            return 31 * (31 * x + y) + z;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (!(obj instanceof PosKey other))
-                return false;
-            return x == other.x && y == other.y && z == other.z;
-        }
     }
 }

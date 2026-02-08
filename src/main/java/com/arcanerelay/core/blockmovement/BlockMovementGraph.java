@@ -56,6 +56,7 @@ public final class BlockMovementGraph {
             Vector3i dependentBlockPosition = targetPosition(blockPosition, moveEntry);
             graph.computeIfAbsent(dependentBlockPosition, k -> new ArrayList<>()).add(blockPosition);
         }
+
         return graph;
     }
 
@@ -73,15 +74,16 @@ public final class BlockMovementGraph {
             Vector3i target = targetPosition(blockPosition, moveEntry);
             targetPositionGraph.computeIfAbsent(target, k -> new ArrayList<>()).add(blockPosition);
         }
+
         return targetPositionGraph;
     }
 
     @Nonnull
     static Vector3i targetPosition(@Nonnull Vector3i blockPosition, @Nonnull MoveEntry moveEntry) {
         return new Vector3i(
-                blockPosition.x + moveEntry.moveDirection.x,
-                blockPosition.y + moveEntry.moveDirection.y,
-                blockPosition.z + moveEntry.moveDirection.z);
+            blockPosition.x + moveEntry.moveDirection.x,
+            blockPosition.y + moveEntry.moveDirection.y,
+            blockPosition.z + moveEntry.moveDirection.z);
     }
 
     /**
@@ -105,22 +107,24 @@ public final class BlockMovementGraph {
                 Vector3i target = targetPosition(blockPosition, moveEntry);
                 List<Vector3i> targetsAt = targetPositionGraph.get(target);
                 if (targetsAt == null) {
-                    ArcaneRelayPlugin.get().getLogger().atInfo().log(
-                            "BlockMovementGraph: no target blocks at " + target.x + "," + target.y + "," + target.z);
+                    ArcaneRelayPlugin.get().getLogger().atInfo().log("BlockMovementGraph: no target blocks at " + target.x + "," + target.y + "," + target.z);
                     continue;
                 }
+
                 if (targetsAt.size() > 1) {
-                    ArcaneRelayPlugin.get().getLogger().atInfo().log(
-                            "BlockMovementGraph: collision at " + blockPosition.x + "," + blockPosition.y + ","
-                                    + blockPosition.z + " (" + targetsAt.size() + " targets)");
+                    ArcaneRelayPlugin.get().getLogger().atInfo().log("BlockMovementGraph: collision at " + blockPosition.x + "," + blockPosition.y + ","
+                        + blockPosition.z + " (" + targetsAt.size() + " targets)");
                     continue;
                 }
+
                 simplified.add(blockPosition);
             }
+
             if (!simplified.isEmpty()) {
                 result.add(simplified);
             }
         }
+        
         return result;
     }
 

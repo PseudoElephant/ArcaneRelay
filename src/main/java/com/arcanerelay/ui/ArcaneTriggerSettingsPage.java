@@ -1,19 +1,27 @@
 package com.arcanerelay.ui;
 
 import com.arcanerelay.components.ArcaneTriggerBlock;
+import com.hypixel.hytale.assetstore.map.BlockTypeAssetMap;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
+import com.hypixel.hytale.server.core.modules.i18n.I18nModule;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
@@ -53,7 +61,7 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         if (!isTriggerBlock) return;
         
         List<Vector3i> outputs = trigger.getOutputPositions();
-        AddOutputDestinationList(commandBuilder, eventBuilder, trigger, outputs);
+        AddOutputDestinationList(chunkStore, commandBuilder, eventBuilder, trigger, outputs);
 
         // Update connection count
         int count = outputs.size();
@@ -71,7 +79,7 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
     }
 
     @NonNullDecl
-    private static void AddOutputDestinationList(@NonNullDecl UICommandBuilder commandBuilder, @NonNullDecl UIEventBuilder eventBuilder, ArcaneTriggerBlock trigger, List<Vector3i> outputs) {        
+    private static void AddOutputDestinationList(@NonNullDecl Store<ChunkStore> chunkStore, @NonNullDecl UICommandBuilder commandBuilder, @NonNullDecl UIEventBuilder eventBuilder, ArcaneTriggerBlock trigger, List<Vector3i> outputs) {        
         boolean isEmpty = outputs.isEmpty();
         commandBuilder.set("#NoConnections.Visible", isEmpty);
 
@@ -80,17 +88,37 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         for (int i = 0; i < outputs.size(); i++) {
             Vector3i destination = outputs.get(i);
             commandBuilder.append("#OutputList", "Pages/ConnectionRow.ui");
-
+            
             String selector = "#OutputList[" + i + "]";
-            String posText = destination.getX() + ", " + destination.getY() + ", " + destination.getZ();
+            String blockName = getBlockName(chunkStore, destination);
+        
+            String displayText = blockName + ": " + destination.getX() + ", " + destination.getY() + ", " + destination.getZ();
             String posKey = destination.getX() + "," + destination.getY() + "," + destination.getZ();
-            commandBuilder.set(selector + " #Position.Text", posText);
-
+            
+            commandBuilder.set(selector + " #Position.Text", displayText);
             EventData eventData = EventData.of("RemovePosition", posKey);
             eventData.put("Selector", selector);
 
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, selector + " #RemoveButton", eventData, false);
         }
+    }
+
+    private static String getBlockName(@NonNullDecl Store<ChunkStore> chunkStore, @NonNullDecl Vector3i destination) {
+        BlockTypeAssetMap<String, BlockType> blockTypeMap = BlockType.getAssetMap();
+        
+        long chunkIndex = ChunkUtil.indexChunkFromBlock(destination.getX(), destination.getZ());
+        World world = chunkStore.getExternalData().getWorld();
+        WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
+            
+        int blockId = chunk.getBlock(destination.getX(), destination.getY(), destination.getZ());
+        BlockType blockType = blockTypeMap.getAsset(blockId);
+
+        Item item = blockType.getItem();
+        if (item == null) {
+            return blockType.getId();
+        }
+
+        return Message.translation(item.getTranslationProperties().getName()).getAnsiMessage();
     }
 
     @Override
@@ -136,14 +164,14 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         public static final BuilderCodec<PageEventData> CODEC = 
             BuilderCodec.builder(PageEventData.class, PageEventData::new)
                 .append(
-                        new KeyedCodec<>("Action", Codec.STRING),
-                        (d, v) -> d.action = v,
-                        d -> d.action)
+                    new KeyedCodec<>("Action", Codec.STRING),
+                    (d, v) -> d.action = v,
+                    d -> d.action)
                 .add()
                 .append(
-                        new KeyedCodec<>("RemovePosition", Codec.STRING),
-                        (d, v) -> d.removePosition = v,
-                        d -> d.removePosition)
+                    new KeyedCodec<>("RemovePosition", Codec.STRING),
+                    (d, v) -> d.removePosition = v,
+                    d -> d.removePosition)
                 .add()
                 .append(
                         new KeyedCodec<>("Selector", Codec.STRING),

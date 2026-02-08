@@ -15,6 +15,7 @@ import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.server.OpenCustomUIInteraction;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.accessor.ChunkAccessor;
 import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -29,10 +30,7 @@ import javax.annotation.Nullable;
 public class ArcaneTriggerPageSupplier implements OpenCustomUIInteraction.CustomPageSupplier {
 
     public static final BuilderCodec<ArcaneTriggerPageSupplier> CODEC =
-            BuilderCodec.builder(ArcaneTriggerPageSupplier.class, ArcaneTriggerPageSupplier::new).build();
-
-    public ArcaneTriggerPageSupplier() {
-    }
+        BuilderCodec.builder(ArcaneTriggerPageSupplier.class, ArcaneTriggerPageSupplier::new).build();
 
     @Nullable
     @Override
@@ -42,33 +40,25 @@ public class ArcaneTriggerPageSupplier implements OpenCustomUIInteraction.Custom
             @Nonnull PlayerRef playerRef,
             @Nonnull InteractionContext context) {
         BlockPosition targetBlock = context.getTargetBlock();
-        if (targetBlock == null) {
-            return null;
-        }
-        Store<EntityStore> store = ref.getStore();
-        World world = store.getExternalData().getWorld();
+        if (targetBlock == null) return null; 
+
+        ComponentAccessor<EntityStore> entityAccessor = ref.getStore();
+        World world = entityAccessor.getExternalData().getWorld();
         ChunkStore chunkStore = world.getChunkStore();
         Ref<ChunkStore> chunkRef = chunkStore.getChunkReference(ChunkUtil.indexChunkFromBlock(targetBlock.x, targetBlock.z));
-        if (chunkRef == null || !chunkRef.isValid()) {
-            return null;
-        }
-        Store<ChunkStore> chunkStoreStore = chunkStore.getStore();
-        BlockComponentChunk blockComponentChunk = chunkStoreStore.getComponent(chunkRef, BlockComponentChunk.getComponentType());
-        if (blockComponentChunk == null) {
-            return null;
-        }
+        if (chunkRef == null || !chunkRef.isValid()) return null;
+
+        ComponentAccessor<ChunkStore> chunkAccesor = chunkStore.getStore();
+        BlockComponentChunk blockComponentChunk = chunkAccesor.getComponent(chunkRef, BlockComponentChunk.getComponentType());
+        if (blockComponentChunk == null) return null;
+
         int blockIndex = ChunkUtil.indexBlockInColumn(targetBlock.x, targetBlock.y, targetBlock.z);
         Ref<ChunkStore> blockRef = blockComponentChunk.getEntityReference(blockIndex);
-        if (blockRef == null || !blockRef.isValid()) {
-            Holder<ChunkStore> holder = ChunkStore.REGISTRY.newHolder();
-            holder.putComponent(BlockModule.BlockStateInfo.getComponentType(), new BlockModule.BlockStateInfo(blockIndex, chunkRef));
-            holder.ensureComponent(ArcaneTriggerBlock.getComponentType());
-            blockRef = chunkStoreStore.addEntity(holder, AddReason.SPAWN);
-        }
-        ArcaneTriggerBlock trigger = chunkStoreStore.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
-        if (trigger == null) {
-            return null;
-        }
+        if (blockRef == null || !blockRef.isValid()) return null;
+
+        ArcaneTriggerBlock trigger = chunkAccesor.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
+        if (trigger == null) return null;
+
         return new ArcaneTriggerSettingsPage(playerRef, blockRef);
     }
 }

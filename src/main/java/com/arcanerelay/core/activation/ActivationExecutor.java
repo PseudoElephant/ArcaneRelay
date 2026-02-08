@@ -94,10 +94,13 @@ public final class ActivationExecutor {
         @Nullable ActivationEffects effects
     ) {
         if (effects == null) return;
+
         String soundId = effects.getWorldSoundEventId();
         if (soundId == null || soundId.isEmpty()) return;
+
         int soundIndex = SoundEvent.getAssetMap().getIndex(soundId);
         if (soundIndex == Integer.MIN_VALUE || soundIndex == 0) return;
+        
         double x = blockX + 0.5, y = blockY + 0.5, z = blockZ + 0.5;
         ComponentAccessor<EntityStore> accessor = world.getEntityStore().getStore();
         SoundUtil.playSoundEvent3d(soundIndex, SoundCategory.SFX, x, y, z, accessor);

@@ -14,6 +14,8 @@ import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 
 import java.util.HashMap;
 
+import java.util.logging.Level;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -24,13 +26,6 @@ public class ArcaneTickSystem extends DelayedSystem<ChunkStore> {
         super(DEFAULT_TICK_INTERVAL_SECONDS);
     }
 
-    public static void requestSignal(@Nonnull World world, int x, int y, int z) {
-        ArcaneState state = world.getChunkStore().getStore().getResource(ArcaneState.getResourceType());
-        if (state != null) {
-            state.addTrigger(x, y, z);
-        }
-    }
-
     public static void requestSignal(@Nonnull World world, int x, int y, int z, int sourceX, int sourceY, int sourceZ) {
         ArcaneState state = world.getChunkStore().getStore().getResource(ArcaneState.getResourceType());
         if (state != null) {
@@ -38,12 +33,8 @@ public class ArcaneTickSystem extends DelayedSystem<ChunkStore> {
         }
     }
 
-    public static void requestSignalNextTick(@Nonnull World world, int x, int y, int z) {
-        requestSignalNextTick(world, x, y, z, x, y, z);
-    }
-
     public static void requestSignalNextTick(@Nonnull World world, int x, int y, int z, int sourceX, int sourceY,
-            int sourceZ) {
+        int sourceZ) {
         ArcaneState state = world.getChunkStore().getStore().getResource(ArcaneState.getResourceType());
         if (state != null) {
             state.addPendingNextTick(x, y, z, sourceX, sourceY, sourceZ);
@@ -51,10 +42,10 @@ public class ArcaneTickSystem extends DelayedSystem<ChunkStore> {
     }
 
     public static void requestSignalNextTick(@Nonnull World world, int x, int y, int z, int sourceX, int sourceY,
-            int sourceZ, @Nullable String activatorId) {
+        int sourceZ, @Nullable String activatorId) {
         ArcaneState state = world.getChunkStore().getStore().getResource(ArcaneState.getResourceType());
         if (state != null) {
-            state.addPendingNextTickWithActivator(x, y, z, sourceX, sourceY, sourceZ, activatorId);
+            state.addPendingNextTick(x, y, z, sourceX, sourceY, sourceZ, activatorId);
         }
     }
 
@@ -71,18 +62,13 @@ public class ArcaneTickSystem extends DelayedSystem<ChunkStore> {
         if (!state.hasTriggers())
             return;
 
-        ArcaneMoveState arcaneMoveState = world.getChunkStore().getStore().getResource(ArcaneMoveState.getResourceType());
-        if (arcaneMoveState == null) {
-            ArcaneRelayPlugin.get().getLogger().atInfo().log("ArcaneTickSystem: no arcane move state");
-            return;
-        }
-
-        HashMap<Vector3i, MoveEntry> moveEntries = arcaneMoveState.getMoveEntries();
-
         ActivationWave.runWave(world, chunkStore, state);
-        world.execute(() -> {
-            BlockMovementExecutor.execute(world, moveEntries);
-        }); 
+
+        ArcaneMoveState arcaneMoveState = chunkStore.getResource(ArcaneMoveState.getResourceType()); 
+        HashMap<Vector3i, MoveEntry> moveEntries = arcaneMoveState.getMoveEntries();
+          
+        ArcaneRelayPlugin.get().getLogger().at(Level.INFO).log("RUNNING MOVEMENT with size " + moveEntries.size());
+        BlockMovementExecutor.execute(world, moveEntries);
 
         arcaneMoveState.clear();
     }

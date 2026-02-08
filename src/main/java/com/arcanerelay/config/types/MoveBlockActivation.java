@@ -225,18 +225,20 @@ public class MoveBlockActivation extends Activation {
                 continue;
 
             final int idx = j;
+
+             ArcaneMoveState arcaneMoveState = world.getChunkStore().getStore().getResource(ArcaneMoveState.getResourceType());
+
+            if (arcaneMoveState == null) {
+                ArcaneRelayPlugin.get().getLogger().atInfo().log("ArcaneTickSystem: no arcane move state");
+                return;
+            }
+
+            ArcaneRelayPlugin.get().getLogger().atInfo().log("ArcaneTickSystem: Adding move entry");
+            arcaneMoveState.addMoveEntry(fromPosition,
+                toPosition.clone().subtract(fromPosition), chainBlockTypes[idx], chainBlockIds[idx],
+                chainRotations[idx], chainFillers[idx], 0, chainHolders[idx]);
+
             world.execute(() -> {
-                ArcaneMoveState arcaneMoveState = world.getChunkStore().getStore().getResource(ArcaneMoveState.getResourceType());
-
-                if (arcaneMoveState == null) {
-                    ArcaneRelayPlugin.get().getLogger().atInfo().log("ArcaneTickSystem: no arcane move state");
-                    return;
-                }
-
-                arcaneMoveState.addMoveEntry(fromPosition,
-                    toPosition.clone().subtract(fromPosition), chainBlockTypes[idx], chainBlockIds[idx],
-                    chainRotations[idx], chainFillers[idx], 0, chainHolders[idx]);
-
                 Vector3i destinationPosition = frontPusherPosition.clone().add(globalForward).add(scaledGlobalUpVector);
                 ActivationExecutor.playEffects(world, destinationPosition.x, destinationPosition.y, destinationPosition.z,
                     getEffects());
