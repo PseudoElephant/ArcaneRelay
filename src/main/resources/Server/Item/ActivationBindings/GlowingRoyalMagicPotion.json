@@ -1,0 +1,5 @@
+{
+    "Pattern": "contains:Magic_Potion_Glow",
+    "Activation": "Toggle_Torch_Crude"
+  }
+  

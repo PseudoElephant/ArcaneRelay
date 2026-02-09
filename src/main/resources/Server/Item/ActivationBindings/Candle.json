@@ -1,0 +1,5 @@
+{
+    "Pattern": "contains:Candle",
+    "Activation": "Toggle_Torch"
+  }
+  

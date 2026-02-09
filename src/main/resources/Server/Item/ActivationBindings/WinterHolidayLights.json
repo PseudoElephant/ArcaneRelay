@@ -1,0 +1,5 @@
+{
+    "Pattern": "contains:WinterHoliday_Lights",
+    "Activation": "Toggle_Torch"
+  }
+  
