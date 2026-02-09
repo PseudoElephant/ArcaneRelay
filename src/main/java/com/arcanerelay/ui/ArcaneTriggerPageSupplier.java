@@ -1,5 +1,6 @@
 package com.arcanerelay.ui;
 
+import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.components.ArcaneTriggerBlock;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.AddReason;
@@ -53,6 +54,7 @@ public class ArcaneTriggerPageSupplier implements OpenCustomUIInteraction.Custom
         if (blockComponentChunk == null) return null;
 
         int blockIndex = ChunkUtil.indexBlockInColumn(targetBlock.x, targetBlock.y, targetBlock.z);
+        ArcaneRelayPlugin.get().getLogger().atInfo().log("UI POSITION: " +targetBlock.x + targetBlock.y + targetBlock.z);
         Ref<ChunkStore> blockRef = blockComponentChunk.getEntityReference(blockIndex);
         if (blockRef == null || !blockRef.isValid()) return null;
 

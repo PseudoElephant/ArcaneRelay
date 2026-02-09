@@ -2,10 +2,16 @@ package com.arcanerelay.core.blockmovement;
 
 import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.state.ArcaneMoveState.MoveEntry;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.chunk.BlockChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.FluidSection;
+import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
+
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 
@@ -19,8 +25,7 @@ import java.util.Map;
  */
 public final class BlockMovementExecutor {
 
-    private BlockMovementExecutor() {
-    }
+    private BlockMovementExecutor() { }
 
     /**
      * Runs all moves for the given move entries: computes order, breaks source
@@ -52,12 +57,12 @@ public final class BlockMovementExecutor {
                 int tz = blockPosition.z + moveEntry.moveDirection.z;
 
                 long futureChunkIndex = ChunkUtil.indexChunkFromBlock(tx, tz);
-                WorldChunk futureChunk = world.getChunkIfInMemory(futureChunkIndex);
+                WorldChunk futureChunk = world.getChunk(futureChunkIndex);
                 if (futureChunk == null)
                     continue;
 
                 long fromChunkIndex = ChunkUtil.indexChunkFromBlock(blockPosition.x, blockPosition.z);
-                WorldChunk fromChunk = world.getChunkIfInMemory(fromChunkIndex);
+                WorldChunk fromChunk = world.getChunk(fromChunkIndex);
                 if (fromChunk == null)
                     continue;
 
@@ -65,12 +70,14 @@ public final class BlockMovementExecutor {
                     List<Vector3i> targetsAtSource = targetPositionGraph.get(blockPosition);
                     boolean noOneMovingHere = targetsAtSource == null || targetsAtSource.isEmpty();
                     if (noOneMovingHere) {
+
+                        int settings = 0;
                         fromChunk.breakBlock(
                             blockPosition.x,
                             blockPosition.y,
                             blockPosition.z,
                             moveEntry.blockFiller,
-                            moveEntry.blockSettings);
+                            4 | 2048); // set empty // naturally removed? // drop item??
                         dirtyChunks.add(fromChunkIndex);
                     }
 
@@ -80,19 +87,48 @@ public final class BlockMovementExecutor {
                         moveEntry.blockType,
                         moveEntry.blockRotation,
                         moveEntry.blockFiller,
-                        moveEntry.blockSettings);
+                        4); // 
+
+                    futureChunk.setState(tx, ty, tz, moveEntry.componentHolder);
+
                     dirtyChunks.add(futureChunkIndex);
+
+                    setBlockAndNeighboursTicking(world, fromChunk, blockPosition);
                 });
             }
         }
 
         world.execute(() ->{
-            ArcaneRelayPlugin.get().getLogger().atInfo()
-            .log("BlockMovementExecutor: invalidating light for " + dirtyChunks.size() + " chunks");
-            dirtyChunks.forEach(idx -> world.getChunkLighting().invalidateLightInChunk(world.getChunkIfInMemory(idx)));
+            dirtyChunks.forEach(idx -> world.getChunkLighting().invalidateLightInChunk(world.getChunk(idx)));
             dirtyChunks.forEach(idx -> world.getNotificationHandler().updateChunk(idx));
         });
                 
         ArcaneRelayPlugin.get().getLogger().atInfo().log("BlockMovementExecutor: finished moving blocks");
+    }
+
+    private static void setBlockAndNeighboursTicking(World world, WorldChunk chunk, Vector3i blockPosition) {
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                for (int z = -1; z <= 1; z++) {
+                    ArcaneRelayPlugin.get().getLogger().atInfo().log("Set block ticking: (" + blockPosition.x + x + ", " + blockPosition.y + y + ", " + blockPosition.z + z + ")");
+
+                    if (!ChunkUtil.isSameChunkSection(blockPosition.x, blockPosition.y, blockPosition.z, blockPosition.x + x,blockPosition.y + y, blockPosition.z + z)) {
+                        Store<ChunkStore> store= world.getChunkStore().getStore();
+                        long fromChunkIndex = ChunkUtil.indexChunkFromBlock(blockPosition.x, blockPosition.z);
+                        WorldChunk newChunk = world.getChunk(fromChunkIndex);
+                        BlockChunk blockChunkComponent = store.getComponent(newChunk.getReference(), BlockChunk.getComponentType());
+                        BlockSection section = blockChunkComponent.getSectionAtBlockY(blockPosition.y + y);
+                        section.setTicking(blockPosition.x + x, blockPosition.y + y, blockPosition.z + z, true);
+                        continue;
+                    }
+                    
+                    Store<ChunkStore> store= world.getChunkStore().getStore();
+                    BlockChunk blockChunkComponent = store.getComponent(chunk.getReference(), BlockChunk.getComponentType());
+                    BlockSection section = blockChunkComponent.getSectionAtBlockY(blockPosition.y + y);
+                
+                    section.setTicking(blockPosition.x + x, blockPosition.y + y, blockPosition.z + z, true);
+                }
+            }
+        }
     }
 }

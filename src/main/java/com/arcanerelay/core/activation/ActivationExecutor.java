@@ -42,7 +42,7 @@ public final class ActivationExecutor {
         if (main == null) return;
 
         int mainX = main[0], mainY = main[1], mainZ = main[2];
-        WorldChunk mainChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(mainX, mainZ));
+        WorldChunk mainChunk = world.getChunk(ChunkUtil.indexChunkFromBlock(mainX, mainZ));
         if (mainChunk == null) return;
 
         BlockType mainBlockType = mainChunk.getBlockType(mainX, mainY, mainZ);
@@ -100,7 +100,7 @@ public final class ActivationExecutor {
 
         int soundIndex = SoundEvent.getAssetMap().getIndex(soundId);
         if (soundIndex == Integer.MIN_VALUE || soundIndex == 0) return;
-        
+
         double x = blockX + 0.5, y = blockY + 0.5, z = blockZ + 0.5;
         ComponentAccessor<EntityStore> accessor = world.getEntityStore().getStore();
         SoundUtil.playSoundEvent3d(soundIndex, SoundCategory.SFX, x, y, z, accessor);

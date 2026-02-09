@@ -123,7 +123,7 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
         }
 
         long chunkIndex = ChunkUtil.indexChunkFromBlock(blockX, blockZ);
-        WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
+        WorldChunk chunk = world.getChunk(chunkIndex);
         if (chunk == null) {
             ArcaneRelayPlugin.get().getLogger().atWarning().log(String.format("ArcaneActivator: chunk not loaded at (%d,%d,%d)", blockX, blockY, blockZ));
             context.getState().state = InteractionState.Finished;

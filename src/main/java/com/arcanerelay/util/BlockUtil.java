@@ -40,7 +40,7 @@ public final class BlockUtil {
                     int tx = x + dx;
                     int ty = y + dy;
                     int tz = z + dz;
-                    WorldChunk tChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(tx, tz));
+                    WorldChunk tChunk = world.getChunk(ChunkUtil.indexChunkFromBlock(tx, tz));
 
                     if (tChunk == null) continue;
                     if (tChunk.getFiller(tx, ty, tz) != 0) continue;

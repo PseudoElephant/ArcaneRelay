@@ -127,7 +127,7 @@ public class ToggleDoorActivation extends Activation {
         int x, int y, int z,
         @Nonnull Rotation rotationToCheck
     ) {
-        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(x, z));
+        WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(x, z));
         if (chunk == null) return null;
         BlockType blockType = chunk.getBlockType(x, y, z);
         if (blockType == null) return null;
@@ -177,7 +177,7 @@ public class ToggleDoorActivation extends Activation {
         @Nonnull DoorState fromState,
         @Nonnull DoorState doorState
     ) {
-        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(blockPosition.x, blockPosition.z));
+        WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(blockPosition.x, blockPosition.z));
         if (chunk == null) return null;
         int rotationIndex = chunk.getRotationIndex(blockPosition.x, blockPosition.y, blockPosition.z);
         BlockBoundingBoxes oldHitbox = BlockBoundingBoxes.getAssetMap().getAsset(blockType.getHitboxTypeIndex());
@@ -223,7 +223,7 @@ public class ToggleDoorActivation extends Activation {
         int[] main = BlockUtil.findMainBlock(world, doorChunk, px, py, pz);
         if (main == null) return;
         int mainX = main[0], mainY = main[1], mainZ = main[2];
-        WorldChunk mainChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(mainX, mainZ));
+        WorldChunk mainChunk = world.getChunk(ChunkUtil.indexChunkFromBlock(mainX, mainZ));
         if (mainChunk == null) return;
         BlockType mainBlockType = mainChunk.getBlockType(mainX, mainY, mainZ);
         if (mainBlockType == null) return;
