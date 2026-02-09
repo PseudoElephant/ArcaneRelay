@@ -31,8 +31,6 @@ public class ArcaneMoveState implements Resource<ChunkStore> {
                 return;
             }
 
-            ArcaneRelayPlugin.get().getLogger().atInfo().log("ADD MOVE ENTRYY");
-        
             this.moveEntries.put(blockPosition, new MoveEntry(blockPosition, moveDirection, blockType, blockId, blockRotation, filler, settings, componentHolder));
         }
     }

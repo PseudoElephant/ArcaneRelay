@@ -68,11 +68,6 @@ public class SendSignalInteraction extends SimpleInstantInteraction {
          return;
       }
 
-
-
-      ArcaneRelayPlugin.get().getLogger().atInfo().log("TARGET " + target.x + " " + target.y + " " + target.z);
-
-
       World world = cb.getExternalData().getWorld();
 
       long chunkIndex = ChunkUtil.indexChunkFromBlock(target.x, target.z);

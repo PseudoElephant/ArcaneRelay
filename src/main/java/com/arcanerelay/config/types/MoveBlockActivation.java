@@ -221,19 +221,13 @@ public class MoveBlockActivation extends Activation {
 
             WorldChunk fromChunk = world.getChunk(ChunkUtil.indexChunkFromBlock(fromPosition.x, fromPosition.z));
             WorldChunk toChunk = world.getChunk(ChunkUtil.indexChunkFromBlock(toPosition.x, toPosition.y));
-            if (fromChunk == null || toChunk == null) {
-                ArcaneRelayPlugin.get().getLogger().atInfo().log("Chunk NOT IN MEMORY!");
+            if (fromChunk == null || toChunk == null)
                 continue;
-            }
-         
+
             ArcaneMoveState arcaneMoveState = world.getChunkStore().getStore().getResource(ArcaneMoveState.getResourceType());
-
-            if (arcaneMoveState == null) {
-                ArcaneRelayPlugin.get().getLogger().atInfo().log("ArcaneTickSystem: no arcane move state");
+            if (arcaneMoveState == null)
                 return;
-            }
 
-            ArcaneRelayPlugin.get().getLogger().atInfo().log("ArcaneTickSystem: Adding move entry");
             arcaneMoveState.addMoveEntry(fromPosition,
                 toPosition.clone().subtract(fromPosition), chainBlockTypes[j], chainBlockIds[j],
                 chainRotations[j], chainFillers[j], 0, chainHolders[j]);

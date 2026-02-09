@@ -128,7 +128,6 @@ public class ToggleStateActivation extends Activation {
         if (effects == null) effects = getEffects();
         ActivationExecutor.playEffects(ctx.world(), ctx.blockX(), ctx.blockY(), ctx.blockZ(), effects);
         if (shouldSendSignal(state, newState)) {
-            ArcaneRelayPlugin.get().getLogger().atInfo().log("sending signal");
             ActivationExecutor.sendSignals(ctx);
         }
     }

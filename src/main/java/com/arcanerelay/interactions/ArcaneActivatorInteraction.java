@@ -131,8 +131,6 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
         }
 
         String activationId = activation.getId();
-        ArcaneRelayPlugin.get().getLogger().atInfo().log(String.format("ArcaneActivator: request next tick block=(%d,%d,%d) activation=%s", blockX, blockY, blockZ, activationId));
-      
         ArcaneTickSystem.requestSignalNextTick(world, blockX, blockY, blockZ, blockX, blockY, blockZ, activationId);
 
         context.getState().state = InteractionState.Finished;

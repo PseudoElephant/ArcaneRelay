@@ -71,7 +71,6 @@ public class ArcaneState implements Resource<ChunkStore> {
 
    public void addTrigger(TriggerEntry entry) {
       synchronized (triggerEntries) {
-         ArcaneRelayPlugin.get().getLogger().atInfo().log("ADDING TRIGGER");
          triggerEntries.addLast(entry);
       }
    }
@@ -85,7 +84,6 @@ public class ArcaneState implements Resource<ChunkStore> {
 
    public void clearTriggers() {
       synchronized (triggerEntries) {
-         ArcaneRelayPlugin.get().getLogger().atInfo().log("CLEAR TRIGGERs");
          triggerEntries.clear();
       }
    }

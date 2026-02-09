@@ -49,7 +49,6 @@ public final class ActivationExecutor {
         if (mainBlockType == null) return;
 
         ActivationContext ctx = new ActivationContext(world, store, mainChunk, mainX, mainY, mainZ, mainBlockType, sources);
-        ArcaneRelayPlugin.get().getLogger().atInfo().log(String.format("ActivationExecutor: running %s at (%d,%d,%d)", activation.getId(), mainX, mainY, mainZ));
         activation.execute(ctx);
     }
 

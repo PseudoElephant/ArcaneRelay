@@ -1,6 +1,5 @@
 package com.arcanerelay.core.blockmovement;
 
-import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.state.ArcaneMoveState.MoveEntry;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.ChunkUtil;
@@ -38,12 +37,8 @@ public final class BlockMovementExecutor {
         if (moveEntries.isEmpty())
             return;
 
-        ArcaneRelayPlugin.get().getLogger().atInfo().log("BlockMovementExecutor: moving blocks");
         List<List<Vector3i>> executionOrder = BlockMovementGraph.getExecutionOrder(moveEntries);
         Map<Vector3i, List<Vector3i>> targetPositionGraph = BlockMovementGraph.buildTargetPositionGraph(moveEntries);
-
-        ArcaneRelayPlugin.get().getLogger().atInfo()
-                .log("BlockMovementExecutor: execution steps: " + executionOrder.size());
 
         LongSet dirtyChunks = new LongOpenHashSet();
         for (List<Vector3i> step : executionOrder) {
@@ -102,16 +97,12 @@ public final class BlockMovementExecutor {
             dirtyChunks.forEach(idx -> world.getChunkLighting().invalidateLightInChunk(world.getChunk(idx)));
             dirtyChunks.forEach(idx -> world.getNotificationHandler().updateChunk(idx));
         });
-                
-        ArcaneRelayPlugin.get().getLogger().atInfo().log("BlockMovementExecutor: finished moving blocks");
     }
 
     private static void setBlockAndNeighboursTicking(World world, WorldChunk chunk, Vector3i blockPosition) {
         for (int x = -1; x <= 1; x++) {
             for (int y = -1; y <= 1; y++) {
                 for (int z = -1; z <= 1; z++) {
-                    ArcaneRelayPlugin.get().getLogger().atInfo().log("Set block ticking: (" + blockPosition.x + x + ", " + blockPosition.y + y + ", " + blockPosition.z + z + ")");
-
                     if (!ChunkUtil.isSameChunkSection(blockPosition.x, blockPosition.y, blockPosition.z, blockPosition.x + x,blockPosition.y + y, blockPosition.z + z)) {
                         Store<ChunkStore> store= world.getChunkStore().getStore();
                         long fromChunkIndex = ChunkUtil.indexChunkFromBlock(blockPosition.x, blockPosition.z);
