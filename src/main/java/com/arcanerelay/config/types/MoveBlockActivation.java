@@ -180,7 +180,7 @@ public class MoveBlockActivation extends Activation {
         for (int i = 0; i < maxRange; i++) {
             Vector3i c = frontPusherPosition.clone().add(globalForward.clone().scale(i).add(scaledGlobalUpVector));
 
-            WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(c.x, c.z));
+            WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(c.x, c.z));
             if (chunk == null)
                 break;
 
@@ -201,7 +201,7 @@ public class MoveBlockActivation extends Activation {
         }
 
         Vector3i nextEmptyPosition = frontPusherPosition.clone().add(globalForward.clone().scale(chainLength).add(scaledGlobalUpVector));
-        WorldChunk emptyChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(nextEmptyPosition.x, nextEmptyPosition.z));
+        WorldChunk emptyChunk = world.getChunk(ChunkUtil.indexChunkFromBlock(nextEmptyPosition.x, nextEmptyPosition.z));
         if (emptyChunk == null)
             return;
 
@@ -219,24 +219,18 @@ public class MoveBlockActivation extends Activation {
             Vector3i fromPosition = frontPusherPosition.clone().add(globalForward.clone().scale(j).add(scaledGlobalUpVector));
             Vector3i toPosition = frontPusherPosition.clone().add(globalForward.clone().scale(j + 1).add(scaledGlobalUpVector));
 
-            WorldChunk fromChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(fromPosition.x, fromPosition.z));
-            WorldChunk toChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(toPosition.x, toPosition.y));
+            WorldChunk fromChunk = world.getChunk(ChunkUtil.indexChunkFromBlock(fromPosition.x, fromPosition.z));
+            WorldChunk toChunk = world.getChunk(ChunkUtil.indexChunkFromBlock(toPosition.x, toPosition.y));
             if (fromChunk == null || toChunk == null)
                 continue;
 
-            final int idx = j;
-
-             ArcaneMoveState arcaneMoveState = world.getChunkStore().getStore().getResource(ArcaneMoveState.getResourceType());
-
-            if (arcaneMoveState == null) {
-                ArcaneRelayPlugin.get().getLogger().atInfo().log("ArcaneTickSystem: no arcane move state");
+            ArcaneMoveState arcaneMoveState = world.getChunkStore().getStore().getResource(ArcaneMoveState.getResourceType());
+            if (arcaneMoveState == null)
                 return;
-            }
 
-            ArcaneRelayPlugin.get().getLogger().atInfo().log("ArcaneTickSystem: Adding move entry");
             arcaneMoveState.addMoveEntry(fromPosition,
-                toPosition.clone().subtract(fromPosition), chainBlockTypes[idx], chainBlockIds[idx],
-                chainRotations[idx], chainFillers[idx], 0, chainHolders[idx]);
+                toPosition.clone().subtract(fromPosition), chainBlockTypes[j], chainBlockIds[j],
+                chainRotations[j], chainFillers[j], 0, chainHolders[j]);
 
             world.execute(() -> {
                 Vector3i destinationPosition = frontPusherPosition.clone().add(globalForward).add(scaledGlobalUpVector);

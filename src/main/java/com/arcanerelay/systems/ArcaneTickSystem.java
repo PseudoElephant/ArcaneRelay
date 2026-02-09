@@ -1,6 +1,5 @@
 package com.arcanerelay.systems;
 
-import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.core.activation.ActivationWave;
 import com.arcanerelay.core.blockmovement.BlockMovementExecutor;
 import com.arcanerelay.state.ArcaneMoveState;
@@ -13,8 +12,6 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 
 import java.util.HashMap;
-
-import java.util.logging.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -64,10 +61,8 @@ public class ArcaneTickSystem extends DelayedSystem<ChunkStore> {
 
         ActivationWave.runWave(world, chunkStore, state);
 
-        ArcaneMoveState arcaneMoveState = chunkStore.getResource(ArcaneMoveState.getResourceType()); 
+        ArcaneMoveState arcaneMoveState = chunkStore.getResource(ArcaneMoveState.getResourceType());
         HashMap<Vector3i, MoveEntry> moveEntries = arcaneMoveState.getMoveEntries();
-          
-        ArcaneRelayPlugin.get().getLogger().at(Level.INFO).log("RUNNING MOVEMENT with size " + moveEntries.size());
         BlockMovementExecutor.execute(world, moveEntries);
 
         arcaneMoveState.clear();

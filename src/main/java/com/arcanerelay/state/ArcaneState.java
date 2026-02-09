@@ -1,5 +1,6 @@
 package com.arcanerelay.state;
 
+import com.arcanerelay.ArcaneRelayPlugin;
 import com.hypixel.hytale.component.Resource;
 import com.hypixel.hytale.component.ResourceType;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
@@ -22,9 +23,6 @@ public class ArcaneState implements Resource<ChunkStore> {
    private final Deque<TriggerEntry> pendingNextTick = new ArrayDeque<>();
    private final AtomicLong lastRunTick = new AtomicLong(Long.MIN_VALUE);
 
-   public ArcaneState() {
-   }
-
    /** Adds a trigger for the next interval (from interactions). Has skip=true: propagate only, no activation. */
    public void addPendingNextTick(int x, int y, int z, int sourceX, int sourceY, int sourceZ) {
       synchronized (pendingNextTick) {
@@ -45,18 +43,21 @@ public class ArcaneState implements Resource<ChunkStore> {
     */
    public void flushPendingToTriggers() {
       List<TriggerEntry> toFlush;
+
       synchronized (pendingNextTick) {
          if (pendingNextTick.isEmpty()) return;
+
          toFlush = new ArrayList<>(pendingNextTick);
          pendingNextTick.clear();
       }
+
       synchronized (triggerEntries) {
          triggerEntries.addAll(toFlush);
       }
    }
 
    public static ResourceType<ChunkStore, ArcaneState> getResourceType() {
-      return com.arcanerelay.ArcaneRelayPlugin.get().getArcaneStateResourceType();
+      return ArcaneRelayPlugin.get().getArcaneStateResourceType();
    }
 
    /** Adds a trigger (skip=false: normal activate + propagate). */
@@ -100,14 +101,6 @@ public class ArcaneState implements Resource<ChunkStore> {
       }
    }
 
-   public boolean tryClaimRun(long worldTick, long intervalTicks) {
-      long prev = lastRunTick.get();
-      if (prev != Long.MIN_VALUE && worldTick - prev < intervalTicks) {
-         return false;
-      }
-      return lastRunTick.compareAndSet(prev, worldTick);
-   }
-
    public long getLastRunTick() {
       return lastRunTick.get();
    }
@@ -117,12 +110,15 @@ public class ArcaneState implements Resource<ChunkStore> {
    public Resource<ChunkStore> clone() {
       ArcaneState clone = new ArcaneState();
       clone.lastRunTick.set(this.lastRunTick.get());
+      
       synchronized (this.triggerEntries) {
          clone.triggerEntries.addAll(this.triggerEntries);
       }
+
       synchronized (this.pendingNextTick) {
          clone.pendingNextTick.addAll(this.pendingNextTick);
       }
+
       return clone;
    }
 }

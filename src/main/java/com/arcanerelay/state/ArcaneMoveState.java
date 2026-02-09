@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
 
+import com.arcanerelay.ArcaneRelayPlugin;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Resource;
 import com.hypixel.hytale.component.ResourceType;
@@ -25,11 +26,11 @@ public class ArcaneMoveState implements Resource<ChunkStore> {
 
     public void addMoveEntry(Vector3i blockPosition, Vector3i moveDirection, BlockType blockType, int blockId, int blockRotation, int filler, int settings, Holder<ChunkStore> componentHolder) {
         synchronized (this.moveEntries) {
-        if (this.moveEntries.containsKey(blockPosition)) {
-            this.moveEntries.get(blockPosition).updateDirection(moveDirection);
-            return;
-        }
-        
+            if (this.moveEntries.containsKey(blockPosition)) {
+                this.moveEntries.get(blockPosition).updateDirection(moveDirection);
+                return;
+            }
+
             this.moveEntries.put(blockPosition, new MoveEntry(blockPosition, moveDirection, blockType, blockId, blockRotation, filler, settings, componentHolder));
         }
     }

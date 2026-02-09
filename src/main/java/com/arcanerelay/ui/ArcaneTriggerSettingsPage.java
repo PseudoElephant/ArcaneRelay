@@ -108,7 +108,7 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         
         long chunkIndex = ChunkUtil.indexChunkFromBlock(destination.getX(), destination.getZ());
         World world = chunkStore.getExternalData().getWorld();
-        WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
+        WorldChunk chunk = world.getChunk(chunkIndex);
             
         int blockId = chunk.getBlock(destination.getX(), destination.getY(), destination.getZ());
         BlockType blockType = blockTypeMap.getAsset(blockId);

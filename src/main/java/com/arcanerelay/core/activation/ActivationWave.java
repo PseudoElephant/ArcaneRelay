@@ -14,12 +14,12 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -53,8 +53,15 @@ public final class ActivationWave {
             int z = entry.getKey().z;
             TargetInfo info = entry.getValue();
 
+           
             long chunkIndex = ChunkUtil.indexChunkFromBlock(x, z);
-            WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
+            WorldChunk chunk = world.getChunk(chunkIndex);
+            Ref<ChunkStore> chunkRef = chunk.getReference();
+            BlockComponentChunk blockComponentChunk = store.getComponent(chunkRef, BlockComponentChunk.getComponentType());
+            if (blockComponentChunk == null) continue;
+
+            int blockIndex = ChunkUtil.indexBlockInColumn(x, y, z);
+            Ref<ChunkStore> blockRef = blockComponentChunk.getEntityReference(blockIndex);
 
             int blockId = chunk.getBlock(x, y, z);
             BlockType blockType = blockTypeMap.getAsset(blockId);
@@ -64,13 +71,9 @@ public final class ActivationWave {
             }
 
             if (info.skip) {
-                ArcaneRelayPlugin.get().getLogger().atFine().log(String.format("ActivationWave: propagateOnly at (%d, %d, %d)", x, y, z));
-
-                Ref<ChunkStore> blockRef = chunk.getBlockComponentEntity(x, y, z);
                 if (blockRef != null) {
                     propagateOnly(world, store, chunk, blockRef, new Vector3i(x, y, z));
                 }
-                
                 continue;
             } 
 
@@ -79,7 +82,6 @@ public final class ActivationWave {
                 sourcesAsInts.add(new int[] { s.getX(), s.getY(), s.getZ() });
             }
 
-            ArcaneRelayPlugin.get().getLogger().atInfo().log(String.format("ActivationWave: activate block=(%d,%d,%d) blockType=%s activatorId=%s", x, y, z, blockType.getId(), info.activatorId));
             activateOutput(world, store, chunk, x, y, z, blockId, blockType, sourcesAsInts, info.activatorId);
         }
     }
@@ -102,8 +104,6 @@ public final class ActivationWave {
             : ArcaneRelayPlugin.get().getActivationRegistry().getActivationForBlock(blockTypeKey);
         
         if (activation != null) {
-            ArcaneRelayPlugin.get().getLogger().atFine().log(String.format(
-                "ActivationWave: scheduling activation %s at (%d,%d,%d)", activation.getId(), blockX, blockY, blockZ));
             ActivationExecutor.execute(world, store, chunk, blockX, blockY, blockZ, blockType, activation, sources);
             return;
         }
@@ -121,7 +121,6 @@ public final class ActivationWave {
     ) {
         ArcaneTriggerBlock trigger = store.getComponent(blockRef,
             ArcaneRelayPlugin.get().getArcaneTriggerBlockComponentType());
-
         if (trigger == null)
             return;
 
@@ -130,7 +129,7 @@ public final class ActivationWave {
             return;
 
         for (Vector3i out : trigger.getOutputPositions()) {
-            state.addTrigger(TriggerEntry.of(out, blockPos));
+                state.addTrigger(TriggerEntry.of(out, blockPos));
         }
     }
 

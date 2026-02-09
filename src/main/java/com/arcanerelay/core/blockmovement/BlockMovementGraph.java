@@ -1,6 +1,5 @@
 package com.arcanerelay.core.blockmovement;
 
-import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.state.ArcaneMoveState.MoveEntry;
 import com.hypixel.hytale.math.vector.Vector3i;
 
@@ -106,16 +105,11 @@ public final class BlockMovementGraph {
 
                 Vector3i target = targetPosition(blockPosition, moveEntry);
                 List<Vector3i> targetsAt = targetPositionGraph.get(target);
-                if (targetsAt == null) {
-                    ArcaneRelayPlugin.get().getLogger().atInfo().log("BlockMovementGraph: no target blocks at " + target.x + "," + target.y + "," + target.z);
+                if (targetsAt == null)
                     continue;
-                }
 
-                if (targetsAt.size() > 1) {
-                    ArcaneRelayPlugin.get().getLogger().atInfo().log("BlockMovementGraph: collision at " + blockPosition.x + "," + blockPosition.y + ","
-                        + blockPosition.z + " (" + targetsAt.size() + " targets)");
+                if (targetsAt.size() > 1)
                     continue;
-                }
 
                 simplified.add(blockPosition);
             }

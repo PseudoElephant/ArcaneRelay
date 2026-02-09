@@ -1,5 +1,6 @@
 package com.arcanerelay.ui;
 
+import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.components.ArcaneTriggerBlock;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.AddReason;
