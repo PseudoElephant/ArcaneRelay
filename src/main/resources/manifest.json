@@ -1,14 +1,14 @@
 {
     "Group": "PseudoElephant",
     "Name": "ArcaneRelay",
-    "Version": "0.8.0",
+    "Version": "1.0.2",
     "Description": "Arcane Relay is a mod that allows you to create and manage arcane relays in Hytale.",
     "Authors": [
         {"Name": "PseudoAle"},
         {"Name": "Fanzy"}
     ],
     "Website": "",
-    "ServerVersion": "2026.02.06-aa1b071c2",
+    "ServerVersion": ">= 2026.02.06-aa1b071c2",
     "Dependencies": {},
     "OptionalDependencies": {},
     "DisabledByDefault": false,
