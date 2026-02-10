@@ -30,13 +30,13 @@ Group #FormContainer {
         Label {
           Anchor: (Bottom: 10);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-          Text: "1. Left click on a target arcane block to set the active source block (sender).";
+          Text: "1. Right click on a target arcane block to set the active source block (sender).";
         }
 
         Label {
           Anchor: (Bottom: 20);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-          Text: "2. Right click on a target position to add that location as a destination for the selected source block.";
+          Text: "2. Left click on a target position to add that location as a destination for the selected source block.";
         }
 
         Label {
@@ -61,13 +61,13 @@ Group #FormContainer {
         Label {
           Anchor: (Bottom: 10);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-          Text: "1. Left click on a target arcane block to set the active source block (sender).";
+          Text: "1. Right click on a target arcane block to set the active source block (sender).";
         }
 
         Label {
           Anchor: (Bottom: 15);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-          Text: "2. Right click on an already targetted position to remove that location as a destination for the selected source block.";
+          Text: "2. Left click on an already targetted position to remove that location as a destination for the selected source block.";
         }
       }
 
@@ -86,7 +86,7 @@ Group #FormContainer {
         Label {
           Anchor: (Bottom: 15);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-          Text: "Left click on a previously selected source block to view it's destinations.";
+          Text: "Right click on a previously selected source block to view it's destinations.";
         }
       }
 
