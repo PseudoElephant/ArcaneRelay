@@ -39,6 +39,34 @@ arcanerelay.notifications.outputRemoved = Output removed.
 arcanerelay.notifications.outputAdded = Output has been added.
 arcanerelay.notifications.signalSentToTrigger = Signal sent to trigger.
 arcanerelay.notifications.blockActivationNotSupported = Block activation not supported for this block.
+
 # === UI ===
 
 customUI.ArcaneStaffLegend.title = Arcane Staff
+
+customUI.ArcaneStaffLegend.setupSectionTitle = Setting Up Connections
+customUI.ArcaneStaffLegend.setupSectionRightClickDescription = 1. Right click on a target arcane block to set the active source block (sender).
+customUI.ArcaneStaffLegend.setupSectionLeftClickDescription = 2. Left click on a target position to add that location as a destination for the selected source block.
+customUI.ArcaneStaffLegend.setupSectionNote = Note: You can add multiple destinations without having to reselect the same source block.
+
+customUI.ArcaneStaffLegend.removeSectionTitle = Removing a Connection
+customUI.ArcaneStaffLegend.removeSectionRightClickDescription = 1. Right click on a target arcane block to set the active source block (sender).
+customUI.ArcaneStaffLegend.removeSectionLeftClickDescription = 2. Left click on an already targetted position to remove that location as a destination for the selected source block.
+
+customUI.ArcaneStaffLegend.viewSectionTitle = View Connections
+customUI.ArcaneStaffLegend.viewSectionRightClickDescription = Right click on a previously selected source block to view it's destinations.
+
+customUI.ArcaneStaffLegend.listSectionTitle = List Connections
+customUI.ArcaneStaffLegend.listSectionDescription = Press 'Crouch Key' + 'Block Interaction Key' on an Arcane block to view it's connections.
+
+
+customUI.ArcaneTrigger.title = Arcane Trigger
+customUI.ArcaneTrigger.failedToLoadDataMessage = Could not load trigger data.
+customUI.ArcaneTrigger.outputConnectionsTitle = Output Connections
+customUI.ArcaneTrigger.noConnectionsMessage = (No connections)
+customUi.ArcaneTrigger.connectionCountSingular = 1 connection
+customUi.ArcaneTrigger.connectionCountPlural = {amount} connections
+customUI.ArcaneTrigger.buttonClearAllTitle = Clear All
+
+
+customUI.ConnectionRow.buttonRemoveTitle = Remove

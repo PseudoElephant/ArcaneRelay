@@ -8,7 +8,7 @@ $C.@PageOverlay {
 
     #Title {
       $C.@Title {
-        @Text = "Arcane Trigger";
+        @Text = %server.customUI.ArcaneTrigger.title;
       }
     }
 
@@ -21,7 +21,7 @@ $C.@PageOverlay {
         Visible: false;
 
         Label {
-          Text: "Could not load trigger data.";
+          Text: %server.customUI.ArcaneTrigger.failedToLoadDataMessage;
           Anchor: (Bottom: 16);
           Style: (...$C.@DefaultLabelStyle, RenderBold: true, TextColor: #ff6666);
         }
@@ -32,7 +32,7 @@ $C.@PageOverlay {
         Visible: true;
 
         Label {
-          Text: "Output Connections";
+          Text: %server.customUI.ArcaneTrigger.outputConnectionsTitle;
           Anchor: (Bottom: 12);
           Style: (...$C.@DefaultLabelStyle, RenderBold: true);
         }
@@ -44,7 +44,7 @@ $C.@PageOverlay {
           Padding: (Full: 8);
           
           Label #NoConnections { 
-            Text: "(No connections)";
+            Text: %server.customUI.ArcaneTrigger.noConnectionsMessage;
             Style: (FontSize: 14, TextColor: #afc2c3); 
             Visible: false;
           }
@@ -59,7 +59,7 @@ $C.@PageOverlay {
           LayoutMode: Right;
 
           Label #ConnectionCount {
-            Text: "0 connections";
+            Text: %server.customUi.ArcaneTrigger.connectionCount;
             Anchor: (Bottom: 10);
             Style: (...$C.@DefaultLabelStyle, FontSize: 13, TextColor: #6e7da1);
           }
@@ -75,7 +75,7 @@ $C.@PageOverlay {
           Anchor: (Height: 44);
 
           $C.@SmallSecondaryTextButton #ClearButton {
-            @Text = "Clear All";
+            @Text = %server.customUI.ArcaneTrigger.buttonClearAllTitle;
             Visible: true;
           }
         }

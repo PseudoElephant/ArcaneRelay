@@ -24,25 +24,25 @@ Group #FormContainer {
         Label {
           Anchor: (Bottom: 5);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 16, TextColor: #94969a, RenderBold: true);
-          Text: "Setting Up Connections";
+          Text: %server.customUI.ArcaneStaffLegend.setupSectionTitle;
         }
 
         Label {
           Anchor: (Bottom: 10);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-          Text: "1. Right click on a target arcane block to set the active source block (sender).";
+          Text: %server.customUI.ArcaneStaffLegend.setupSectionRightClickDescription;
         }
 
         Label {
           Anchor: (Bottom: 20);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-          Text: "2. Left click on a target position to add that location as a destination for the selected source block.";
+          Text: %server.customUI.ArcaneStaffLegend.setupSectionLeftClickDescription;
         }
 
         Label {
           Anchor: (Bottom: 15);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-          Text: "Note: You can add many destinations without having to reselect the source block. ";
+          Text: %server.customUI.ArcaneStaffLegend.setupSectionNote;
         }
       }
 
@@ -55,19 +55,19 @@ Group #FormContainer {
           Padding: (Top: 15);
           Anchor: (Bottom: 5);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 16, TextColor: #94969a, RenderBold: true);
-          Text: "Removing a Connection";
+          Text: %server.customUI.ArcaneStaffLegend.removeSectionTitle;
         }
 
         Label {
           Anchor: (Bottom: 10);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-          Text: "1. Right click on a target arcane block to set the active source block (sender).";
+          Text: %server.customUI.ArcaneStaffLegend.removeSectionRightClickDescription;
         }
 
         Label {
           Anchor: (Bottom: 15);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-          Text: "2. Left click on an already targetted position to remove that location as a destination for the selected source block.";
+          Text: %server.customUI.ArcaneStaffLegend.removeSectionLeftClickDescription;
         }
       }
 
@@ -80,13 +80,13 @@ Group #FormContainer {
           Padding: (Top: 15);
           Anchor: (Bottom: 5);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 16, TextColor: #94969a, RenderBold: true);
-          Text: "View Connections";
+          Text: %server.customUI.ArcaneStaffLegend.viewSectionTitle;
         }
 
         Label {
           Anchor: (Bottom: 15);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-          Text: "Right click on a previously selected source block to view it's destinations.";
+          Text: %server.customUI.ArcaneStaffLegend.viewSectionRightClickDescription;
         }
       }
 
@@ -99,13 +99,13 @@ Group #FormContainer {
           Padding: (Top: 15);
           Anchor: (Bottom: 5);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 16, TextColor: #94969a, RenderBold: true);
-          Text: "List Connections";
+          Text: %server.customUI.ArcaneStaffLegend.listSectionTitle;
         }
 
         Label {
           Anchor: (Bottom: 15);
           Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 14, TextColor: #94969a);
-          Text: "Press 'Crouch Key' + 'Block Interaction Key' on an Arcane block to view it's connections.";
+          Text: %server.customUI.ArcaneStaffLegend.listSectionDescription;
         }
       }
     }

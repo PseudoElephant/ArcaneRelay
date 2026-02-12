@@ -65,7 +65,14 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
 
         // Update connection count
         int count = outputs.size();
-        String countText = count == 1 ? "1 connection" : count + " connections";
+        String countText = "";
+
+        if (count == 1) {
+            countText = Message.translation("server.customUi.ArcaneTrigger.connectionCountSingular").getAnsiMessage();
+        } else {
+            countText = Message.translation("server.customUi.ArcaneTrigger.connectionCountPlural").param("amount", count).getAnsiMessage();
+        }
+        
         commandBuilder.set("#ConnectionCount.Text", countText);
         
         // Show/hide clear button
