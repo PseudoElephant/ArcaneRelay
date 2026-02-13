@@ -97,7 +97,7 @@ public class AddOutputInteraction extends SimpleInstantInteraction {
                 store.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), comp);
             });
 
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.outputRemoved"), NotificationStyle.Success);
+            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.outputRemoved"), NotificationStyle.Warning);
             context.getState().state = InteractionState.Finished;
             return;
         }
