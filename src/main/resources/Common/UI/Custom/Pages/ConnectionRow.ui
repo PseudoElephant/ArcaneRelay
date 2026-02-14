@@ -11,6 +11,6 @@ Group {
   }
 
   $C.@SmallSecondaryTextButton #RemoveButton {
-    @Text = "Remove";
+    @Text = %server.customUI.ConnectionRow.buttonRemoveTitle;
   }
 }
