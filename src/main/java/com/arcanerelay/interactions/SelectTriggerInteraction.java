@@ -8,6 +8,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.protocol.InteractionType;
+import com.hypixel.hytale.protocol.BlockPosition;
 import com.hypixel.hytale.protocol.InteractionState;
 import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
 import com.hypixel.hytale.server.core.Message;
@@ -17,7 +18,6 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;
-import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.modules.debug.DebugUtils;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
@@ -25,7 +25,6 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.server.core.util.TargetUtil;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import javax.annotation.Nonnull;
 
@@ -34,30 +33,25 @@ import javax.annotation.Nonnull;
  * Stores the block position in ArcaneConfiguratorComponent.
  */
 public class SelectTriggerInteraction extends SimpleInstantInteraction {
-
-    private static final double TARGET_DISTANCE = 20.0;
-
     @Nonnull
     public static final BuilderCodec<SelectTriggerInteraction> CODEC = BuilderCodec.builder(
             SelectTriggerInteraction.class, SelectTriggerInteraction::new, SimpleInstantInteraction.CODEC)
             .documentation("ArcaneRelay: select an Arcane Trigger block to configure.")
             .build();
 
-    public SelectTriggerInteraction() {
-    }
+    public SelectTriggerInteraction() { }
 
     public SelectTriggerInteraction(String id) {
         super(id);
     }
 
     @Override
-       protected void firstRun(@Nonnull InteractionType type, @Nonnull InteractionContext context, @Nonnull CooldownHandler cooldownHandler) {
+    protected void firstRun(@Nonnull InteractionType type, @Nonnull InteractionContext context, @Nonnull CooldownHandler cooldownHandler) {
         CommandBuffer<EntityStore> cb = context.getCommandBuffer();
         if (cb == null) return;
 
         Ref<EntityStore> ref = context.getEntity();
         Player player = cb.getComponent(ref, Player.getComponentType());
-
 
         PlayerRef playerRef = cb.getComponent(ref, PlayerRef.getComponentType());
         if (playerRef == null) return;
@@ -65,14 +59,15 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
         ArcaneConfiguratorComponent configurator = cb.getComponent(ref, ArcaneConfiguratorComponent.getComponentType());
         if (player == null || configurator == null) return;
 
-        Vector3i target = TargetUtil.getTargetBlock(ref, TARGET_DISTANCE, cb);
-        if (target == null) {
+        BlockPosition targetPosition = context.getTargetBlock();
+        if (targetPosition == null) {
             NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.noBlockInRange"), NotificationStyle.Warning);
             context.getState().state = InteractionState.Failed; 
             return;
         }
-        
 
+        Vector3i target = new Vector3i(targetPosition.x, targetPosition.y, targetPosition.z);
+        
         World world = cb.getExternalData().getWorld();
         WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(target.x, target.z));
         if (chunk == null) return;

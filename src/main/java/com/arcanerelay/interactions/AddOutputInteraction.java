@@ -6,6 +6,7 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.math.vector.Vector3i;
+import com.hypixel.hytale.protocol.BlockPosition;
 import com.hypixel.hytale.protocol.InteractionState;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
@@ -19,7 +20,6 @@ import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Sim
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.server.core.util.TargetUtil;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import javax.annotation.Nonnull;
 
@@ -28,8 +28,6 @@ import javax.annotation.Nonnull;
  * Uses ArcaneConfiguratorComponent to find the trigger block.
  */
 public class AddOutputInteraction extends SimpleInstantInteraction {
-
-    private static final double TARGET_DISTANCE = 20.0;
     private static final double TRIGGER_DISTANCE = 10.0;
 
     @Nonnull
@@ -59,24 +57,28 @@ public class AddOutputInteraction extends SimpleInstantInteraction {
 
         Vector3i triggerPos = configurator.getConfiguredBlock();
         if (triggerPos == null) {
-            
             NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.selectTriggerFirst"), NotificationStyle.Warning);
+            context.getState().state = InteractionState.Failed; 
             return;
         }
 
-        Vector3i target = TargetUtil.getTargetBlock(ref, TARGET_DISTANCE, cb);
-        if (target == null) {
+        BlockPosition targetPosition = context.getTargetBlock();
+        if (targetPosition == null) {
             NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.noBlockInRange"), NotificationStyle.Warning);
+            context.getState().state = InteractionState.Failed; 
             return;
         }
 
+        Vector3i target = new Vector3i(targetPosition.x, targetPosition.y, targetPosition.z);
         if (triggerPos.equals(target)) {
             NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.targetSameAsTrigger"), NotificationStyle.Warning);
+            context.getState().state = InteractionState.Failed; 
             return;
         }
 
         if (triggerPos.distanceTo(target) > TRIGGER_DISTANCE) {
             NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.targetTooFarFromTrigger"), NotificationStyle.Warning);
+            context.getState().state = InteractionState.Failed; 
             return;
         }
 
