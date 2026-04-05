@@ -57,7 +57,14 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         commandBuilder.set("#ErrorScreen.Visible", !isTriggerBlock);
         commandBuilder.set("#MainContent.Visible", isTriggerBlock);
 
-        if (!isTriggerBlock) return;
+        if (trigger == null) return;
+
+        commandBuilder.set("#UseRelativeOutputMode #CheckBox.Value", trigger.isUsingRelativeOutput());
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.ValueChanged,
+            "#UseRelativeOutputMode #CheckBox",
+            EventData.of("Action", "ToggleRelativeOutputs")
+        );
         
         List<Vector3i> outputs = trigger.getOutputPositions();
         AddOutputDestinationList(chunkStore, commandBuilder, eventBuilder, trigger, outputs);
@@ -78,9 +85,9 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         commandBuilder.set("#ClearButton.Visible", trigger.hasOutputPositions());
         
         eventBuilder.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                "#ClearButton",
-                EventData.of("Action", "Clear")
+            CustomUIEventBindingType.Activating,
+            "#ClearButton",
+            EventData.of("Action", "Clear")
         );
     }
 
@@ -144,6 +151,14 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
             
             return;
         } 
+
+        if ("ToggleRelativeOutputs".equals(data.action)) {
+            updated.setUsingRelativeOutput(!updated.isUsingRelativeOutput());
+            chunkStore.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), updated);
+            rebuild();
+            
+            return;
+        }
         
         if (data.removePosition == null || data.removePosition.isEmpty()) return;
 

@@ -25,6 +25,7 @@ public class VisualsUtil {
     static final double LINE_THICKNESS = 0.025;
     static final int DEBUG_FLAGS = DebugUtils.FLAG_FADE | DebugUtils.FLAG_NO_WIREFRAME;
     static final double CORNER_SIZE = 0.20;
+    static final double INNER_BOX_GAP = 0.075; 
 
     static int colorIndex = 0;
     static Vector3f[] colors = new Vector3f[] {
@@ -66,10 +67,25 @@ public class VisualsUtil {
     }
 
     private static void showInputWireframe(World world, Vector3i triggerPos) {
+        WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(triggerPos.x, triggerPos.z));
+        if (chunk == null) return;
+
+        Ref<ChunkStore> blockRef = chunk.getBlockComponentEntity(triggerPos.x, triggerPos.y, triggerPos.z);
+        if (blockRef == null || !blockRef.isValid()) return;
+
+        Store<ChunkStore> store = world.getChunkStore().getStore();
+        ArcaneTriggerBlock triggerBlock = store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
+        if (triggerBlock == null) return;
+
         Box box = getEnclosingBoundingHitbox(world, triggerPos);
-        if (box != null) {
-            DebugVisualsCustomShapes.drawBoxWireframe(world, box, triggerPos, colors[colorIndex]);
-        }
+        if (box == null) return;
+
+        Vector3f color = colors[colorIndex];
+        if (triggerBlock.isUsingRelativeOutput()) {
+            DebugVisualsCustomShapes.drawCenterBoxesInWireframe(world, box, triggerPos, color);
+        } 
+        
+        DebugVisualsCustomShapes.drawBoxWireframe(world, box, triggerPos, color);
     }
 
     private static void showOutputWireframes(World world, Vector3i triggerPos) {
@@ -167,11 +183,66 @@ public class VisualsUtil {
     }
 
     private class DebugVisualsCustomShapes {
-        private static void drawLine(World world, Vector3d start, Vector3d end, Vector3f color) {
-            DebugUtils.addLine(world, start, end, color, LINE_THICKNESS, FADE_TIME, DEBUG_FLAGS);
+        private static void drawLine(@Nonnull World world, @Nonnull Vector3d start, @Nonnull Vector3d end, @Nonnull Vector3f color) {
+            DebugVisualsCustomShapes.drawLine(world, start, end, color, LINE_THICKNESS);
         }
 
-        public static void drawBoxWireframe(World world, Box box, Vector3i blockPos, Vector3f color) {
+        private static void drawLine(@Nonnull World world, @Nonnull Vector3d start, @Nonnull Vector3d end, @Nonnull Vector3f color, double thickness) {
+            DebugUtils.addLine(world, start, end, color, thickness, FADE_TIME, DEBUG_FLAGS);
+        }
+
+        public static void drawCenterBoxesInWireframe(@Nonnull World world, @Nonnull Box box, @Nonnull Vector3i blockPos, @Nonnull Vector3f color) {
+            double minX = box.min.x + blockPos.x, minY = box.min.y + blockPos.y, minZ = box.min.z + blockPos.z;
+            double maxX = box.max.x + blockPos.x, maxY = box.max.y + blockPos.y, maxZ = box.max.z + blockPos.z;
+            double gap = INNER_BOX_GAP;
+            
+            // Bottom face
+            drawCenteredRectangle(world, minX + gap, maxX - gap, minZ + gap, maxZ - gap, minY, 0, color);
+            
+            // Top face
+            drawCenteredRectangle(world, minX + gap, maxX - gap, minZ + gap, maxZ - gap, maxY, 0, color);
+            
+            // Front face
+            drawCenteredRectangle(world, minX + gap, maxX - gap, minY + gap, maxY - gap, minZ, 1, color);
+            
+            // Back face
+            drawCenteredRectangle(world, minX + gap, maxX - gap, minY + gap, maxY - gap, maxZ, 1, color);
+            
+            // Left face
+            drawCenteredRectangle(world, minY + gap, maxY - gap, minZ + gap, maxZ - gap, minX, 2, color);
+            
+            // Right face
+            drawCenteredRectangle(world, minY + gap, maxY - gap, minZ + gap, maxZ - gap, maxX, 2, color);
+        }
+        
+        private static void drawCenteredRectangle(@Nonnull World world, double c1min, double c1max, double c2min, double c2max, double fixed, int plane, @Nonnull Vector3f color) {
+            Vector3d p1, p2, p3, p4;
+            
+            if (plane == 0) { // XZ plane constant Y
+                p1 = new Vector3d(c1min, fixed, c2min);
+                p2 = new Vector3d(c1max, fixed, c2min);
+                p3 = new Vector3d(c1max, fixed, c2max);
+                p4 = new Vector3d(c1min, fixed, c2max);
+            } else if (plane == 1) { // XY plane constant Z
+                p1 = new Vector3d(c1min, c2min, fixed);
+                p2 = new Vector3d(c1max, c2min, fixed);
+                p3 = new Vector3d(c1max, c2max, fixed);
+                p4 = new Vector3d(c1min, c2max, fixed);
+            } else { // plane == 2, YZ plane constant X
+                p1 = new Vector3d(fixed, c1min, c2min);
+                p2 = new Vector3d(fixed, c1max, c2min);
+                p3 = new Vector3d(fixed, c1max, c2max);
+                p4 = new Vector3d(fixed, c1min, c2max);
+            }
+            
+            int thinFactor = 3; 
+            drawLine(world, p1, p2, color, LINE_THICKNESS / thinFactor);
+            drawLine(world, p2, p3, color, LINE_THICKNESS / thinFactor);
+            drawLine(world, p3, p4, color, LINE_THICKNESS / thinFactor);
+            drawLine(world, p4, p1, color, LINE_THICKNESS / thinFactor);
+        }
+
+        public static void drawBoxWireframe(@Nonnull World world, @Nonnull Box box, @Nonnull Vector3i blockPos, @Nonnull Vector3f color) {
             double minX = box.min.x + blockPos.x, minY = box.min.y + blockPos.y, minZ = box.min.z + blockPos.z;
             double maxX = box.max.x + blockPos.x, maxY = box.max.y + blockPos.y, maxZ = box.max.z + blockPos.z;
 
@@ -194,7 +265,7 @@ public class VisualsUtil {
             drawLine(world, new Vector3d(minX, minY, maxZ), new Vector3d(minX, maxY, maxZ), color);
         }
 
-        public static void drawCornerOnlyBoxWireframe(World world, Box box, Vector3i blockPos, Vector3f color) {
+        public static void drawCornerOnlyBoxWireframe(@Nonnull World world, @Nonnull Box box, @Nonnull Vector3i blockPos, @Nonnull Vector3f color) {
             double minX = box.min.x + blockPos.x, minY = box.min.y + blockPos.y, minZ = box.min.z + blockPos.z;
             double maxX = box.max.x + blockPos.x, maxY = box.max.y + blockPos.y, maxZ = box.max.z + blockPos.z;
 
@@ -230,7 +301,7 @@ public class VisualsUtil {
             }
         }
 
-        public static void drawArrow(World world, Vector3d position, Vector3d direction, Vector3f color, double thickness, float time, int flags) {
+        public static void drawArrow(@Nonnull World world, @Nonnull Vector3d position, @Nonnull Vector3d direction, @Nonnull Vector3f color, double thickness, float time, int flags) {
             drawArrow(world, position, direction, color, 0.8F, time, flags, thickness);
         }
 

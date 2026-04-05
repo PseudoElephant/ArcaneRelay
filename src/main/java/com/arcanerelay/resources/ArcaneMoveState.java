@@ -72,6 +72,14 @@ public class ArcaneMoveState implements Resource<ChunkStore> {
             this.componentHolder = componentHolder;
         }
 
+        /**
+         * Creates a copy of this MoveEntry with an updated componentHolder.
+         * Used for updating block components with modified state (e.g., adjusted output positions).
+         */
+        public MoveEntry withComponentHolder(Holder<ChunkStore> newComponentHolder) {
+            return new MoveEntry(this.blockPosition, this.moveDirection, this.blockType, this.blockId, this.blockRotation, this.blockFiller, this.blockSettings, newComponentHolder);
+        }
+
         public void updateDirection(Vector3i moveDirection) {
             this.moveDirection.x = Math.clamp(this.moveDirection.x + moveDirection.x, -1, 1);
             this.moveDirection.y = Math.clamp(this.moveDirection.y + moveDirection.y, -1, 1);

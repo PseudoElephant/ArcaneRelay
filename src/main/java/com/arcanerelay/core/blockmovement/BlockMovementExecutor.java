@@ -1,6 +1,10 @@
 package com.arcanerelay.core.blockmovement;
 
+import com.arcanerelay.ArcaneRelayPlugin;
+import com.arcanerelay.components.ArcaneTriggerBlock;
 import com.arcanerelay.resources.ArcaneMoveState.MoveEntry;
+import com.hypixel.hytale.component.Holder;
+import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Vector3i;
@@ -61,6 +65,8 @@ public final class BlockMovementExecutor {
                     continue;
 
                 world.execute(() -> {
+                    MoveEntry updatedEntry = moveArcaneTriggerRelativeOutputs(world, fromChunk, blockPosition, moveEntry);
+
                     List<Vector3i> targetsAtSource = targetPositionGraph.get(blockPosition);
                     boolean noOneMovingHere = targetsAtSource == null || targetsAtSource.isEmpty();
                     if (noOneMovingHere) {
@@ -70,21 +76,21 @@ public final class BlockMovementExecutor {
                             blockPosition.x,
                             blockPosition.y,
                             blockPosition.z,
-                            moveEntry.blockFiller,
+                            updatedEntry.blockFiller,
                             4 | 2048); // set empty // naturally removed? // drop item??
                         dirtyChunks.add(fromChunkIndex);
                     }
 
                     futureChunk.setBlock(
                         tx, ty, tz,
-                        moveEntry.blockId,
-                        moveEntry.blockType,
-                        moveEntry.blockRotation,
-                        moveEntry.blockFiller,
+                        updatedEntry.blockId,
+                        updatedEntry.blockType,
+                        updatedEntry.blockRotation,
+                        updatedEntry.blockFiller,
                         4
                     ); 
 
-                    futureChunk.setState(tx, ty, tz, moveEntry.blockType, moveEntry.blockRotation, moveEntry.componentHolder);
+                    futureChunk.setState(tx, ty, tz, updatedEntry.blockType, updatedEntry.blockRotation, updatedEntry.componentHolder);
 
                     dirtyChunks.add(futureChunkIndex);
 
@@ -102,6 +108,50 @@ public final class BlockMovementExecutor {
 
             dirtyChunks.forEach(idx -> world.getNotificationHandler().updateChunk(idx));
         });
+    }
+
+private static MoveEntry moveArcaneTriggerRelativeOutputs(@Nonnull World world, @Nonnull WorldChunk worldChunk, @Nonnull Vector3i blockPos, @Nonnull MoveEntry moveEntry) {
+        ArcaneRelayPlugin.LOGGER.atInfo().log("Attempting to Update ArcanePullerBlock Relative Outputs at: " + blockPos.x + ", " + blockPos.y + ", " + blockPos.z);
+
+        // Use the componentHolder stored in the move entry (captured during chain creation)
+        // rather than looking up blockRef from chunk, which may not exist for blocks
+        // in the middle of a chain
+        Holder<ChunkStore> originalHolder = moveEntry.componentHolder;
+        if (originalHolder == null) {
+            ArcaneRelayPlugin.LOGGER.atInfo().log("No component holder in move entry");
+            return moveEntry;
+        }
+
+        ArcaneTriggerBlock triggerBlock = originalHolder.getComponent(ArcaneTriggerBlock.getComponentType());
+        if (triggerBlock == null || !triggerBlock.hasOutputPositions()) {
+            ArcaneRelayPlugin.LOGGER.atInfo().log("Block is not a trigger block with outputs");
+            return moveEntry;
+        }
+
+        ArcaneRelayPlugin.LOGGER.atInfo().log("Is trigger block with outputs");
+
+        if (!triggerBlock.isUsingRelativeOutput() || !triggerBlock.hasOutputPositions()) {
+            ArcaneRelayPlugin.LOGGER.atInfo().log("Not using relative outputs");
+            return moveEntry;
+        }
+
+        ArcaneRelayPlugin.LOGGER.atInfo().log("Using relative outputs, moving them");
+    
+        // Clone the original holder to preserve other components
+        Holder<ChunkStore> updatedHolder = originalHolder.clone();
+        
+        if (updatedHolder == null) return moveEntry;
+
+        ArcaneRelayPlugin.LOGGER.atInfo().log("Holder cloned, updating outputs");
+
+        // Modify the ArcaneTriggerBlock and put it back in the cloned holder
+        ArcaneTriggerBlock updated = (ArcaneTriggerBlock) triggerBlock.clone();
+        updated.moveOutputPositions(moveEntry.moveDirection);
+        updatedHolder.putComponent(ArcaneTriggerBlock.getComponentType(), updated);
+
+        ArcaneRelayPlugin.LOGGER.atInfo().log("Updated block outputs - moved by: " + moveEntry.moveDirection.x + ", " + moveEntry.moveDirection.y + ", " + moveEntry.moveDirection.z);
+
+        return moveEntry.withComponentHolder(updatedHolder);
     }
 
     private static void setBlockAndNeighboursTicking(World world, WorldChunk chunk, Vector3i blockPosition) {

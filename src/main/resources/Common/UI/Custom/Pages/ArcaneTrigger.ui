@@ -39,7 +39,7 @@ $C.@PageOverlay {
 
         Group #OutputListContainer {
           LayoutMode: Top;
-          Anchor: (Height: 280, Bottom: 10);
+          Anchor: (Height: 277, Bottom: 10);
           Background: #000000(0.3);
           Padding: (Full: 8);
           
@@ -56,17 +56,25 @@ $C.@PageOverlay {
         }
 
         Group {
-          LayoutMode: Right;
+          LayoutMode: Left;
+
+          $C.@CheckBoxWithLabel #UseRelativeOutputMode {
+            @Text =  %server.customUI.ArcaneTrigger.useRelativeOutputsLabel;
+            @Checked = false;
+            TooltipText: %server.customUI.ArcaneTrigger.useRelativeOutputsTooltip;
+            Anchor: (Bottom: 12);
+            FlexWeight: 1;
+          }
 
           Label #ConnectionCount {
             Text: %server.customUi.ArcaneTrigger.connectionCount;
-            Anchor: (Bottom: 10);
+            Anchor: (Bottom: 12);
             Style: (...$C.@DefaultLabelStyle, FontSize: 13, TextColor: #6e7da1);
           }
         }
 
         Group {
-          Anchor: (Bottom: 10, Height: 1);
+          Anchor: (Bottom: 8, Height: 1);
           Background: #5e512c;
         }
 

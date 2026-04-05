@@ -60,9 +60,8 @@ customUI.ArcaneStaffLegend.removeSectionLeftClickDescription = 2. Left click on 
 customUI.ArcaneStaffLegend.viewSectionTitle = View Connections
 customUI.ArcaneStaffLegend.viewSectionRightClickDescription = Right click on a previously selected source block to view it's destinations.
 
-customUI.ArcaneStaffLegend.listSectionTitle = List Connections
-customUI.ArcaneStaffLegend.listSectionDescription = Press 'Crouch Key' + 'Block Interaction Key' on an Arcane block to view it's connections.
-
+customUI.ArcaneStaffLegend.listSectionTitle = Open Block Settings
+customUI.ArcaneStaffLegend.listSectionDescription = Press 'Crouch Key' + 'Block Interaction Key' on an Arcane block to view and edit it's settings.
 
 customUI.ArcaneTrigger.title = Arcane Trigger
 customUI.ArcaneTrigger.failedToLoadDataMessage = Could not load trigger data.
@@ -71,6 +70,8 @@ customUI.ArcaneTrigger.noConnectionsMessage = (No connections)
 customUi.ArcaneTrigger.connectionCountSingular = 1 connection
 customUi.ArcaneTrigger.connectionCountPlural = {amount} connections
 customUI.ArcaneTrigger.buttonClearAllTitle = Clear All
+customUI.ArcaneTrigger.useRelativeOutputsLabel = Use Relative Output Mode
+customUI.ArcaneTrigger.useRelativeOutputsTooltip = When active, moving the source block will also move its output destinations. This setting is individual per source block.
 
 customUI.ConnectionRow.buttonRemoveTitle = Remove
 

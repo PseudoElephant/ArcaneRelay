@@ -4,6 +4,7 @@ import com.arcanerelay.ArcaneRelayPlugin;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
+import com.hypixel.hytale.codec.codecs.simple.BooleanCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.math.codec.Vector3iArrayCodec;
@@ -13,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.annotation.Nonnull;
 
 /** Block component for Arcane Trigger: stores multiple output positions to activate, and tracks charge sources. */
@@ -29,13 +29,38 @@ public class ArcaneTriggerBlock implements Component<ChunkStore> {
             b -> b.getOutputPositions().toArray(Vector3i[]::new)
         )
         .add()
+        .append(
+            new KeyedCodec<>("UseRelativeOutputs", new BooleanCodec(), false),
+            (b, useRelative) -> b.useRelativeOutputs = useRelative,
+            b -> b.useRelativeOutputs
+        )
+        .add()
         .build();
 
     private HashSet<Vector3i> outputPositions = new HashSet<>();
-    private HashSet<Vector3i> chargedSources = new HashSet<>();
+    private boolean useRelativeOutputs = false;
 
     public static ComponentType<ChunkStore, ArcaneTriggerBlock> getComponentType() {
         return ArcaneRelayPlugin.get().getArcaneTriggerBlockComponentType();
+    }
+
+    /** Returns true if this trigger is using relative output positions. */
+    public boolean isUsingRelativeOutput() {
+        return useRelativeOutputs;
+    }
+
+    /** Sets whether this trigger should use relative output positions. */
+    public void setUsingRelativeOutput(boolean useRelative) {
+        this.useRelativeOutputs = useRelative;
+    }
+
+    public void moveOutputPositions(Vector3i direction) {
+        HashSet<Vector3i> newPositions = new HashSet<>();
+        for (Vector3i pos : outputPositions) {
+            newPositions.add(new Vector3i(pos.x + direction.x, pos.y + direction.y, pos.z + direction.z));
+        }
+        
+        this.outputPositions = newPositions;
     }
 
     /** Positions this trigger will attempt to activate when triggered. */
@@ -69,35 +94,6 @@ public class ArcaneTriggerBlock implements Component<ChunkStore> {
         return !outputPositions.isEmpty();
     }
 
-    /** Positions that have contributed a charge this cycle (for arcane discharge unique-source logic). */
-    @Nonnull
-    public Set<Vector3i> getChargedSources() {
-        return Collections.unmodifiableSet(chargedSources);
-    }
-
-    /** Number of unique sources that have charged this block this cycle. */
-    public int getChargeCount() {
-        return chargedSources.size();
-    }
-
-    /**
-     * Records a charge from the given source position.
-     *
-     * @param sourceX source block X
-     * @param sourceY source block Y
-     * @param sourceZ source block Z
-     * @return true if this was a new (unique) source and the charge should advance state; false if duplicate
-     */
-    public boolean addChargeFrom(int sourceX, int sourceY, int sourceZ) {
-        Vector3i pos = new Vector3i(sourceX, sourceY, sourceZ);
-        return chargedSources.add(pos);
-    }
-
-    /** Clears all charged sources (e.g. when discharge block resets to Off). */
-    public void clearCharges() {
-        chargedSources.clear();
-    }
-
     @Nonnull
     @Override
     public Component<ChunkStore> clone() {
@@ -105,9 +101,9 @@ public class ArcaneTriggerBlock implements Component<ChunkStore> {
         for (Vector3i p : outputPositions) {
             clone.outputPositions.add(p.clone());
         }
-        for (Vector3i p : chargedSources) {
-            clone.chargedSources.add(p.clone());
-        }
+
+        clone.useRelativeOutputs = this.useRelativeOutputs;
+        
         return clone;
     }
 }
