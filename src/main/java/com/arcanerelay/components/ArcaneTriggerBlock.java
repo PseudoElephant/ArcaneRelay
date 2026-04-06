@@ -3,6 +3,7 @@ package com.arcanerelay.components;
 import com.arcanerelay.ArcaneRelayPlugin;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.codec.codecs.EnumCodec;
 import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
 import com.hypixel.hytale.codec.codecs.simple.BooleanCodec;
 import com.hypixel.hytale.component.Component;
@@ -30,15 +31,15 @@ public class ArcaneTriggerBlock implements Component<ChunkStore> {
         )
         .add()
         .append(
-            new KeyedCodec<>("UseRelativeOutputs", new BooleanCodec(), false),
-            (b, useRelative) -> b.useRelativeOutputs = useRelative,
-            b -> b.useRelativeOutputs
+            new KeyedCodec<>("OutputMode", new EnumCodec<>(OutputMode.class), false),
+            (b, mode) -> b.outputMode = mode,
+            b -> b.outputMode
         )
         .add()
         .build();
 
     private HashSet<Vector3i> outputPositions = new HashSet<>();
-    private boolean useRelativeOutputs = false;
+    private OutputMode outputMode = OutputMode.ABSOLUTE;
 
     public static ComponentType<ChunkStore, ArcaneTriggerBlock> getComponentType() {
         return ArcaneRelayPlugin.get().getArcaneTriggerBlockComponentType();
@@ -46,21 +47,51 @@ public class ArcaneTriggerBlock implements Component<ChunkStore> {
 
     /** Returns true if this trigger is using relative output positions. */
     public boolean isUsingRelativeOutput() {
-        return useRelativeOutputs;
+        return outputMode == OutputMode.RELATIVE;
     }
 
     /** Sets whether this trigger should use relative output positions. */
     public void setUsingRelativeOutput(boolean useRelative) {
-        this.useRelativeOutputs = useRelative;
+        this.outputMode = useRelative ? OutputMode.RELATIVE : OutputMode.ABSOLUTE;
     }
 
-    public void moveOutputPositions(Vector3i direction) {
-        HashSet<Vector3i> newPositions = new HashSet<>();
-        for (Vector3i pos : outputPositions) {
-            newPositions.add(new Vector3i(pos.x + direction.x, pos.y + direction.y, pos.z + direction.z));
+    public void changeOutputMode(OutputMode mode, @Nonnull Vector3i currentGlobalPosition) {
+        switch (mode) {
+            case RELATIVE:
+                if (isUsingRelativeOutput()) return;
+                convertOutputPositionsToRelative(currentGlobalPosition);
+                this.outputMode = OutputMode.RELATIVE;
+
+                break;
+            case ABSOLUTE:
+                if (!isUsingRelativeOutput()) return;
+                convertOutputPositionsToAbsolute(currentGlobalPosition);
+                this.outputMode = OutputMode.ABSOLUTE;
+
+                break;
         }
-        
-        this.outputPositions = newPositions;
+    }
+
+    private void convertOutputPositionsToRelative(@Nonnull Vector3i currentGlobalPosition) {
+        if (isUsingRelativeOutput()) return;
+
+        HashSet<Vector3i> relativePositions = new HashSet<>();
+        for (Vector3i pos : outputPositions) {
+            relativePositions.add(pos.clone().subtract(currentGlobalPosition.clone()));
+        }
+
+        outputPositions = relativePositions;
+    }
+
+    private void convertOutputPositionsToAbsolute(@Nonnull Vector3i currentGlobalPosition) {
+        if (!isUsingRelativeOutput()) return;
+
+        HashSet<Vector3i> absolutePositions = new HashSet<>();
+        for (Vector3i pos : outputPositions) {
+            absolutePositions.add(pos.clone().add(currentGlobalPosition.clone()));
+        }
+
+        outputPositions = absolutePositions;
     }
 
     /** Positions this trigger will attempt to activate when triggered. */
@@ -69,9 +100,26 @@ public class ArcaneTriggerBlock implements Component<ChunkStore> {
         return Collections.unmodifiableList(new ArrayList<>(outputPositions));
     }
 
+    public List<Vector3i> getGlobalOutputPositions(@Nonnull Vector3i currentGlobalPosition) {
+        List<Vector3i> relativePositions = new ArrayList<>();
+        for (Vector3i pos : outputPositions) {
+            if (isUsingRelativeOutput()) {
+                relativePositions.add(pos.clone().add(currentGlobalPosition.clone()));
+            } else {
+                relativePositions.add(pos.clone());
+            }
+        }
+        
+        return Collections.unmodifiableList(new ArrayList<>(relativePositions));
+    }
+
     /** Add an output position (e.g. when using ArcaneRelay tool to connect). */
-    public void addOutputPosition(@Nonnull Vector3i position) {
-        outputPositions.add(position.clone());
+    public void addOutputPosition(@Nonnull Vector3i position, @Nonnull Vector3i currentGlobalPosition) {
+        if (isUsingRelativeOutput()) {
+            outputPositions.add(position.clone().subtract(currentGlobalPosition.clone()));
+        } else {
+            outputPositions.add(position.clone());
+        }
     }
 
     /** Remove all output positions. */
@@ -102,8 +150,13 @@ public class ArcaneTriggerBlock implements Component<ChunkStore> {
             clone.outputPositions.add(p.clone());
         }
 
-        clone.useRelativeOutputs = this.useRelativeOutputs;
+        clone.outputMode = this.outputMode;
         
         return clone;
+    }
+
+    public enum OutputMode {
+        RELATIVE,
+        ABSOLUTE
     }
 }

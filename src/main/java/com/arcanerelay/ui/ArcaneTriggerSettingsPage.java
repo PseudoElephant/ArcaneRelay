@@ -1,6 +1,8 @@
 package com.arcanerelay.ui;
 
+import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.components.ArcaneTriggerBlock;
+import com.arcanerelay.util.BlockUtil;
 import com.hypixel.hytale.assetstore.map.BlockTypeAssetMap;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -36,10 +38,13 @@ import java.util.List;
 public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTriggerSettingsPage.PageEventData> {    
     @Nonnull
     private final Ref<ChunkStore> blockRef;
+    @Nonnull
+    private final Vector3i blockPosition;
 
-    public ArcaneTriggerSettingsPage(@Nonnull PlayerRef playerRef, @Nonnull Ref<ChunkStore> blockRef) {
+    public ArcaneTriggerSettingsPage(@Nonnull PlayerRef playerRef, @Nonnull Ref<ChunkStore> blockRef, @Nonnull Vector3i blockPosition) {
         super(playerRef, CustomPageLifetime.CanDismissOrCloseThroughInteraction, PageEventData.CODEC);
         this.blockRef = blockRef;
+        this.blockPosition = blockPosition;
     }
 
     @Override
@@ -153,7 +158,11 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         } 
 
         if ("ToggleRelativeOutputs".equals(data.action)) {
-            updated.setUsingRelativeOutput(!updated.isUsingRelativeOutput());
+            ArcaneTriggerBlock.OutputMode newMode = updated.isUsingRelativeOutput() ? ArcaneTriggerBlock.OutputMode.ABSOLUTE : ArcaneTriggerBlock.OutputMode.RELATIVE;
+            
+            updated.changeOutputMode(newMode, blockPosition);
+            ArcaneRelayPlugin.LOGGER.atInfo().log("Toggling output mode to " + newMode + " for trigger at " + blockPosition.getX() + ", " + blockPosition.getY() + ", " + blockPosition.getZ());
+            
             chunkStore.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), updated);
             rebuild();
             

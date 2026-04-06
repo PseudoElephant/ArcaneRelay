@@ -58,7 +58,7 @@ public final class ActivationExecutor {
         ArcaneTriggerBlock trigger = accessor.getComponent(blockRef, ArcaneRelayPlugin.get().getArcaneTriggerBlockComponentType());
         if (trigger == null) return;
 
-        for (Vector3i out : trigger.getOutputPositions()) {
+        for (Vector3i out : trigger.getGlobalOutputPositions(new Vector3i(worldX, worldY, worldZ))) {
             ArcaneUtil.setTicking(accessor, out.getX(), out.getY(), out.getZ(), worldX, worldY, worldZ);
         }
     }

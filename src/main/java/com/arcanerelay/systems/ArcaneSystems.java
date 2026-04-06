@@ -1,6 +1,7 @@
 package com.arcanerelay.systems;
 
 import com.hypixel.hytale.component.system.HolderSystem;
+import com.hypixel.hytale.component.system.RefChangeSystem;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.component.system.tick.TickingSystem;
 import com.hypixel.hytale.math.util.ChunkUtil;
@@ -16,6 +17,9 @@ import com.hypixel.hytale.component.dependency.SystemDependency;
 import com.hypixel.hytale.component.query.Query;
 import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.components.ArcaneSection;
+import com.arcanerelay.components.ArcaneSignalComponent;
+import com.arcanerelay.components.ArcaneTriggerBlock;
+import com.arcanerelay.core.activation.ActivationExecutor;
 import com.arcanerelay.core.activation.ArcaneCachedAccessor;
 import com.arcanerelay.core.activation.ChunkStoreCommandBufferAdapter;
 import com.arcanerelay.core.blockmovement.BlockMovementExecutor;
@@ -31,6 +35,7 @@ import com.hypixel.hytale.builtin.blocktick.system.ChunkBlockTickSystem;
 import com.hypixel.hytale.component.AddReason;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.RemoveReason;
@@ -40,6 +45,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import java.time.Instant;
 import java.util.List;
@@ -83,7 +89,8 @@ public class ArcaneSystems {
         @SuppressWarnings("null")
         @Nonnull
         private static final Set<Dependency<ChunkStore>> DEPENDENCIES = Set.of(
-           new SystemDependency<>(Order.AFTER, ChunkBlockTickSystem.PreTick.class), new SystemDependency<>(Order.BEFORE, ChunkBlockTickSystem.Ticking.class)
+           new SystemDependency<>(Order.AFTER, ChunkBlockTickSystem.PreTick.class), 
+           new SystemDependency<>(Order.BEFORE, ChunkBlockTickSystem.Ticking.class)
         );
 
         @Nonnull
@@ -105,7 +112,6 @@ public class ArcaneSystems {
         public boolean isParallel(int archetypeChunkSize, int taskCount) {
             return EntityTickingSystem.maybeUseParallel(archetypeChunkSize, taskCount);
         }
-
 
         @Override
         public void tick(float dt, int index, @Nonnull ArchetypeChunk<ChunkStore> archetypeChunk, @Nonnull Store<ChunkStore> store, @Nonnull CommandBuffer<ChunkStore> commandBuffer) {
@@ -260,5 +266,67 @@ public class ArcaneSystems {
         public Set<Dependency<ChunkStore>> getDependencies() {
            return DEPENDENCIES;
         }
+    }
+
+    public static class SendSignal extends RefChangeSystem<ChunkStore, ArcaneSignalComponent> {
+        @Nonnull
+        private static final Query<ChunkStore> QUERY = Query.and(ChunkSection.getComponentType(), ArcaneSignalComponent.getComponentType(), ArcaneTriggerBlock.getComponentType());
+        
+        @SuppressWarnings("null")
+        @Nonnull
+        private static final Set<Dependency<ChunkStore>> DEPENDENCIES = Set.of(
+            new SystemDependency<>(Order.BEFORE, ChunkBlockTickSystem.Ticking.class),
+            new SystemDependency<>(Order.AFTER, ArcaneSystems.MoveBlock.class)
+        );
+
+        @Nonnull
+        @Override
+        public Set<Dependency<ChunkStore>> getDependencies() {
+           return DEPENDENCIES;
+        }
+
+        @Override
+        @Nullable
+        public Query<ChunkStore> getQuery() {
+            return QUERY;
+        }
+
+        @Override
+        @Nonnull
+        public ComponentType<ChunkStore, ArcaneSignalComponent> componentType() {
+            return ArcaneSignalComponent.getComponentType();
+        }
+
+        @Override
+        public void onComponentAdded(@Nonnull Ref<ChunkStore> ref, @Nonnull ArcaneSignalComponent component,
+                @Nonnull Store<ChunkStore> store, @Nonnull CommandBuffer<ChunkStore> commandBuffer) {
+            // Get the ChunkSection to determine which section this block belongs to
+            ChunkSection chunkSection = commandBuffer.getComponent(ref, ChunkSection.getComponentType());
+            if (chunkSection == null) return;
+
+            // Get the block index directly from the ref
+            int blockIndexInColumn = ref.getIndex();
+
+            // Extract local block coordinates from the block index
+            int blockX = ChunkUtil.xFromIndex(blockIndexInColumn);
+            int blockY = ChunkUtil.yFromIndex(blockIndexInColumn);
+            int blockZ = ChunkUtil.zFromIndex(blockIndexInColumn);
+
+            // Convert to world coordinates
+            int worldX = ChunkUtil.worldCoordFromLocalCoord(chunkSection.getX(), blockX);
+            int worldY = blockY;
+            int worldZ = ChunkUtil.worldCoordFromLocalCoord(chunkSection.getZ(), blockZ);
+
+            ActivationExecutor.sendSignals(store, ref, worldX, worldY, worldZ);
+        }
+
+        @Override
+        public void onComponentRemoved(@Nonnull Ref<ChunkStore> ref, @Nonnull ArcaneSignalComponent component,
+                @Nonnull Store<ChunkStore> store, @Nonnull CommandBuffer<ChunkStore> commandBuffer) { }
+
+        @Override
+        public void onComponentSet(@Nonnull Ref<ChunkStore> ref, @Nullable ArcaneSignalComponent component,
+                @Nonnull ArcaneSignalComponent newComponent, @Nonnull Store<ChunkStore> store,
+                @Nonnull CommandBuffer<ChunkStore> commandBuffer) { }
     }
 }

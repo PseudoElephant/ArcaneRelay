@@ -2,6 +2,7 @@ package com.arcanerelay.config.types;
 
 import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.components.ArcaneSection;
+import com.arcanerelay.components.ArcaneSignalComponent;
 import com.arcanerelay.config.Activation;
 import com.arcanerelay.config.ActivationEffects;
 import com.arcanerelay.core.activation.ActivationExecutor;
@@ -174,7 +175,8 @@ public class ToggleStateActivation extends Activation {
         if (shouldSendSignal(state, newState)) {
             // MIGHT need to make adjustments here to ensure we are sending the signals to the correct blocks
             commandBuffer.run((@Nonnull Store<ChunkStore> store) -> {
-                ActivationExecutor.sendSignals(store, blockRef, worldX, worldY, worldZ);
+                if (blockRef == null || !blockRef.isValid()) return;
+                store.addComponent(blockRef, ArcaneSignalComponent.getComponentType());
             });
         }
 

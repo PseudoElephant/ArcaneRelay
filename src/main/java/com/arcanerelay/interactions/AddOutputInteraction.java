@@ -94,7 +94,7 @@ public class AddOutputInteraction extends SimpleInstantInteraction {
         ArcaneTriggerBlock comp = store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
         if (comp == null) return;
 
-        if (comp.getOutputPositions().contains(outputPos)) {
+        if (comp.getGlobalOutputPositions(triggerPos).contains(outputPos)) {
             world.execute(() -> {
                 comp.removeOutputPosition(outputPos.x, outputPos.y, outputPos.z);
                 store.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), comp);
@@ -106,7 +106,7 @@ public class AddOutputInteraction extends SimpleInstantInteraction {
         }
 
         world.execute(() -> {
-            comp.addOutputPosition(outputPos);
+            comp.addOutputPosition(outputPos, triggerPos);
             store.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), comp);
             VisualsUtil.displayTriggerConnections(world, triggerPos);
         });

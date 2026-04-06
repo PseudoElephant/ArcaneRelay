@@ -1,6 +1,7 @@
 package com.arcanerelay.config.types;
 
 import com.arcanerelay.components.ArcaneSection;
+import com.arcanerelay.components.ArcaneSignalComponent;
 import com.arcanerelay.config.Activation;
 import com.arcanerelay.core.activation.ActivationExecutor;
 import com.arcanerelay.core.activation.ArcaneActivationAccessor;
@@ -45,7 +46,9 @@ public class SendSignalActivation extends Activation {
             World world = store.getExternalData().getWorld();
 
             ActivationExecutor.playEffects(world, worldX, worldY, worldZ, getEffects());
-            ActivationExecutor.sendSignals(store, blockRef, worldX, worldY, worldZ);
+
+            if (blockRef == null || !blockRef.isValid()) return;
+            store.addComponent(blockRef, ArcaneSignalComponent.getComponentType());
         });
 
         return ArcaneSection.BlockTickStrategy.PROCESSED;

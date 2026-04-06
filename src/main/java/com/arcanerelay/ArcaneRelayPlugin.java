@@ -11,6 +11,7 @@ import com.arcanerelay.config.types.ToggleStateActivation;
 import com.arcanerelay.components.ArcaneConfiguratorComponent;
 import com.arcanerelay.components.ArcanePullerBlock;
 import com.arcanerelay.components.ArcaneSection;
+import com.arcanerelay.components.ArcaneSignalComponent;
 import com.arcanerelay.components.ArcaneStaffLegendVisible;
 import com.arcanerelay.components.ArcaneTriggerBlock;
 import com.arcanerelay.interactions.AddOutputInteraction;
@@ -59,6 +60,7 @@ public class ArcaneRelayPlugin extends JavaPlugin {
     private ComponentType<ChunkStore, ArcanePullerBlock> arcanePullerBlockComponentType;
     private ComponentType<EntityStore, ArcaneConfiguratorComponent> arcaneConfiguratorComponentType;
     private ComponentType<EntityStore, ArcaneStaffLegendVisible> arcaneStaffLegendVisibleComponentType;
+    private ComponentType<ChunkStore, ArcaneSignalComponent> arcaneSignalComponentType;
     private ResourceType<ChunkStore, ArcaneMoveState> arcaneMoveStateResourceType;
     private ResourceType<EntityStore, CustomHudRestoreState> customHudRestoreStateResourceType;
 
@@ -83,11 +85,14 @@ public class ArcaneRelayPlugin extends JavaPlugin {
                 ArcaneSection.CODEC);
         this.arcanePullerBlockComponentType = chunkRegistry.registerComponent(ArcanePullerBlock.class,
                 "ArcanePuller", ArcanePullerBlock.CODEC);
+        this.arcaneSignalComponentType = chunkRegistry.registerComponent(ArcaneSignalComponent.class,
+                "ArcaneSignal", ArcaneSignalComponent.CODEC);
 
         chunkRegistry.registerSystem(new ArcaneSystems.EnsureArcaneSection());
         chunkRegistry.registerSystem(new ArcaneSystems.PreTick());
         chunkRegistry.registerSystem(new ArcaneSystems.Ticking());
         chunkRegistry.registerSystem(new ArcaneSystems.MoveBlock());
+        chunkRegistry.registerSystem(new ArcaneSystems.SendSignal());
 
 
         ComponentRegistryProxy<EntityStore> entityRegistry = this.getEntityStoreRegistry();
@@ -133,10 +138,14 @@ public class ArcaneRelayPlugin extends JavaPlugin {
         return this.arcaneMoveStateResourceType;
     }
 
-
     @Nonnull
     public ComponentType<EntityStore, ArcaneStaffLegendVisible> getArcaneStaffLegendVisibleComponentType() {
         return arcaneStaffLegendVisibleComponentType;
+    }
+
+    @Nonnull
+    public ComponentType<ChunkStore, ArcaneSignalComponent> getArcaneSignalComponentType() {
+        return this.arcaneSignalComponentType;
     }
 
     public ComponentType<ChunkStore, ArcaneTriggerBlock> getArcaneTriggerBlockComponentType() {

@@ -1,6 +1,7 @@
 package com.arcanerelay.config.types;
 
 import com.arcanerelay.components.ArcaneSection;
+import com.arcanerelay.components.ArcaneSignalComponent;
 import com.arcanerelay.config.Activation;
 import com.arcanerelay.config.ActivationEffects;
 import com.arcanerelay.core.activation.ActivationExecutor;
@@ -288,7 +289,8 @@ public class ToggleDoorActivation extends Activation {
                 ActivationExecutor.playEffects(w, mainX, mainY, mainZ, getEffects());
             }
 
-            ActivationExecutor.sendSignals(store, blockRef, mainX, mainY, mainZ);
+            if (blockRef == null || !blockRef.isValid()) return;
+            store.addComponent(blockRef, ArcaneSignalComponent.getComponentType());
         });
 
         return ArcaneSection.BlockTickStrategy.PROCESSED;

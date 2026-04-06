@@ -280,18 +280,20 @@ public class ArcanePullerActivation extends Activation {
         ArcaneRelayPlugin.LOGGER.atInfo().log(
             "Puller move-entry check: extLen=%d tip=%d,%d,%d blockId=%d pullable=%s",
             extLen, tipPos.x, tipPos.y, tipPos.z, tipBlockId, isPullable(tipBlockType, tipBlockId));
+
         commandBuffer.run((Store<ChunkStore> s) -> {
             WorldChunk lastChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(lastPos.x, lastPos.z));
             if (lastChunk != null) {
                 lastChunk.breakBlock(lastPos.x, lastPos.y, lastPos.z, lastChunk.getFiller(lastPos.x, lastPos.y, lastPos.z), 4);
             }
+            
             int newLen = extLen - 1;
             updateExtensionConnectedBlocks(s, world, pullerPos, globalUp, newLen, puller.getExtensionBlockKey());
             
-
-        if (isPullable(tipBlockType, tipBlockId)) {
+            if (isPullable(tipBlockType, tipBlockId)) {
                 ArcaneMoveState moveState = s.getResource(ArcaneMoveState.getResourceType());
                 if (moveState == null) return;
+
                 moveState.addMoveEntry(tipPos, globalUp.clone().scale(-1), tipBlockType, tipBlockId,
                     rotation, filler, 0, holder);
             }

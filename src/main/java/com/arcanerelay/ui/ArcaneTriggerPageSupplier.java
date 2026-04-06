@@ -5,6 +5,7 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.math.util.ChunkUtil;
+import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.protocol.BlockPosition;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.CustomUIPage;
@@ -54,6 +55,7 @@ public class ArcaneTriggerPageSupplier implements OpenCustomUIInteraction.Custom
         ArcaneTriggerBlock trigger = chunkAccesor.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
         if (trigger == null) return null;
 
-        return new ArcaneTriggerSettingsPage(playerRef, blockRef);
+        Vector3i blockPos = new Vector3i(targetBlock.x, targetBlock.y, targetBlock.z);
+        return new ArcaneTriggerSettingsPage(playerRef, blockRef, blockPos);
     }
 }

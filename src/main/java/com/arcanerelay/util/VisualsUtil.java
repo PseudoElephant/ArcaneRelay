@@ -100,7 +100,7 @@ public class VisualsUtil {
         if (triggerBlock == null || !triggerBlock.hasOutputPositions()) return;
 
         Vector3f color = colors[colorIndex];
-        for (Vector3i out : triggerBlock.getOutputPositions()) {
+        for (Vector3i out : triggerBlock.getGlobalOutputPositions(triggerPos)) {
             Box box = getEnclosingBoundingHitbox(world, out);
             if (box != null) {
                 DebugVisualsCustomShapes.drawCornerOnlyBoxWireframe(world, box, out, color);
@@ -122,7 +122,7 @@ public class VisualsUtil {
 
         Vector3d from = new Vector3d(triggerPos.x + 0.5, triggerPos.y + 0.5, triggerPos.z + 0.5);
         Vector3f color = colors[colorIndex];
-        for (Vector3i out : triggerBlock.getOutputPositions()) {
+        for (Vector3i out : triggerBlock.getGlobalOutputPositions(triggerPos)) {
             Vector3d to = new Vector3d(out.x + 0.5, out.y + 0.5, out.z + 0.5);
             Vector3d direction = to.clone().subtract(from);
             
