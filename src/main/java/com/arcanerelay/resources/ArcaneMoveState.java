@@ -8,7 +8,7 @@ import com.hypixel.hytale.component.Resource;
 import com.hypixel.hytale.component.ResourceType;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 
 public class ArcaneMoveState implements Resource<ChunkStore> {
     private ConcurrentHashMap<Vector3i, MoveEntry> moveEntries;

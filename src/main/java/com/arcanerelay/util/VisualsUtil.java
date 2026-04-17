@@ -5,16 +5,16 @@ import javax.annotation.Nonnull;
 import com.arcanerelay.components.ArcaneTriggerBlock;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.math.matrix.Matrix4d;
+import org.joml.Matrix4d;
 import com.hypixel.hytale.math.shape.Box;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.server.core.modules.debug.DebugUtils;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import com.hypixel.hytale.protocol.DebugShape;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.blockhitbox.BlockBoundingBoxes;
@@ -108,9 +108,9 @@ public class VisualsUtil {
         Vector3f color = colors[colorIndex];
         for (Vector3i out : triggerBlock.getOutputPositions()) {
             Vector3d to = new Vector3d(out.x + 0.5, out.y + 0.5, out.z + 0.5);
-            Vector3d direction = to.clone().subtract(from);
+            Vector3d direction = new Vector3d(to).sub(from);
             
-            if (direction.squaredLength() < 0.01) continue;
+            if (direction.lengthSquared() < 0.01) continue;
 
             DebugVisualsCustomShapes.drawArrow(world, from, direction, color, LINE_THICKNESS * 2, FADE_TIME / 4, DEBUG_FLAGS); // 2 and 4 chosen just because they felt right.
         }
@@ -236,15 +236,14 @@ public class VisualsUtil {
 
         // This is a modified copy of DebugUtils.drawArrow that allows for custom thickness.
         private static void drawArrow(@Nonnull World world, @Nonnull Vector3d position, @Nonnull Vector3d direction, @Nonnull Vector3f color, float opacity, float time, int flags, double thickness) {
-            Vector3d directionClone = direction.clone();
-            Matrix4d tmp = new Matrix4d();
+            Vector3d directionClone = new Vector3d(direction);
             Matrix4d matrix = new Matrix4d();
             matrix.identity();
             matrix.translate(position);
             double angleY = Math.atan2(directionClone.z, directionClone.x);
-            matrix.rotateAxis(angleY + (Math.PI / 2D), (double)0.0F, (double)1.0F, (double)0.0F, tmp);
+            matrix.rotate(-(angleY + (Math.PI / 2D)), (double)0.0F, (double)1.0F, (double)0.0F);
             double angleX = Math.atan2(Math.sqrt(directionClone.x * directionClone.x + directionClone.z * directionClone.z), directionClone.y);
-            matrix.rotateAxis(angleX, (double)1.0F, (double)0.0F, (double)0.0F, tmp);
+            matrix.rotate(-angleX, (double)1.0F, (double)0.0F, (double)0.0F);
             drawArrow(world, matrix, color, opacity, directionClone.length(), time, flags, thickness);
         }
 

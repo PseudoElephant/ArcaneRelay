@@ -8,7 +8,7 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.server.core.Message;
@@ -98,8 +98,8 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
             String selector = "#OutputList[" + i + "]";
             String blockName = getBlockName(chunkStore, destination);
         
-            String displayText = blockName + ": " + destination.getX() + ", " + destination.getY() + ", " + destination.getZ();
-            String posKey = destination.getX() + "," + destination.getY() + "," + destination.getZ();
+            String displayText = blockName + ": " + destination.x + ", " + destination.y + ", " + destination.z;
+            String posKey = destination.x + "," + destination.y + "," + destination.z;
             
             commandBuilder.set(selector + " #Position.Text", displayText);
             EventData eventData = EventData.of("RemovePosition", posKey);
@@ -112,11 +112,11 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
     private static String getBlockName(@NonNullDecl Store<ChunkStore> chunkStore, @NonNullDecl Vector3i destination) {
         BlockTypeAssetMap<String, BlockType> blockTypeMap = BlockType.getAssetMap();
         
-        long chunkIndex = ChunkUtil.indexChunkFromBlock(destination.getX(), destination.getZ());
+        long chunkIndex = ChunkUtil.indexChunkFromBlock(destination.x, destination.z);
         World world = chunkStore.getExternalData().getWorld();
         WorldChunk chunk = world.getChunk(chunkIndex);
             
-        int blockId = chunk.getBlock(destination.getX(), destination.getY(), destination.getZ());
+        int blockId = chunk.getBlock(destination.x, destination.y, destination.z);
         BlockType blockType = blockTypeMap.getAsset(blockId);
 
         Item item = blockType.getItem();

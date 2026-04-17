@@ -8,7 +8,7 @@ import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import com.hypixel.hytale.server.core.blocktype.component.BlockPhysics;
@@ -38,8 +38,8 @@ public final class ArcaneConnectedBlocksUtil {
         @Nonnull RotationTuple rotation
     ) {
         updateSingle(store, world, blockPos, extendDir, rotation);
-        Vector3i back = extendDir.clone().scale(-1);
-        Vector3i prev = blockPos.clone().add(back);
+        Vector3i back = new Vector3i(extendDir).mul(-1);
+        Vector3i prev = new Vector3i(blockPos).add(back);
 
         WorldChunk prevChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(prev.x, prev.z));
         if (prevChunk == null) return;
@@ -54,8 +54,8 @@ public final class ArcaneConnectedBlocksUtil {
         RotationTuple prevRotation2 = RotationTuple.get(prevRotationIndex2);
         updateSingle(store, world, prev, extendDir, prevRotation2);
         // update 1 forward
-        Vector3i forward = extendDir.clone();
-        Vector3i next = blockPos.clone().add(forward);
+        Vector3i forward = new Vector3i(extendDir);
+        Vector3i next = new Vector3i(blockPos).add(forward);
         WorldChunk nextChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(next.x, next.z));
         if (nextChunk == null) return;
         int nextRotationIndex = nextChunk.getRotationIndex(next.x, next.y, next.z);

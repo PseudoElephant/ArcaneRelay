@@ -20,8 +20,8 @@ import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3d;
+import org.joml.Vector3i;
 import com.hypixel.hytale.protocol.BlockMaterial;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
@@ -135,9 +135,9 @@ public class ArcanePullerBlock implements Component<ChunkStore> {
         Vector3d localUp = getLocalUpVector(pullerBlockType);
         Vector3d rotatedUp = rotationTuple.rotatedVector(localUp);
         Vector3i up = new Vector3i(
-            (int) Math.round(rotatedUp.getX()),
-            (int) Math.round(rotatedUp.getY()),
-            (int) Math.round(rotatedUp.getZ())
+            (int) Math.round(rotatedUp.x),
+            (int) Math.round(rotatedUp.y),
+            (int) Math.round(rotatedUp.z)
         );
 
         int chainLen = this.extensionPositions.size();

@@ -14,7 +14,7 @@ import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -59,7 +59,7 @@ public final class ActivationExecutor {
         if (trigger == null) return;
 
         for (Vector3i out : trigger.getOutputPositions()) {
-            ArcaneUtil.setTicking(accessor, out.getX(), out.getY(), out.getZ(), worldX, worldY, worldZ);
+            ArcaneUtil.setTicking(accessor, out.x, out.y, out.z, worldX, worldY, worldZ);
         }
     }
 

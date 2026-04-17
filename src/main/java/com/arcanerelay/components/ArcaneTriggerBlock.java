@@ -7,7 +7,7 @@ import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.math.codec.Vector3iArrayCodec;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,7 +46,7 @@ public class ArcaneTriggerBlock implements Component<ChunkStore> {
 
     /** Add an output position (e.g. when using ArcaneRelay tool to connect). */
     public void addOutputPosition(@Nonnull Vector3i position) {
-        outputPositions.add(position.clone());
+        outputPositions.add(new Vector3i(position));
     }
 
     /** Remove all output positions. */
@@ -57,7 +57,7 @@ public class ArcaneTriggerBlock implements Component<ChunkStore> {
     /** Remove output position by coordinates. Returns true if removed. */
     public boolean removeOutputPosition(int x, int y, int z) {
         for (Vector3i p : outputPositions) {
-            if (p.getX() == x && p.getY() == y && p.getZ() == z) {
+            if (p.x == x && p.y == y && p.z == z) {
                 outputPositions.remove(p);
                 return true;
             }
@@ -103,10 +103,10 @@ public class ArcaneTriggerBlock implements Component<ChunkStore> {
     public Component<ChunkStore> clone() {
         ArcaneTriggerBlock clone = new ArcaneTriggerBlock();
         for (Vector3i p : outputPositions) {
-            clone.outputPositions.add(p.clone());
+            clone.outputPositions.add(new Vector3i(p));
         }
         for (Vector3i p : chargedSources) {
-            clone.chargedSources.add(p.clone());
+            clone.chargedSources.add(new Vector3i(p));
         }
         return clone;
     }

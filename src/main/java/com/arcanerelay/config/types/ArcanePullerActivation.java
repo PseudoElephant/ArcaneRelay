@@ -16,9 +16,9 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.math.vector.Vector3d;
+import org.joml.Vector3d;
 import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.protocol.BlockMaterial;
 import com.hypixel.hytale.protocol.ChangeVelocityType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
@@ -292,7 +292,7 @@ public class ArcanePullerActivation extends Activation {
         if (isPullable(tipBlockType, tipBlockId)) {
                 ArcaneMoveState moveState = s.getResource(ArcaneMoveState.getResourceType());
                 if (moveState == null) return;
-                moveState.addMoveEntry(tipPos, globalUp.clone().scale(-1), tipBlockType, tipBlockId,
+                moveState.addMoveEntry(tipPos, new Vector3i(globalUp).mul(-1), tipBlockType, tipBlockId,
                     rotation, filler, 0, holder);
             }
         });
@@ -303,7 +303,7 @@ public class ArcanePullerActivation extends Activation {
             collectEntitiesInBlock(entityStore, new Vector3i(tipPos.x, tipPos.y, tipPos.z), entitiesInTip);
            
             if (!entitiesInTip.isEmpty()) {
-                Vector3i knockbackDir = globalUp.clone().scale(-1);
+                Vector3i knockbackDir = new Vector3i(globalUp).mul(-1);
                 for (Ref<EntityStore> ref : entitiesInTip) {
                     if (ref != null && ref.isValid()) {
                         float duration = computePullDuration(entityStore, ref, tipPos);
@@ -338,7 +338,7 @@ public class ArcanePullerActivation extends Activation {
         RotationTuple rotationTuple = RotationTuple.get(rotationIndex);
         Vector3d localUp = getLocalUp(blockType);
         Vector3d global = rotationTuple.rotatedVector(localUp);
-        return new Vector3i((int) Math.round(global.getX()), (int) Math.round(global.getY()), (int) Math.round(global.getZ()));
+        return new Vector3i((int) Math.round(global.x), (int) Math.round(global.y), (int) Math.round(global.z));
     }
 
     private static Vector3d getLocalUp(BlockType blockType) {
@@ -475,8 +475,8 @@ public class ArcanePullerActivation extends Activation {
     }
 
     private static void applyKnockbackToward(Store<EntityStore> entityStore, Ref<EntityStore> ref, Vector3i direction, float duration) {
-        Vector3d velocity = new Vector3d(direction.clone().normalize());
-        velocity.scale(KNOCKBACK_MAX_SPEED);
+        Vector3d velocity = new Vector3d(direction).normalize();
+        velocity.mul(KNOCKBACK_MAX_SPEED);
         KnockbackComponent knockback = entityStore.ensureAndGetComponent(ref, KnockbackComponent.getComponentType());
         knockback.setVelocity(velocity);
         knockback.setVelocityType(ChangeVelocityType.Set);
@@ -489,7 +489,7 @@ public class ArcanePullerActivation extends Activation {
         if (transform == null) return KNOCKBACK_DURATION;
         Vector3d current = transform.getPosition();
         Vector3d target = new Vector3d(targetPos.x + 0.5, targetPos.y + 0.5, targetPos.z + 0.5);
-        double distance = current.distanceTo(target);
+        double distance = current.distance(target);
         float duration = (float) (distance / KNOCKBACK_MAX_SPEED);
         if (duration < KNOCKBACK_MIN_DURATION) duration = KNOCKBACK_MIN_DURATION;
         return duration;

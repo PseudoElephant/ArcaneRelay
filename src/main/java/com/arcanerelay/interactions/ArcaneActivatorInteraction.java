@@ -11,7 +11,7 @@ import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.math.vector.Vector3d;
+import org.joml.Vector3d;
 import com.hypixel.hytale.protocol.BlockPosition;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.InteractionState;
@@ -100,9 +100,9 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
                 context.getState().state = InteractionState.Failed;
                 return;
             }
-            blockX = target.getX();
-            blockY = target.getY();
-            blockZ = target.getZ();
+            blockX = target.x;
+            blockY = target.y;
+            blockZ = target.z;
         }
 
         World world = cb.getExternalData().getWorld();

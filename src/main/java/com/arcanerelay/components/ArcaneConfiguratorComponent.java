@@ -3,7 +3,7 @@ package com.arcanerelay.components;
 import com.arcanerelay.ArcaneRelayPlugin;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,7 +24,7 @@ public class ArcaneConfiguratorComponent implements Component<EntityStore> {
     }
 
     public void setConfiguredBlock(@Nullable Vector3i pos) {
-        this.configuredBlock = pos != null ? pos.clone() : null;
+        this.configuredBlock = pos != null ? new Vector3i(pos) : null;
     }
 
     public void clearConfiguredBlock() {
@@ -35,7 +35,7 @@ public class ArcaneConfiguratorComponent implements Component<EntityStore> {
     @Override
     public Component<EntityStore> clone() {
         ArcaneConfiguratorComponent clone = new ArcaneConfiguratorComponent();
-        clone.configuredBlock = configuredBlock != null ? configuredBlock.clone() : null;
+        clone.configuredBlock = configuredBlock != null ? new Vector3i(configuredBlock) : null;
         return clone;
     }
 }

@@ -13,8 +13,8 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.util.MathUtil;
 import com.hypixel.hytale.math.util.TrigMathUtil;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3d;
+import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blockhitbox.BlockBoundingBoxes;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.Rotation;
@@ -118,7 +118,7 @@ public class ToggleDoorActivation extends Activation {
         double doorRotationRad = Math.toRadians(doorRotationYaw != null ? doorRotationYaw.getDegrees() : 0.0);
         Vector3d doorRotationVector = new Vector3d(TrigMathUtil.sin(doorRotationRad), 0.0, TrigMathUtil.cos(doorRotationRad));
         Vector3d sourcePos = new Vector3d(sourceX + 0.5, sourceY + 0.5, sourceZ + 0.5);
-        Vector3d direction = Vector3d.directionTo(doorBlockPosition, sourcePos);
+        Vector3d direction = new Vector3d(doorBlockPosition).sub(sourcePos).normalize();
         return direction.dot(doorRotationVector) < 0.0;
     }
 
@@ -168,7 +168,7 @@ public class ToggleDoorActivation extends Activation {
         int offsetX = (int) baseBoxes.getBoundingBox().getMax().x * 2 - 1;
         Vector3i offset = new Vector3i(offsetX, 0, 0);
         Rotation rotationToCheck = RotationTuple.get(rotation).yaw();
-        Vector3i otherPos = worldPosition.clone().add(MathUtil.rotateVectorYAxis(offset, rotationToCheck.getDegrees(), false));
+        Vector3i otherPos = new Vector3i(worldPosition).add(MathUtil.rotateVectorYAxis(offset, rotationToCheck.getDegrees(), false));
         DoorInfo matchingDoor = getDoorAtPosition(world, otherPos.x, otherPos.y, otherPos.z, rotationToCheck.flip());
         if (matchingDoor == null || matchingDoor.doorState() != doorStateToCheck || matchingDoor.filler() != 0) return null;
         BlockType matchingBlockType = matchingDoor.blockType();

@@ -6,7 +6,7 @@ import com.arcanerelay.util.VisualsUtil;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.math.vector.Vector3i;
+import org.joml.Vector3i;
 import com.hypixel.hytale.protocol.BlockPosition;
 import com.hypixel.hytale.protocol.InteractionState;
 import com.hypixel.hytale.protocol.InteractionType;
@@ -77,13 +77,13 @@ public class AddOutputInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        if (triggerPos.distanceTo(target) > TRIGGER_DISTANCE) {
+        if (triggerPos.distance(target) > TRIGGER_DISTANCE) {
             NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.targetTooFarFromTrigger"), NotificationStyle.Warning);
             context.getState().state = InteractionState.Failed; 
             return;
         }
 
-        Vector3i outputPos = target.clone();
+        Vector3i outputPos = new Vector3i(target);
         World world = cb.getExternalData().getWorld();
         
         var chunkStore = world.getChunkStore();

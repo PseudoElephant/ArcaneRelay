@@ -89,7 +89,6 @@ public class ArcaneRelayPlugin extends JavaPlugin {
         chunkRegistry.registerSystem(new ArcaneSystems.Ticking());
         chunkRegistry.registerSystem(new ArcaneSystems.MoveBlock());
 
-
         ComponentRegistryProxy<EntityStore> entityRegistry = this.getEntityStoreRegistry();
         this.arcaneConfiguratorComponentType = entityRegistry.registerComponent(ArcaneConfiguratorComponent.class,
                 ArcaneConfiguratorComponent::new);
