@@ -38,6 +38,8 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.dependency.Dependency;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.arcanerelay.externalplugins.HexcodeBridge;
+import com.hypixel.hytale.math.vector.Vector3i;
 
 import javax.annotation.Nonnull;
 
@@ -212,6 +214,12 @@ public class ArcaneSystems {
                         ArcaneSection.BlockTickStrategy strategy = activation.execute(
                             accessor, sectionRef, blockRef, worldX, y, worldZ,
                             sources);
+
+                        // HEXCODE, if it's available, try to consume the block. At the moment ignore the outcome.
+                        if (HexcodeBridge.isAvailable()) {
+                            HexcodeBridge.tryConsume(accessor, world, new Vector3i(worldX, y, worldZ));
+                        }
+
                         return strategy != null ? strategy : ArcaneSection.BlockTickStrategy.PROCESSED;
                     } catch (Throwable t) {
                         ArcaneRelayPlugin.LOGGER.atSevere().withCause(t).log("Activation %s failed at %d,%d,%d",

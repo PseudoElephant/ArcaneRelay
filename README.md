@@ -172,7 +172,7 @@ You can then copy it manually into your mod folder.
 Alternativley, you can do the following to build and move the JAR automatically to your mod folder:
 1. Copy `.env.example` to `.env` and update the `HYTALE_MODS` path to your Hytale mods directory.
    - Mac: `/Users/username/Library/Application Support/Hytale/UserData/Mods`
-   - Windows: `C:\Users\username\AppData\Roaming\Hytale\UserData\Mods`
+   - Windows: `C:\Users\user\AppData\Roaming\Hytale\UserData\Mods`
 2. Run the deploy script:
    - Mac/Linux: `./deploy.sh`
    - Windows: `deploy.bat`

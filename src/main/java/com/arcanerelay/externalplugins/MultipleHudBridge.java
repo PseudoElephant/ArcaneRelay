@@ -9,10 +9,18 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
-public final class MultipleHudBridge {
-    private static final PluginIdentifier PLUGIN_ID = new PluginIdentifier("Buuz135", "MultipleHUD");
+public class MultipleHudBridge extends ExternalPluginBridge {
 
     private MultipleHudBridge() {
+    }
+
+    @Nonnull
+    private static PluginIdentifier id() {
+        return new PluginIdentifier("Buuz135", "MultipleHUD");
+    }
+
+    public static boolean isAvailable() {
+        return isPluginLoaded(id());
     }
 
     public static void setCustomHud(
@@ -21,7 +29,7 @@ public final class MultipleHudBridge {
         @Nonnull String hudId,
         @Nonnull Object hud
     ) {
-        Object plugin = PluginManager.get().getPlugin(PLUGIN_ID);
+        Object plugin = PluginManager.get().getPlugin(id());
         if (plugin == null) return;
 
         try {
