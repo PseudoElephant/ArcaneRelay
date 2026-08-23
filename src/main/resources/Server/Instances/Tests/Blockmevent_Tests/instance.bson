@@ -1,0 +1,67 @@
+{
+  "GameMode": "Creative",
+  "RequiredPlugins": {},
+  "SpawnProvider": {
+    "Id": "Global",
+    "SpawnPoint": {
+      "X": 0.5,
+      "Y": 80.0,
+      "Z": 0.5,
+      "Pitch": 0.0,
+      "Yaw": 180.0,
+      "Roll": 0.0
+    }
+  },
+  "WorldGen": {
+    "Type": "HytaleGenerator",
+    "WorldStructure": "Default_Flat"
+  },
+  "ChunkStorage": {
+    "Type": "Hytale"
+  },
+  "IsPvpEnabled": false,
+  "IsSpawningNPC": false,
+  "IsSpawnMarkersEnabled": true,
+  "IsGameTimePaused": false,
+  "GameTime": "0001-01-01T15:40:44.750922755Z",
+  "ClientEffects": {
+    "SunHeightPercent": 100.0,
+    "SunAngleDegrees": 0.0,
+    "BloomIntensity": 0.30000001192092896,
+    "BloomPower": 8.0,
+    "SunIntensity": 0.25,
+    "SunshaftIntensity": 0.30000001192092896,
+    "SunshaftScaleFactor": 4.0
+  },
+  "UUID": {
+    "$binary": "+MNebVdfT8yeE9y47rwQtw==",
+    "$type": "04"
+  },
+  "GameplayConfig": "Default",
+  "DeleteOnRemove": true,
+  "IsCompassUpdating": true,
+  "IsTicking": true,
+  "Seed": 1785040778631,
+  "IsObjectiveMarkersEnabled": true,
+  "IsAllNPCFrozen": false,
+  "IsSavingPlayers": true,
+  "Version": 4,
+  "Plugin": {
+    "Instance": {
+      "Discovery": {
+        "TitleKey": "server.instances.blockmovement_tests.title",
+        "SubtitleKey": "server.instances.blockmovement_tests.subtitle",
+        "Display": true,
+        "AlwaysDisplay": true,
+        "Major": true,
+        "Icon": "Blockmovement_Tests.png"
+      },
+      "RemovalConditions": [
+        {
+          "Type": "WorldEmpty",
+          "TimeoutSeconds": 20
+        }
+      ]
+    }
+  }
+}
