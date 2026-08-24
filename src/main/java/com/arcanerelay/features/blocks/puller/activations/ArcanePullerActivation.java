@@ -26,6 +26,7 @@ import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.entity.knockback.KnockbackComponent;
@@ -94,7 +95,7 @@ public class ArcanePullerActivation extends Activation {
 
 
         Vector3i pullerPos = new Vector3i(worldX, worldY, worldZ);
-        Vector3i globalUp = BlockVectorUtil.getUpVector(chunk, pullerPos);
+        Vector3i globalUp = BlockVectorUtil.getUpVector(commandBuffer, pullerPos);
         if (globalUp.length() == 0) return ArcaneSection.BlockTickStrategy.PROCESSED;
         int maxRange = getRange(pullerBlockType);
 
@@ -148,7 +149,8 @@ public class ArcanePullerActivation extends Activation {
             if (extLen == 0) {
                 puller.setIDLE();
                 commandBuffer.run((Store<ChunkStore> s) -> {
-                    int rotationIndex = pullerChunk.getRotationIndex(pullerPos.x, pullerPos.y, pullerPos.z);
+                    BlockSection pullerSection = BlockUtil.getBlockSection(s, pullerPos.x, pullerPos.y, pullerPos.z);
+                    int rotationIndex = pullerSection != null ? BlockUtil.getRotationIndex(pullerSection, pullerPos.x, pullerPos.y, pullerPos.z) : 0;
                     ArcaneConnectedBlocksUtil.updateCurrentAndPrevious(s, world, pullerPos, globalForward, RotationTuple.get(rotationIndex));
                 });
                 return ArcaneSection.BlockTickStrategy.PROCESSED;
@@ -187,8 +189,10 @@ public class ArcanePullerActivation extends Activation {
                 return ArcaneSection.BlockTickStrategy.CONTINUE;
             }
             commandBuffer.run((Store<ChunkStore> s) -> {
+                BlockSection pullerSection = BlockUtil.getBlockSection(s, pullerPos.x, pullerPos.y, pullerPos.z);
+                int pullerRotation = pullerSection != null ? BlockUtil.getRotationIndex(pullerSection, pullerPos.x, pullerPos.y, pullerPos.z) : 0;
                 boolean placed = puller.extend(world, pullerPos.x, pullerPos.y, pullerPos.z,
-                        pullerBlockType, pullerChunk.getRotationIndex(pullerPos.x, pullerPos.y, pullerPos.z));
+                        pullerBlockType, pullerRotation);
                 if (!placed) return;
 
                 ActivationExecutor.playEffects(world, pullerPos.x, pullerPos.y, pullerPos.z,
@@ -197,7 +201,8 @@ public class ArcanePullerActivation extends Activation {
                         "Puller extended to %d,%d,%d (len=%d)",
                         tipX, tipY, tipZ, puller.getExtensionLength());
 
-                int rotationIndex = tipChunk.getRotationIndex(tipX, tipY, tipZ);
+                BlockSection tipSection = BlockUtil.getBlockSection(s, tipX, tipY, tipZ);
+                int rotationIndex = tipSection != null ? BlockUtil.getRotationIndex(tipSection, tipX, tipY, tipZ) : 0;
                 Holder<ChunkStore> pullerHolder = pullerChunk.getBlockComponentHolder(
                         pullerPos.x, pullerPos.y, pullerPos.z);
 
@@ -223,7 +228,8 @@ public class ArcanePullerActivation extends Activation {
         if (extLen == 0) { // No extension blocks, so we're done
             puller.setIDLE();
             commandBuffer.run((Store<ChunkStore> s) -> {
-                int rotationIndex = pullerChunk.getRotationIndex(pullerPos.x, pullerPos.y, pullerPos.z);
+                BlockSection pullerSection = BlockUtil.getBlockSection(s, pullerPos.x, pullerPos.y, pullerPos.z);
+                int rotationIndex = pullerSection != null ? BlockUtil.getRotationIndex(pullerSection, pullerPos.x, pullerPos.y, pullerPos.z) : 0;
                 ArcaneConnectedBlocksUtil.updateCurrentAndPrevious(s, world, pullerPos, globalForward, RotationTuple.get(rotationIndex));
             });
 
@@ -274,8 +280,9 @@ public class ArcanePullerActivation extends Activation {
         int tipBlockId = tipChunk.getBlock(tipPos.x, tipPos.y, tipPos.z);
         BlockType tipBlockType = BlockType.getAssetMap().getAsset(tipBlockId);
         Holder<ChunkStore> holder = tipChunk.getBlockComponentHolder(tipPos.x, tipPos.y, tipPos.z);
-        int rotation = tipChunk.getRotationIndex(tipPos.x, tipPos.y, tipPos.z);
-        int filler = tipChunk.getFiller(tipPos.x, tipPos.y, tipPos.z);
+        BlockSection tipSection = BlockUtil.getBlockSection(commandBuffer, tipPos.x, tipPos.y, tipPos.z);
+        int rotation = tipSection != null ? BlockUtil.getRotationIndex(tipSection, tipPos.x, tipPos.y, tipPos.z) : 0;
+        int filler = tipSection != null ? BlockUtil.getFiller(tipSection, tipPos.x, tipPos.y, tipPos.z) : 0;
 
         ArcaneRelayPlugin.LOGGER.atInfo().log(
                 "Puller move-entry check: extLen=%d tip=%d,%d,%d blockId=%d pullable=%s",
@@ -283,7 +290,9 @@ public class ArcanePullerActivation extends Activation {
         commandBuffer.run((Store<ChunkStore> s) -> {
             WorldChunk lastChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(lastPos.x, lastPos.z));
             if (lastChunk != null) {
-                lastChunk.breakBlock(lastPos.x, lastPos.y, lastPos.z, lastChunk.getFiller(lastPos.x, lastPos.y, lastPos.z), 4);
+                BlockSection lastSection = BlockUtil.getBlockSection(s, lastPos.x, lastPos.y, lastPos.z);
+                lastChunk.breakBlock(lastPos.x, lastPos.y, lastPos.z,
+                        lastSection != null ? BlockUtil.getFiller(lastSection, lastPos.x, lastPos.y, lastPos.z) : 0, 4);
             }
             int newLen = extLen - 1;
             updateExtensionConnectedBlocks(s, world, pullerPos, globalUp, newLen, puller.getExtensionBlockKey());
@@ -415,7 +424,8 @@ public class ArcanePullerActivation extends Activation {
 
         WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(x, z));
         if (chunk == null) return;
-        int rotationIndex = chunk.getRotationIndex(x, y, z);
+        BlockSection section = BlockUtil.getBlockSection(store, x, y, z);
+        int rotationIndex = section != null ? BlockUtil.getRotationIndex(section, x, y, z) : 0;
 
         Holder<ChunkStore> pullerHolder = pullerChunk.getBlockComponentHolder(
                 pullerPos.x, pullerPos.y, pullerPos.z

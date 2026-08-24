@@ -9,11 +9,13 @@ import com.hypixel.hytale.protocol.BlockMaterial;
 import org.joml.Vector3d;
 import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import com.hypixel.hytale.server.core.modules.entity.component.BoundingBox;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockComponentSection;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
@@ -36,9 +38,9 @@ public final class BlockUtil {
      * {@code BlockComponentChunk.getEntityReference(int)}.
      *
      * @param store chunk-store component accessor
-     * @param x     block X (world or local; each axis is masked mod 32)
-     * @param y     block Y
-     * @param z     block Z
+     * @param x     block X (world coordinates required)
+     * @param y     block Y (world)
+     * @param z     block Z (world coordinates required)
      * @return the block-entity reference, or null if the section/component/reference does not exist
      */
     @Nullable
@@ -59,19 +61,67 @@ public final class BlockUtil {
     }
 
     /**
+     * Resolves the {@link BlockSection} for a block position.
+     *
+     * @param store chunk-store component accessor
+     * @param x     block X (world coordinates required)
+     * @param y     block Y (world; out of range simply fails to resolve)
+     * @param z     block Z (world coordinates required)
+     * @return the block section, or null if it cannot be resolved (e.g. unloaded or y outside [0, 320))
+     */
+    @Nullable
+    public static BlockSection getBlockSection(
+            @Nonnull ComponentAccessor<ChunkStore> store, int x, int y, int z) {
+        Ref<ChunkStore> sectionRef = store.getExternalData().getChunkSectionReferenceAtBlock(x, y, z);
+        if (sectionRef == null || !sectionRef.isValid()) {
+            return null;
+        }
+
+        return store.getComponent(sectionRef, BlockSection.getComponentType());
+    }
+
+    public static int getFiller(@Nonnull BlockSection section, int x, int y, int z) {
+        return section.getFiller(x, y, z);
+    }
+
+    public static int getRotationIndex(@Nonnull BlockSection section, int x, int y, int z) {
+        return section.getRotationIndex(x, y, z);
+    }
+
+    /**
+     * Resolves the {@link RotationTuple} for a block position.
+     *
+     * @param store chunk-store component accessor
+     * @param x     block X (world coordinates required)
+     * @param y     block Y (world)
+     * @param z     block Z (world coordinates required)
+     * @return the rotation tuple, or null if the block section cannot be resolved
+     */
+    @Nullable
+    public static RotationTuple getRotationTuple(
+            @Nonnull ComponentAccessor<ChunkStore> store, int x, int y, int z
+    ) {
+        BlockSection section = getBlockSection(store, x, y, z);
+        return section != null ? RotationTuple.get(getRotationIndex(section, x, y, z)) : null;
+    }
+
+    /**
      * For a position that may be part of a multi-block structure (e.g. door filler), finds the main block.
      * The main block is the non-filler block that has state (e.g. door part, or block with InteractionState).
      *
      * @param world the world
      * @param chunk the chunk containing the block
-     * @param x     block X
-     * @param y     block Y
-     * @param z     block Z
+     * @param x     block X (world coordinates required)
+     * @param y     block Y (world)
+     * @param z     block Z (world coordinates required)
      * @return [mainX, mainY, mainZ] or null if not found. Returns the same position if it is already the main block.
      */
     @Nullable
     public static int[] findMainBlock(@Nonnull World world, @Nonnull WorldChunk chunk, int x, int y, int z) {
-        if (chunk.getFiller(x, y, z) == 0) {
+        ComponentAccessor<ChunkStore> store = world.getChunkStore().getStore();
+        BlockSection blockSection = getBlockSection(store, x, y, z);
+        int filler = blockSection != null ? getFiller(blockSection, x, y, z) : 0;
+        if (filler == 0) {
             return new int[]{x, y, z};
         }
 
@@ -86,7 +136,9 @@ public final class BlockUtil {
                     WorldChunk tChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(tx, tz));
 
                     if (tChunk == null) continue;
-                    if (tChunk.getFiller(tx, ty, tz) != 0) continue;
+                    BlockSection tSection = getBlockSection(store, tx, ty, tz);
+                    int tFiller = tSection != null ? getFiller(tSection, tx, ty, tz) : 0;
+                    if (tFiller != 0) continue;
 
                     BlockType tBt = tChunk.getBlockType(tx, ty, tz);
                     if (tBt == null) continue;

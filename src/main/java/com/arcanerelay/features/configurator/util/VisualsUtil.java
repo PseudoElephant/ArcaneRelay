@@ -3,6 +3,7 @@ package com.arcanerelay.features.configurator.util;
 import javax.annotation.Nonnull;
 
 import com.arcanerelay.features.signaltrigger.components.ArcaneTriggerBlock;
+import com.arcanerelay.util.BlockUtil;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import org.joml.Matrix4d;
@@ -11,6 +12,7 @@ import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.server.core.modules.debug.DebugUtils;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
@@ -123,7 +125,10 @@ public class VisualsUtil {
         BlockType blockType = chunk.getBlockType(blockPos.x, blockPos.y, blockPos.z);
         if (blockType == null) return null;
 
-        int rotationIndex = chunk.getRotationIndex(blockPos.x, blockPos.y, blockPos.z);
+        BlockSection section = BlockUtil.getBlockSection(world.getChunkStore().getStore(), blockPos.x, blockPos.y, blockPos.z);
+        if (section == null) return null;
+
+        int rotationIndex = BlockUtil.getRotationIndex(section, blockPos.x, blockPos.y, blockPos.z);
         int hitboxTypeIndex = blockType.getHitboxTypeIndex();
         
         BlockBoundingBoxes hitboxAsset = BlockBoundingBoxes.getAssetMap().getAsset(hitboxTypeIndex);

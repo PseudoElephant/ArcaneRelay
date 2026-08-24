@@ -22,6 +22,7 @@ import com.arcanerelay.features.signal.components.ArcaneSection;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 
 import java.util.List;
@@ -130,6 +131,7 @@ public class ToggleDoorActivation extends Activation {
     @Nullable
     private static DoorInfo getDoorAtPosition(
         @Nonnull World world,
+        @Nonnull Store<ChunkStore> store,
         int x, int y, int z,
         @Nonnull Rotation rotationToCheck
     ) {
@@ -137,12 +139,14 @@ public class ToggleDoorActivation extends Activation {
         if (chunk == null) return null;
         BlockType blockType = chunk.getBlockType(x, y, z);
         if (blockType == null) return null;
-        int rotationIndex = chunk.getRotationIndex(x, y, z);
+        BlockSection section = BlockUtil.getBlockSection(store, x, y, z);
+        if (section == null) return null;
+        int rotationIndex = BlockUtil.getRotationIndex(section, x, y, z);
         RotationTuple blockRotation = RotationTuple.get(rotationIndex);
         String blockState = blockType.getStateForBlock(blockType);
         DoorState doorState = DoorState.fromBlockState(blockState);
         Rotation doorRotation = blockRotation.yaw();
-        int filler = chunk.getFiller(x, y, z);
+        int filler = BlockUtil.getFiller(section, x, y, z);
         if (doorRotation != rotationToCheck) return null;
         return new DoorInfo(blockType, filler, new Vector3i(x, y, z), doorState);
     }
@@ -150,6 +154,7 @@ public class ToggleDoorActivation extends Activation {
     @Nullable
     private static DoorInfo getDoubleDoor(
         @Nonnull World world,
+        @Nonnull Store<ChunkStore> store,
         @Nonnull Vector3i worldPosition,
         @Nonnull BlockType blockType,
         int rotation,
@@ -167,7 +172,7 @@ public class ToggleDoorActivation extends Activation {
         Vector3i offset = new Vector3i(offsetX, 0, 0);
         Rotation rotationToCheck = RotationTuple.get(rotation).yaw();
         Vector3i otherPos = new Vector3i(worldPosition).add(MathUtil.rotateVectorYAxis(offset, rotationToCheck.getDegrees(), false));
-        DoorInfo matchingDoor = getDoorAtPosition(world, otherPos.x, otherPos.y, otherPos.z, rotationToCheck.flip());
+        DoorInfo matchingDoor = getDoorAtPosition(world, store, otherPos.x, otherPos.y, otherPos.z, rotationToCheck.flip());
         if (matchingDoor == null || matchingDoor.doorState() != doorStateToCheck || matchingDoor.filler() != 0) return null;
         BlockType matchingBlockType = matchingDoor.blockType();
         if (matchingBlockType.getItem() == null) return null;
@@ -178,6 +183,7 @@ public class ToggleDoorActivation extends Activation {
     @Nullable
     private static BlockType activateDoor(
         @Nonnull World world,
+        @Nonnull Store<ChunkStore> store,
         @Nonnull BlockType blockType,
         @Nonnull Vector3i blockPosition,
         @Nonnull DoorState fromState,
@@ -186,7 +192,9 @@ public class ToggleDoorActivation extends Activation {
         
         WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(blockPosition.x, blockPosition.z));
         if (chunk == null) return null;
-        int rotationIndex = chunk.getRotationIndex(blockPosition.x, blockPosition.y, blockPosition.z);
+        BlockSection section = BlockUtil.getBlockSection(store, blockPosition.x, blockPosition.y, blockPosition.z);
+        if (section == null) return null;
+        int rotationIndex = BlockUtil.getRotationIndex(section, blockPosition.x, blockPosition.y, blockPosition.z);
         BlockBoundingBoxes oldHitbox = BlockBoundingBoxes.getAssetMap().getAsset(blockType.getHitboxTypeIndex());
         String interactionStateToSend = getInteractionState(fromState, doorState);
         BlockType blockTypeForState = blockType;
@@ -246,10 +254,13 @@ public class ToggleDoorActivation extends Activation {
             BlockType mainBlockType = mainChunk.getBlockType(mainX, mainY, mainZ);
             if (mainBlockType == null) return;
 
+            BlockSection mainSection = BlockUtil.getBlockSection(store, mainX, mainY, mainZ);
+            if (mainSection == null) return;
+
             Vector3i mainPos = new Vector3i(mainX, mainY, mainZ);
             String blockState = mainBlockType.getStateForBlock(mainBlockType);
             DoorState currentState = DoorState.fromBlockState(blockState);
-            int rotation = mainChunk.getRotationIndex(mainX, mainY, mainZ);
+            int rotation = BlockUtil.getRotationIndex(mainSection, mainX, mainY, mainZ);
 
             Rotation doorYaw = RotationTuple.get(rotation).yaw();
 
@@ -275,13 +286,13 @@ public class ToggleDoorActivation extends Activation {
                 newState = DoorState.CLOSED;
             }
 
-            BlockType resultType = activateDoor(w, mainBlockType, mainPos, currentState, newState);
+            BlockType resultType = activateDoor(w, store, mainBlockType, mainPos, currentState, newState);
             if (resultType != null) {
                 DoorState stateDoubleDoor = getOppositeDoorState(currentState);
-                DoorInfo doubleDoor = getDoubleDoor(w, mainPos, mainBlockType, rotation, stateDoubleDoor);
+                DoorInfo doubleDoor = getDoubleDoor(w, store, mainPos, mainBlockType, rotation, stateDoubleDoor);
                 if (doubleDoor != null) {
                     DoorState stateForDoubleDoor = horizontal ? newState : getOppositeDoorState(newState);
-                    activateDoor(w, doubleDoor.blockType(), doubleDoor.blockPosition(), doubleDoor.doorState(), stateForDoubleDoor);
+                    activateDoor(w, store, doubleDoor.blockType(), doubleDoor.blockPosition(), doubleDoor.doorState(), stateForDoubleDoor);
                 }
                 ActivationExecutor.playBlockInteractionSound(w, mainX, mainY, mainZ, resultType);
                 ActivationExecutor.playEffects(w, mainX, mainY, mainZ, getEffects());

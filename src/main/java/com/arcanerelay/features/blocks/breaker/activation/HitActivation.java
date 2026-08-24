@@ -110,7 +110,7 @@ public class HitActivation extends Activation {
             return;
         }
 
-        Vector3i globalUp = BlockVectorUtil.getUpVector(worldChunkComponent, currentPosition);
+        Vector3i globalUp = BlockVectorUtil.getUpVector(chunkStore.getStore(), currentPosition);
         Vector3d targetDestination = new Vector3d(currentPosition).add(0.5, 0.5, 0.5);
         Store<EntityStore> store = world.getEntityStore().getStore();
 
@@ -205,7 +205,7 @@ public class HitActivation extends Activation {
             return;
         }
 
-        Vector3i globalUp = BlockVectorUtil.getUpVector(worldChunkComponent, currentPosition);
+        Vector3i globalUp = BlockVectorUtil.getUpVector(chunkStore.getStore(), currentPosition);
         Vector3i targetPosition = new Vector3i(currentPosition).add(globalUp);
 
         EntityStore entityStore = world.getEntityStore();

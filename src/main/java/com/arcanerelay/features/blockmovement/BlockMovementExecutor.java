@@ -82,7 +82,7 @@ public final class BlockMovementExecutor {
                         moveEntry.blockRotation,
                         moveEntry.blockFiller,
                         4
-                    ); 
+                    );
 
                     futureChunk.setState(tx, ty, tz, moveEntry.blockType, moveEntry.blockRotation, moveEntry.componentHolder);
 

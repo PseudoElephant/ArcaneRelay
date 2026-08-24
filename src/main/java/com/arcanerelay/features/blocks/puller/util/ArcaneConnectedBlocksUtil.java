@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
+import com.arcanerelay.util.BlockUtil;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -41,24 +42,24 @@ public final class ArcaneConnectedBlocksUtil {
         Vector3i back = new Vector3i(extendDir).mul(-1);
         Vector3i prev = new Vector3i(blockPos).add(back);
 
-        WorldChunk prevChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(prev.x, prev.z));
-        if (prevChunk == null) return;
-        int prevRotationIndex = prevChunk.getRotationIndex(prev.x, prev.y, prev.z);
+        BlockSection prevSection = BlockUtil.getBlockSection(store, prev.x, prev.y, prev.z);
+        if (prevSection == null) return;
+        int prevRotationIndex = BlockUtil.getRotationIndex(prevSection, prev.x, prev.y, prev.z);
         RotationTuple prevRotation = RotationTuple.get(prevRotationIndex);
 
         updateSingle(store, world, prev, extendDir, prevRotation);
         prev.add(back);
-        WorldChunk prevChunk2 = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(prev.x, prev.z));
-        if (prevChunk2 == null) return;
-        int prevRotationIndex2 = prevChunk2.getRotationIndex(prev.x, prev.y, prev.z);
+        BlockSection prevSection2 = BlockUtil.getBlockSection(store, prev.x, prev.y, prev.z);
+        if (prevSection2 == null) return;
+        int prevRotationIndex2 = BlockUtil.getRotationIndex(prevSection2, prev.x, prev.y, prev.z);
         RotationTuple prevRotation2 = RotationTuple.get(prevRotationIndex2);
         updateSingle(store, world, prev, extendDir, prevRotation2);
         // update 1 forward
         Vector3i forward = new Vector3i(extendDir);
         Vector3i next = new Vector3i(blockPos).add(forward);
-        WorldChunk nextChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(next.x, next.z));
-        if (nextChunk == null) return;
-        int nextRotationIndex = nextChunk.getRotationIndex(next.x, next.y, next.z);
+        BlockSection nextSection = BlockUtil.getBlockSection(store, next.x, next.y, next.z);
+        if (nextSection == null) return;
+        int nextRotationIndex = BlockUtil.getRotationIndex(nextSection, next.x, next.y, next.z);
         RotationTuple nextRotation = RotationTuple.get(nextRotationIndex);
         updateSingle(store, world, next, extendDir, nextRotation);
     }
@@ -101,11 +102,10 @@ public final class ArcaneConnectedBlocksUtil {
         int newId = BlockType.getAssetMap().getIndex(result.blockTypeKey());
         BlockType newType = BlockType.getAssetMap().getAsset(newId);
         Holder<ChunkStore> holder = chunk.getBlockComponentHolder(blockPos.x, blockPos.y, blockPos.z);
-       
+
         ChunkColumn column = (ChunkColumn)store.getComponent(chunk.getReference(), ChunkColumn.getComponentType());
         Ref<ChunkStore> sectionRef = column.getSection(ChunkUtil.chunkCoordinate(blockPos.y));
 
-    
         chunk.setBlock(blockPos.x, blockPos.y, blockPos.z, newId, newType, result.rotationIndex(), 0, SETTINGS);
         if (holder != null) {
             chunk.setState(blockPos.x, blockPos.y, blockPos.z, newType, result.rotationIndex(), holder);

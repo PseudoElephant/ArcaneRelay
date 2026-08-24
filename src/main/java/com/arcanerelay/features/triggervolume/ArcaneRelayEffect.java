@@ -22,6 +22,7 @@ import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.FillerBlockUtil;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 
 import javax.annotation.Nonnull;
@@ -109,7 +110,8 @@ public class ArcaneRelayEffect extends TriggerEffect {
             return new Vector3i(x, y, z);
         }
 
-        int filler = chunk.getFiller(x, y, z);
+        BlockSection section = com.arcanerelay.util.BlockUtil.getBlockSection(world.getChunkStore().getStore(), x, y, z);
+        int filler = section != null ? com.arcanerelay.util.BlockUtil.getFiller(section, x, y, z) : 0;
         return filler == 0 ? new Vector3i(x, y, z) : new Vector3i(x - FillerBlockUtil.unpackX(filler), y - FillerBlockUtil.unpackY(filler), z - FillerBlockUtil.unpackZ(filler));
     }
    
