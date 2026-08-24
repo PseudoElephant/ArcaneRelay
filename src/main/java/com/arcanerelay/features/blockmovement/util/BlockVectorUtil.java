@@ -3,6 +3,8 @@ package com.arcanerelay.features.blockmovement.util;
 import org.joml.Vector3i;
 import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.features.config.ArcaneRelayConfig;
+import com.arcanerelay.util.BlockUtil;
+import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.math.Axis;
 import org.joml.Vector3d;
 import com.hypixel.hytale.protocol.BlockMaterial;
@@ -10,6 +12,7 @@ import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.Rotation;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -103,21 +106,20 @@ public class BlockVectorUtil {
         return blockType.getMaterial() != BlockMaterial.Empty;
     }
 
-    public static Vector3i getUpVector(@Nonnull WorldChunk chnk, Vector3i sourcePos) {
-        return getUpVector(chnk, sourcePos, false, 1);
+    public static Vector3i getUpVector(@Nonnull ComponentAccessor<ChunkStore> store, Vector3i sourcePos) {
+        return getUpVector(store, sourcePos, false, 1);
     }
 
-    public static Vector3i getUpVector(@Nonnull WorldChunk chnk, Vector3i sourcePos, int distance) {
-        return getUpVector(chnk, sourcePos, false, distance);
+    public static Vector3i getUpVector(@Nonnull ComponentAccessor<ChunkStore> store, Vector3i sourcePos, int distance) {
+        return getUpVector(store, sourcePos, false, distance);
     }
 
-    public static Vector3i getUpVector(@Nonnull WorldChunk chnk, Vector3i sourcePos, boolean isWallPusher) {
-        return getUpVector(chnk, sourcePos, isWallPusher, 1);
+    public static Vector3i getUpVector(@Nonnull ComponentAccessor<ChunkStore> store, Vector3i sourcePos, boolean isWallPusher) {
+        return getUpVector(store, sourcePos, isWallPusher, 1);
     }
 
-    public static Vector3i getUpVector(@Nonnull WorldChunk chnk, Vector3i sourcePos, boolean isWallPusher, int distance) {
-        int RotIndex = chnk.getRotationIndex(sourcePos.x, sourcePos.y, sourcePos.z);
-        RotationTuple blockRotation = RotationTuple.get(RotIndex);
+    public static Vector3i getUpVector(@Nonnull ComponentAccessor<ChunkStore> store, Vector3i sourcePos, boolean isWallPusher, int distance) {
+        RotationTuple blockRotation = BlockUtil.getRotationTuple(store, sourcePos.x, sourcePos.y, sourcePos.z);
 
         Vector3i localUp = isWallPusher ? new Vector3i(0, 0, 1) : new Vector3i(0, 1, 0);
         Vector3i resultVector = applyRotationToVector(localUp, blockRotation);
@@ -125,21 +127,20 @@ public class BlockVectorUtil {
         return resultVector.mul(distance);
     }
 
-    public static Vector3i getForwardVector(@Nonnull WorldChunk chnk, Vector3i sourcePos) {
-        return getForwardVector(chnk, sourcePos, false, 1);
+    public static Vector3i getForwardVector(@Nonnull ComponentAccessor<ChunkStore> store, Vector3i sourcePos) {
+        return getForwardVector(store, sourcePos, false, 1);
     }
 
-    public static Vector3i getForwardVector(@Nonnull WorldChunk chnk, Vector3i sourcePos, int distance) {
-        return getForwardVector(chnk, sourcePos, false, distance);
+    public static Vector3i getForwardVector(@Nonnull ComponentAccessor<ChunkStore> store, Vector3i sourcePos, int distance) {
+        return getForwardVector(store, sourcePos, false, distance);
     }
 
-    public static Vector3i getForwardVector(@Nonnull WorldChunk chnk, Vector3i sourcePos, boolean isWallPusher) {
-        return getForwardVector(chnk, sourcePos, isWallPusher, 1);
+    public static Vector3i getForwardVector(@Nonnull ComponentAccessor<ChunkStore> store, Vector3i sourcePos, boolean isWallPusher) {
+        return getForwardVector(store, sourcePos, isWallPusher, 1);
     }
 
-    public static Vector3i getForwardVector(@Nonnull WorldChunk chnk, Vector3i sourcePos, boolean isWallPusher, int distance) {
-        int RotIndex = chnk.getRotationIndex(sourcePos.x, sourcePos.y, sourcePos.z);
-        RotationTuple blockRotation = RotationTuple.get(RotIndex);
+    public static Vector3i getForwardVector(@Nonnull ComponentAccessor<ChunkStore> store, Vector3i sourcePos, boolean isWallPusher, int distance) {
+        RotationTuple blockRotation = BlockUtil.getRotationTuple(store, sourcePos.x, sourcePos.y, sourcePos.z);
 
         Vector3i localForward = isWallPusher ? new Vector3i(0, -1, 0) : new Vector3i(0, 0, -1);
         Vector3i resultVector = applyRotationToVector(localForward, blockRotation);

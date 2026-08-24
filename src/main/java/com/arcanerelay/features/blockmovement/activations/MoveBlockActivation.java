@@ -33,6 +33,7 @@ import com.hypixel.hytale.server.core.modules.splitvelocity.VelocityConfig;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
@@ -96,7 +97,7 @@ public class MoveBlockActivation extends Activation {
         WorldChunk pusherChunk = commandBuffer.getExternalData().getWorld().getChunk(ChunkUtil.indexChunkFromBlock(worldX, worldZ));
         if (pusherChunk == null) return new Vector3i(0, 0, 0);
 
-        return BlockVectorUtil.getForwardVector(pusherChunk, pusherPosition, isWallPusher);
+        return BlockVectorUtil.getForwardVector(commandBuffer, pusherPosition, isWallPusher);
     }
 
     private Vector3i getGlobalUpVector(@Nonnull ComponentAccessor<ChunkStore> commandBuffer, @Nonnull Ref<ChunkStore> blockRef, @Nonnull Ref<ChunkStore> sectionRef, int worldX, int worldY, int worldZ, Vector3i pusherPosition) {
@@ -105,7 +106,7 @@ public class MoveBlockActivation extends Activation {
         WorldChunk pusherChunk = commandBuffer.getExternalData().getWorld().getChunk(ChunkUtil.indexChunkFromBlock(worldX, worldZ));
         if (pusherChunk == null) return new Vector3i(0, 0, 0);
 
-        return BlockVectorUtil.getUpVector(pusherChunk, pusherPosition, isWallPusher);
+        return BlockVectorUtil.getUpVector(commandBuffer, pusherPosition, isWallPusher);
     }
 
     @Override
@@ -160,8 +161,9 @@ public class MoveBlockActivation extends Activation {
                     break;
 
                 chainBlockIds[chainLength]     = blockId;
-                chainRotations[chainLength]    = chunk.getRotationIndex(c.x, c.y, c.z);
-                chainFillers[chainLength]      = chunk.getFiller(c.x, c.y, c.z);
+                BlockSection cSection = BlockUtil.getBlockSection(store, c.x, c.y, c.z);
+                chainRotations[chainLength]    = cSection != null ? BlockUtil.getRotationIndex(cSection, c.x, c.y, c.z) : 0;
+                chainFillers[chainLength]      = cSection != null ? BlockUtil.getFiller(cSection, c.x, c.y, c.z) : 0;
                 chainBlockTypes[chainLength]   = blockType;
 
                 Holder<ChunkStore> stateHolder = chunk.getBlockComponentHolder(c.x, c.y, c.z);

@@ -110,7 +110,7 @@ public class HitActivation extends Activation {
             return;
         }
 
-        Vector3i globalUp = BlockVectorUtil.getUpVector(worldChunkComponent, currentPosition);
+        Vector3i globalUp = BlockVectorUtil.getUpVector(chunkStore.getStore(), currentPosition);
         Vector3d targetDestination = new Vector3d(currentPosition).add(0.5, 0.5, 0.5);
         Store<EntityStore> store = world.getEntityStore().getStore();
 
@@ -205,7 +205,7 @@ public class HitActivation extends Activation {
             return;
         }
 
-        Vector3i globalUp = BlockVectorUtil.getUpVector(worldChunkComponent, currentPosition);
+        Vector3i globalUp = BlockVectorUtil.getUpVector(chunkStore.getStore(), currentPosition);
         Vector3i targetPosition = new Vector3i(currentPosition).add(globalUp);
 
         EntityStore entityStore = world.getEntityStore();
@@ -215,10 +215,17 @@ public class HitActivation extends Activation {
 
         ItemTool tool = getItemTool(currentBlockType);
 
+        Ref<ChunkStore> targetSectionRef = chunkStore.getChunkSectionReferenceAtBlock(
+                targetPosition.x, targetPosition.y, targetPosition.z);
+        if (targetSectionRef == null || !targetSectionRef.isValid()) {
+            return;
+        }
+
         world.execute(() -> {
             BlockHarvestUtils.performBlockDamage(
-                    (Ref<EntityStore>) null, targetPosition, null, tool, (String) null, false,
-                    .4f, damageFlags.getValue(), chunkRef, entityStore.getStore(), chunkStore.getStore());
+                    (Ref<EntityStore>) null, null, targetPosition, null, tool, (String) null, false,
+                    .4f, damageFlags.getValue(), false, targetSectionRef,
+                    entityStore.getStore(), chunkStore.getStore());
         });
     }
 

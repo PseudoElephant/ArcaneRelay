@@ -27,6 +27,7 @@ import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
@@ -169,16 +170,17 @@ public class RotateBlockActivation extends Activation {
             BlockType rotatorBlockType = chunk.getBlockType(worldX, worldY, worldZ);
             Vector3i rotatorPos = new Vector3i(worldX, worldY, worldZ);
             boolean isClockWise = isClockWise(rotatorBlockType);
-            Vector3i rotatorUp = BlockVectorUtil.getUpVector(chunk, rotatorPos);
+            Vector3i rotatorUp = BlockVectorUtil.getUpVector(store, rotatorPos);
 
             // Target Info
-            Vector3i tempUp = BlockVectorUtil.getUpVector(chunk, rotatorPos);
+            Vector3i tempUp = BlockVectorUtil.getUpVector(store, rotatorPos);
             Vector3i targetPos = new Vector3i (rotatorPos.x + tempUp.x, rotatorPos.y + tempUp.y, rotatorPos.z + tempUp.z);
             BlockType targetBlockType = chunk.getBlockType(targetPos.x, targetPos.y, targetPos.z);
             if (targetBlockType == null) return;
             
             String targetID = ArcaneUtil.getOriginalBlockTypeId(targetBlockType);
-            RotationTuple currenRotation = RotationTuple.get(chunk.getRotationIndex(targetPos.x, targetPos.y, targetPos.z));
+            BlockSection targetSection = BlockUtil.getBlockSection(store, targetPos.x, targetPos.y, targetPos.z);
+            RotationTuple currenRotation = RotationTuple.get(targetSection != null ? BlockUtil.getRotationIndex(targetSection, targetPos.x, targetPos.y, targetPos.z) : 0);
             RotationTuple newRotation = BlockVectorUtil.rotateOverAxis90Degrees(currenRotation, rotatorUp, isClockWise);
             
             boolean blockWasRotated = BlockVectorUtil.isRotatable(targetBlockType);

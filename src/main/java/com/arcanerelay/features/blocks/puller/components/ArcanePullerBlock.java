@@ -143,7 +143,7 @@ public class ArcanePullerBlock implements Component<ChunkStore> {
 
         int extensionBlockIndex = BlockType.getAssetMap().getIndex(extensionBlockType.getId());
         Store<ChunkStore> store = world.getChunkStore().getStore();
-       
+
         int noParticles = 4;
         chunk.setBlock(posX, posY, posZ, extensionBlockIndex, extensionBlockType, rotationIndex, 0, noParticles);
         ChunkColumn column = (ChunkColumn)store.getComponent(chunk.getReference(), ChunkColumn.getComponentType());
