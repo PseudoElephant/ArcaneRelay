@@ -215,10 +215,17 @@ public class HitActivation extends Activation {
 
         ItemTool tool = getItemTool(currentBlockType);
 
+        Ref<ChunkStore> targetSectionRef = chunkStore.getChunkSectionReferenceAtBlock(
+                targetPosition.x, targetPosition.y, targetPosition.z);
+        if (targetSectionRef == null || !targetSectionRef.isValid()) {
+            return;
+        }
+
         world.execute(() -> {
             BlockHarvestUtils.performBlockDamage(
-                    (Ref<EntityStore>) null, targetPosition, null, tool, (String) null, false,
-                    .4f, damageFlags.getValue(), chunkRef, entityStore.getStore(), chunkStore.getStore());
+                    (Ref<EntityStore>) null, null, targetPosition, null, tool, (String) null, false,
+                    .4f, damageFlags.getValue(), false, targetSectionRef,
+                    entityStore.getStore(), chunkStore.getStore());
         });
     }
 

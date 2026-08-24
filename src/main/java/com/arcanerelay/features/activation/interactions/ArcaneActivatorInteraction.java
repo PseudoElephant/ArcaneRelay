@@ -26,8 +26,8 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockComponentSection;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.ChunkSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
@@ -155,9 +155,9 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        BlockComponentChunk blockComponentChunk = store.getComponent(chunkSection.getChunkColumnReference(), BlockComponentChunk.getComponentType());
-        Ref<ChunkStore> blockRef = blockComponentChunk != null
-            ? blockComponentChunk.getEntityReference(ChunkUtil.indexBlockInColumn(blockX, blockY, blockZ))
+        BlockComponentSection blockComponentSection = store.getComponent(sectionRef, BlockComponentSection.getComponentType());
+        Ref<ChunkStore> blockRef = blockComponentSection != null
+            ? blockComponentSection.getBlockReference(ChunkUtil.indexBlock(blockX, blockY, blockZ))
             : null;
 
         ArcaneCachedAccessor accessor = new ArcaneCachedAccessor();

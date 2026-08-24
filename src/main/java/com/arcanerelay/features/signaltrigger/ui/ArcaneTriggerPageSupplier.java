@@ -1,17 +1,16 @@
 package com.arcanerelay.features.signaltrigger.ui;
 
 import com.arcanerelay.features.signaltrigger.components.ArcaneTriggerBlock;
+import com.arcanerelay.util.BlockUtil;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.protocol.BlockPosition;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.CustomUIPage;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.server.OpenCustomUIInteraction;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import javax.annotation.Nonnull;
@@ -40,15 +39,9 @@ public class ArcaneTriggerPageSupplier implements OpenCustomUIInteraction.Custom
         ComponentAccessor<EntityStore> entityAccessor = ref.getStore();
         World world = entityAccessor.getExternalData().getWorld();
         ChunkStore chunkStore = world.getChunkStore();
-        Ref<ChunkStore> chunkRef = chunkStore.getChunkReference(ChunkUtil.indexChunkFromBlock(targetBlock.x, targetBlock.z));
-        if (chunkRef == null || !chunkRef.isValid()) return null;
 
         ComponentAccessor<ChunkStore> chunkAccesor = chunkStore.getStore();
-        BlockComponentChunk blockComponentChunk = chunkAccesor.getComponent(chunkRef, BlockComponentChunk.getComponentType());
-        if (blockComponentChunk == null) return null;
-
-        int blockIndex = ChunkUtil.indexBlockInColumn(targetBlock.x, targetBlock.y, targetBlock.z);
-        Ref<ChunkStore> blockRef = blockComponentChunk.getEntityReference(blockIndex);
+        Ref<ChunkStore> blockRef = BlockUtil.getBlockEntityReference(chunkAccesor, targetBlock.x, targetBlock.y, targetBlock.z);
         if (blockRef == null || !blockRef.isValid()) return null;
 
         ArcaneTriggerBlock trigger = chunkAccesor.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());

@@ -2,7 +2,7 @@ package com.arcanerelay.features.signal.systems;
 
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockComponentSection;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.ChunkSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
@@ -81,9 +81,9 @@ public class TickingSignalPropagationSystem extends EntityTickingSystem<ChunkSto
         if (arcaneSection == null)
             return;
 
-        BlockComponentChunk blockComponentChunk = commandBuffer.getComponent(chunkSection.getChunkColumnReference(),
-                BlockComponentChunk.getComponentType());
-        if (blockComponentChunk == null)
+        BlockComponentSection blockComponentSection = commandBuffer.getComponent(sectionRef,
+                BlockComponentSection.getComponentType());
+        if (blockComponentSection == null)
             return;
 
         WorldChunk worldChunkComponent = commandBuffer.getComponent(chunkSection.getChunkColumnReference(),
@@ -117,8 +117,8 @@ public class TickingSignalPropagationSystem extends EntityTickingSystem<ChunkSto
                         return ArcaneSection.BlockTickStrategy.CONTINUE;
                     }
 
-                    Ref<ChunkStore> blockRef = blockComponentChunk
-                            .getEntityReference(ChunkUtil.indexBlockInColumn(x, y, z));
+                    Ref<ChunkStore> blockRef = blockComponentSection
+                            .getBlockReference(ChunkUtil.indexBlock(x, y, z));
 
                     int sectionStartY = chunkSection.getY() << 5;
                     int blockIndex = ChunkUtil.indexBlock(x, y - sectionStartY, z);

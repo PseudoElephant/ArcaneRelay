@@ -18,7 +18,6 @@ import com.hypixel.hytale.math.util.MathUtil;
 
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -125,11 +124,7 @@ public class ArcaneRelayEffect extends TriggerEffect {
                 break;
             
             case ALL_RELAYS_IN_VOLUME:
-                BlockComponentChunk blockComponentChunk = chunkStore.getComponent(chunkRef, BlockComponentChunk.getComponentType());
-                if (blockComponentChunk == null) break;
-
-                int blockIndex = ChunkUtil.indexBlockInColumn(x, y, z);
-                Ref<ChunkStore> blockRef = blockComponentChunk.getEntityReference(blockIndex);
+                Ref<ChunkStore> blockRef = com.arcanerelay.util.BlockUtil.getBlockEntityReference(chunkStore, x, y, z);
                 if (blockRef == null || !blockRef.isValid()) break;
 
                 ArcaneTriggerBlock trigger = chunkStore.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());

@@ -1,5 +1,6 @@
 package com.arcanerelay.util;
 
+import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.ChunkUtil;
@@ -12,6 +13,8 @@ import com.hypixel.hytale.server.core.modules.entity.component.BoundingBox;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockComponentSection;
+import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
 
@@ -26,6 +29,34 @@ import javax.annotation.Nullable;
 public final class BlockUtil {
 
     private BlockUtil() { }
+
+    /**
+     * Resolves the block-entity reference stored for a block position via its section-level
+     * {@link BlockComponentSection}. Replaces the removed
+     * {@code BlockComponentChunk.getEntityReference(int)}.
+     *
+     * @param store chunk-store component accessor
+     * @param x     block X (world or local; each axis is masked mod 32)
+     * @param y     block Y
+     * @param z     block Z
+     * @return the block-entity reference, or null if the section/component/reference does not exist
+     */
+    @Nullable
+    public static Ref<ChunkStore> getBlockEntityReference(
+            @Nonnull ComponentAccessor<ChunkStore> store, int x, int y, int z) {
+        Ref<ChunkStore> sectionRef = store.getExternalData().getChunkSectionReferenceAtBlock(x, y, z);
+        if (sectionRef == null || !sectionRef.isValid()) {
+            return null;
+        }
+
+        BlockComponentSection blockComponentSection =
+                store.getComponent(sectionRef, BlockComponentSection.getComponentType());
+        if (blockComponentSection == null) {
+            return null;
+        }
+
+        return blockComponentSection.getBlockReference(ChunkUtil.indexBlock(x, y, z));
+    }
 
     /**
      * For a position that may be part of a multi-block structure (e.g. door filler), finds the main block.

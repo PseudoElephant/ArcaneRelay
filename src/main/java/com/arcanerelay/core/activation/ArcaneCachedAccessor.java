@@ -16,16 +16,17 @@ import com.hypixel.hytale.server.core.universe.world.chunk.section.ChunkSection;
  */
 public final class ArcaneCachedAccessor extends AbstractCachedAccessor implements ArcaneActivationAccessor {
 
-    private static final int ARCANE_COMPONENT = 0;
-    private static final int BLOCK_COMPONENT = 1;
-    private static final int CHUNK_COMPONENT = 2;
+    private static final Registry REGISTRY = new Registry();
+    private static final Key<ArcaneSection> ARCANE = REGISTRY.forSection(ArcaneSection::getComponentType);
+    private static final Key<BlockSection> BLOCK = REGISTRY.forSection(BlockSection::getComponentType);
+    private static final Key<ChunkSection> CHUNK = REGISTRY.forSection(ChunkSection::getComponentType);
     protected ArcaneSection selfArcaneSection;
     protected BlockSection selfBlockSection;
     protected ChunkSection selfChunkSection;
     protected ChunkStoreCommandBufferLike selfCommandBuffer;
 
     public ArcaneCachedAccessor() {
-        super(3);
+        super(REGISTRY);
     }
 
     public void init(
@@ -40,28 +41,28 @@ public final class ArcaneCachedAccessor extends AbstractCachedAccessor implement
         this.selfChunkSection  = chunkSection;
         this.selfCommandBuffer = commandBuffer;
         super.init(commandBuffer, chunkSection.getX(), chunkSection.getY(), chunkSection.getZ(), radius);
-        insertSectionComponent(ARCANE_COMPONENT, section, chunkSection.getX(), chunkSection.getY(), chunkSection.getZ());
-        insertSectionComponent(BLOCK_COMPONENT, blockSection, chunkSection.getX(), chunkSection.getY(), chunkSection.getZ());
-        insertSectionComponent(CHUNK_COMPONENT, chunkSection, chunkSection.getX(), chunkSection.getY(), chunkSection.getZ());
+        insertSectionComponent(ARCANE, section, chunkSection.getX(), chunkSection.getY(), chunkSection.getZ());
+        insertSectionComponent(BLOCK, blockSection, chunkSection.getX(), chunkSection.getY(), chunkSection.getZ());
+        insertSectionComponent(CHUNK, chunkSection, chunkSection.getX(), chunkSection.getY(), chunkSection.getZ());
     }
 
 
     @Override
     @Nullable
     public ArcaneSection getArcaneSection(int cx, int cy, int cz) {
-        return getComponentSection(cx, cy, cz, ARCANE_COMPONENT, ArcaneSection.getComponentType());
+        return getComponentSection(cx, cy, cz, ARCANE);
     }
 
     @Override
     @Nullable
     public BlockSection getBlockSection(int cx, int cy, int cz) {
-        return getComponentSection(cx, cy, cz, BLOCK_COMPONENT, BlockSection.getComponentType());
+        return getComponentSection(cx, cy, cz, BLOCK);
     }
 
     @Override
     @Nullable
     public ChunkSection getChunkSection(int cx, int cy, int cz) {
-        return getComponentSection(cx, cy, cz, CHUNK_COMPONENT, ChunkSection.getComponentType());
+        return getComponentSection(cx, cy, cz, CHUNK);
     }
 
     @Override
