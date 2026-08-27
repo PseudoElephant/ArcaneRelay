@@ -108,7 +108,6 @@ public class AddOutputInteraction extends SimpleInstantInteraction {
         world.execute(() -> {
             comp.addOutputPosition(outputPos);
             store.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), comp);
-            VisualsUtil.displayTriggerConnections(world, triggerPos);
         });
 
         NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.outputAdded"), NotificationStyle.Success);

@@ -23,7 +23,7 @@ import com.hypixel.hytale.server.core.asset.type.blockhitbox.BlockBoundingBoxes;
 import javax.annotation.Nullable;
 
 public class VisualsUtil {
-    static final float FADE_TIME = 12f;
+    static final float FADE_TIME = 0.25f;
     static final double LINE_THICKNESS = 0.025;
     static final int DEBUG_FLAGS = DebugUtils.FLAG_FADE | DebugUtils.FLAG_NO_WIREFRAME;
     static final double CORNER_SIZE = 0.20;
@@ -48,33 +48,29 @@ public class VisualsUtil {
         new Vector3f(0.2f, 0.8f, 1f)
     };
 
-    public static void displayTriggerConnections(World world, Vector3i triggerPos) {
-        boolean cycleColor = false;
-        displayTriggerConnections(world, triggerPos, cycleColor);
+    public static void displayTriggerConnections(World world, Vector3i triggerPos, Vector3f color) {
+        showTriggerOutputArrows(world, triggerPos, color);
+        showOutputWireframes(world, triggerPos, color);
+        showInputWireframe(world, triggerPos, color);
     }
 
-    public static void displayTriggerConnections(World world, Vector3i triggerPos, boolean cycleColor) {
-        if (cycleColor) {
-            cycleColor();
-        }
-
-        showTriggerOutputArrows(world, triggerPos);
-        showOutputWireframes(world, triggerPos);
-        showInputWireframe(world, triggerPos);
+    public static Vector3f getNextColor() {
+        cycleColor();
+        return colors[colorIndex];
     }
 
     private static void cycleColor() {
         colorIndex = (colorIndex + 1) % colors.length;
     }
 
-    private static void showInputWireframe(World world, Vector3i triggerPos) {
+    private static void showInputWireframe(World world, Vector3i triggerPos, Vector3f color) {
         Box box = getEnclosingBoundingHitbox(world, triggerPos);
         if (box != null) {
-            DebugVisualsCustomShapes.drawBoxWireframe(world, box, triggerPos, colors[colorIndex]);
+            DebugVisualsCustomShapes.drawBoxWireframe(world, box, triggerPos, color);
         }
     }
 
-    private static void showOutputWireframes(World world, Vector3i triggerPos) {
+    private static void showOutputWireframes(World world, Vector3i triggerPos, Vector3f color) {
         WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(triggerPos.x, triggerPos.z));
         if (chunk == null) return;
 
@@ -85,7 +81,6 @@ public class VisualsUtil {
         ArcaneTriggerBlock triggerBlock = store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
         if (triggerBlock == null || !triggerBlock.hasOutputPositions()) return;
 
-        Vector3f color = colors[colorIndex];
         for (Vector3i out : triggerBlock.getOutputPositions()) {
             Box box = getEnclosingBoundingHitbox(world, out);
             if (box != null) {
@@ -95,7 +90,7 @@ public class VisualsUtil {
     }
 
     /** Draw debug arrows from trigger to each output; call after updating trigger outputs (e.g. from AddOutputInteraction). */
-    private static void showTriggerOutputArrows(World world, Vector3i triggerPos) {
+    private static void showTriggerOutputArrows(World world, Vector3i triggerPos, Vector3f color) {
         WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(triggerPos.x, triggerPos.z));
         if (chunk == null) return;
 
@@ -107,14 +102,13 @@ public class VisualsUtil {
         if (triggerBlock == null || !triggerBlock.hasOutputPositions()) return;
 
         Vector3d from = new Vector3d(triggerPos.x + 0.5, triggerPos.y + 0.5, triggerPos.z + 0.5);
-        Vector3f color = colors[colorIndex];
         for (Vector3i out : triggerBlock.getOutputPositions()) {
             Vector3d to = new Vector3d(out.x + 0.5, out.y + 0.5, out.z + 0.5);
             Vector3d direction = new Vector3d(to).sub(from);
             
             if (direction.lengthSquared() < 0.01) continue;
 
-            DebugVisualsCustomShapes.drawArrow(world, from, direction, color, LINE_THICKNESS * 2, FADE_TIME / 4, DEBUG_FLAGS); // 2 and 4 chosen just because they felt right.
+            DebugVisualsCustomShapes.drawArrow(world, from, direction, color, LINE_THICKNESS * 2, FADE_TIME, DEBUG_FLAGS); // 2 and 4 chosen just because they felt right.
         }
     }
 

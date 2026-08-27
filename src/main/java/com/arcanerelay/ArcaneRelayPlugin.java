@@ -19,6 +19,7 @@ import com.arcanerelay.features.configurator.components.ArcaneConfiguratorCompon
 import com.arcanerelay.features.configurator.interactions.AddOutputInteraction;
 import com.arcanerelay.features.configurator.interactions.SelectTriggerInteraction;
 import com.arcanerelay.features.configurator.systems.ArcaneConfiguratorAddSystem;
+import com.arcanerelay.features.configurator.systems.VisualSelectionSystem;
 import com.arcanerelay.features.signal.components.ArcaneSection;
 import com.arcanerelay.features.signal.systems.EnsureArcaneSectionSystem;
 import com.arcanerelay.features.signal.systems.PreTickSignalPropagationSystem;
@@ -192,6 +193,7 @@ public class ArcaneRelayPlugin extends JavaPlugin {
         ComponentRegistryProxy<EntityStore> entityRegistry = this.getEntityStoreRegistry();
 
         entityRegistry.registerSystem(new ArcaneConfiguratorAddSystem());
+        entityRegistry.registerSystem(new VisualSelectionSystem());
     }
 
     private void registerResources() {

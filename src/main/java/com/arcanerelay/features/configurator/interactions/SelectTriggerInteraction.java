@@ -69,6 +69,7 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
 
         BlockPosition targetPosition = context.getTargetBlock();
         if (targetPosition == null) {
+            configurator.clearConfiguredBlock();
             NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.noBlockInRange"), NotificationStyle.Warning);
             context.getState().state = InteractionState.Failed; 
             return;
@@ -85,6 +86,7 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
 
         Ref<ChunkStore> blockRef = chunk.getBlockComponentEntity(target.x, target.y, target.z);
         if (blockRef == null || !blockRef.isValid()) {
+            configurator.clearConfiguredBlock();
             NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.targetMustBeArcaneTrigger"), NotificationStyle.Warning);
             context.getState().state = InteractionState.Failed; 
             return;
@@ -94,18 +96,13 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
 
         ArcaneTriggerBlock trigger = store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
         if (trigger == null) {
+            configurator.clearConfiguredBlock();
             NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.targetMustBeArcaneTrigger"), NotificationStyle.Warning);
             context.getState().state = InteractionState.Failed; 
             return;
         }
 
-        ArcaneConfiguratorComponent updated = (ArcaneConfiguratorComponent) configurator.clone();
-        updated.setConfiguredBlock(target);
-        cb.putComponent(ref, ArcaneConfiguratorComponent.getComponentType(), updated);
-
-        boolean cycleColor = true;
-        VisualsUtil.displayTriggerConnections(world, target, cycleColor);
-
+        configurator.setConfiguredBlock(target);
         NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.triggerSelected"), NotificationStyle.Success);
         context.getState().state = InteractionState.Finished;
     }
