@@ -2,6 +2,8 @@ package com.arcanerelay.features.configurator.systems;
 
 import org.joml.Vector3i;
 
+import java.util.Map;
+
 import com.arcanerelay.ArcaneRelayPlugin;
 import com.arcanerelay.features.configurator.components.ArcaneConfiguratorComponent;
 import com.arcanerelay.features.configurator.util.VisualsUtil;
@@ -26,9 +28,8 @@ public class VisualSelectionSystem extends EntityTickingSystem<EntityStore> {
         World world = store.getExternalData().getWorld();
         ArcaneConfiguratorComponent configurator = archetypeChunk.getComponent(index, ArcaneConfiguratorComponent.getComponentType());
 
-        Vector3i triggerPos = configurator.getConfiguredBlock();
-        if (triggerPos == null) return;
-
-        VisualsUtil.displayTriggerConnections(world, triggerPos, configurator.getDisplayColor());
+        for (Map.Entry<Vector3i, Integer> selection : configurator.getSelectedBlocks().entrySet()) {
+            VisualsUtil.displayTriggerConnections(world, selection.getKey(), selection.getValue());
+        }
     }
 }

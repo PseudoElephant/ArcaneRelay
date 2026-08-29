@@ -48,19 +48,15 @@ public class VisualsUtil {
         new Vector3f(0.2f, 0.8f, 1f)
     };
 
-    public static void displayTriggerConnections(World world, Vector3i triggerPos, Vector3f color) {
+    public static void displayTriggerConnections(World world, Vector3i triggerPos, int colorIndex) {
+        Vector3f color = colors[colorIndex % colors.length];
         showTriggerOutputArrows(world, triggerPos, color);
         showOutputWireframes(world, triggerPos, color);
         showInputWireframe(world, triggerPos, color);
     }
 
-    public static Vector3f getNextColor() {
-        cycleColor();
-        return colors[colorIndex];
-    }
-
-    private static void cycleColor() {
-        colorIndex = (colorIndex + 1) % colors.length;
+    public static int getNextColorIndex() {
+        return colorIndex = (colorIndex + 1) % colors.length;
     }
 
     private static void showInputWireframe(World world, Vector3i triggerPos, Vector3f color) {
