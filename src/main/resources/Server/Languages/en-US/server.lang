@@ -65,22 +65,22 @@ arcanerelay.notifications.ResetSucces = Settings have been reset successfully.
 
 customUI.ArcaneStaffLegend.title = Arcane Staff
 
-customUI.ArcaneStaffLegend.setupSectionTitle = Setting Up Connections
-customUI.ArcaneStaffLegend.setupSectionRightClickDescription = On a Relay block to select it as the active Relay.
-customUI.ArcaneStaffLegend.setupSectionLeftClickDescription = On any block(s) to add their location as a destination.
+customUI.ArcaneStaffLegend.setupSectionTitle = Relay Artifact Selection
+customUI.ArcaneStaffLegend.setupSectionRightClickSelectDescription = On a Relay Artifact to select it as an active Relay.
+customUI.ArcaneStaffLegend.setupSectionLeftClickDeselectDescription = On a selection to deselect it, or elsewhere to deselect all.
+customUI.ArcaneStaffLegend.setupSectionNoteDescription = Note: You can select multiple Relay Artifacts while crouching.
 
-customUI.ArcaneStaffLegend.removeSectionTitle = Removing a Connection
-customUI.ArcaneStaffLegend.removeSectionRightClickDescription = On a Relay block to select it as the active Relay.
-customUI.ArcaneStaffLegend.removeSectionLeftClickDescription = On any existing destination(s) to remove them.
+customUI.ArcaneStaffLegend.addRemoveSectionTitle = Add / Remove Connections
+customUI.ArcaneStaffLegend.addRemoveSectionLeftClickDescription = On any block(s) to add / remove that position as a connection.
 
-customUI.ArcaneStaffLegend.viewSectionTitle = View Connections
-customUI.ArcaneStaffLegend.viewSectionRightClickDescription = On a Relay block to select it and view it's destinations.
+customUI.ArcaneStaffLegend.viewConnectionsSectionTitle = View Connections
+customUI.ArcaneStaffLegend.viewConnectionsSectionRightClickDescription = Select / deselect a Relay Artifact to view / hide it's connections.
 
-customUI.ArcaneStaffLegend.listSectionTitle = Block Settings
-customUI.ArcaneStaffLegend.listSectionDescription = Crouch-interact with an Arcane block for settings.
+customUI.ArcaneStaffLegend.blockSettingSectionTitle = Block Settings
+customUI.ArcaneStaffLegend.blockSettingsSectionDescription = Crouch-interact with an Arcane block for settings.
 
 customUI.ArcaneStaffLegend.dismissSectionTitle = Dismiss Legend 
-customUI.ArcaneStaffLegend.dismissSectionDescription = Hide Arcane Staff legend 
+customUI.ArcaneStaffLegend.dismissSectionDescription = Hide Arcane Staff legend.
 
 customUI.ArcaneTrigger.title = Arcane Trigger
 customUI.ArcaneTrigger.failedToLoadDataMessage = Could not load trigger data.

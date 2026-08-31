@@ -37,12 +37,17 @@ Group #FormContainer {
 
             $LegendCommon.@HotkeyRow {
               @InputBindingKey = "SecondaryItemAction";
-              @Description = %server.customUI.ArcaneStaffLegend.setupSectionRightClickDescription;
+              @Description = %server.customUI.ArcaneStaffLegend.setupSectionRightClickSelectDescription;
             }
 
             $LegendCommon.@HotkeyRow {
-              @InputBindingKey = "PrimaryItemAction";
-              @Description = %server.customUI.ArcaneStaffLegend.setupSectionLeftClickDescription;
+              @InputBindingKey = "SecondaryItemAction";
+              @Description = %server.customUI.ArcaneStaffLegend.setupSectionLeftClickDeselectDescription;
+            }
+
+            $LegendCommon.@RowLabel {
+              Text: %server.customUI.ArcaneStaffLegend.setupSectionNoteDescription;
+              Padding: (Top: 8);
             }
           }
 
@@ -54,17 +59,12 @@ Group #FormContainer {
             Label {
               Anchor: (Bottom: 5);
               Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 16, TextColor: #94969a, RenderBold: true);
-              Text: %server.customUI.ArcaneStaffLegend.removeSectionTitle;
-            }
-
-            $LegendCommon.@HotkeyRow {
-              @InputBindingKey = "SecondaryItemAction";
-              @Description = %server.customUI.ArcaneStaffLegend.removeSectionRightClickDescription;
+              Text: %server.customUI.ArcaneStaffLegend.addRemoveSectionTitle;
             }
 
             $LegendCommon.@HotkeyRow {
               @InputBindingKey = "PrimaryItemAction";
-              @Description = %server.customUI.ArcaneStaffLegend.removeSectionLeftClickDescription;
+              @Description = %server.customUI.ArcaneStaffLegend.addRemoveSectionLeftClickDescription;
             }
           }
 
@@ -76,12 +76,12 @@ Group #FormContainer {
             Label {
               Anchor: (Bottom: 5);
               Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 16, TextColor: #94969a, RenderBold: true);
-              Text: %server.customUI.ArcaneStaffLegend.viewSectionTitle;
+              Text: %server.customUI.ArcaneStaffLegend.viewConnectionsSectionTitle;
             }
 
             $LegendCommon.@HotkeyRow {
               @InputBindingKey = "SecondaryItemAction";
-              @Description = %server.customUI.ArcaneStaffLegend.viewSectionRightClickDescription;
+              @Description = %server.customUI.ArcaneStaffLegend.viewConnectionsSectionRightClickDescription;
             }
           }
 
@@ -93,13 +93,13 @@ Group #FormContainer {
             Label {
               Anchor: (Bottom: 5);
               Style: (...$C.@DefaultLabelStyle, Wrap: true, FontSize: 16, TextColor: #94969a, RenderBold: true);
-              Text: %server.customUI.ArcaneStaffLegend.listSectionTitle;
+              Text: %server.customUI.ArcaneStaffLegend.blockSettingSectionTitle;
             }
 
             $LegendCommon.@HotkeyRow {
               @InputBindingKey = "F";
               @InputBindingKeyPrefix = "CTRL + ";
-              @Description = %server.customUI.ArcaneStaffLegend.listSectionDescription;
+              @Description = %server.customUI.ArcaneStaffLegend.blockSettingsSectionDescription;
             }
           }
 
