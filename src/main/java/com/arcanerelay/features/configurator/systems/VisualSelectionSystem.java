@@ -4,7 +4,8 @@ import org.joml.Vector3i;
 
 import java.util.Map;
 
-import com.arcanerelay.ArcaneRelayPlugin;
+import javax.annotation.Nonnull;
+
 import com.arcanerelay.features.configurator.components.ArcaneConfiguratorComponent;
 import com.arcanerelay.features.configurator.util.VisualsUtil;
 import com.hypixel.hytale.component.ArchetypeChunk;
@@ -23,13 +24,10 @@ public class VisualSelectionSystem extends EntityTickingSystem<EntityStore> {
     }
 
     @Override
-    public void tick(float dt, int index, ArchetypeChunk<EntityStore> archetypeChunk, Store<EntityStore> store,
-            CommandBuffer<EntityStore> commandBuffer) {
+    public void tick(float dt, int index, @Nonnull ArchetypeChunk<EntityStore> archetypeChunk, @Nonnull Store<EntityStore> store,
+            @Nonnull CommandBuffer<EntityStore> commandBuffer) {
         World world = store.getExternalData().getWorld();
         ArcaneConfiguratorComponent configurator = archetypeChunk.getComponent(index, ArcaneConfiguratorComponent.getComponentType());
-
-        for (Map.Entry<Vector3i, Integer> selection : configurator.getSelectedBlocks().entrySet()) {
-            VisualsUtil.displayTriggerConnections(world, selection.getKey(), selection.getValue());
-        }
+        VisualsUtil.displayTriggerConnections(world, configurator.getSelectedBlocks());
     }
 }

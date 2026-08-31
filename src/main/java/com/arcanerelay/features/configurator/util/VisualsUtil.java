@@ -1,5 +1,9 @@
 package com.arcanerelay.features.configurator.util;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.Nonnull;
 
 import com.arcanerelay.features.signaltrigger.components.ArcaneTriggerBlock;
@@ -29,6 +33,7 @@ public class VisualsUtil {
     static final double CORNER_SIZE = 0.20;
 
     static int colorIndex = 0;
+    static final Vector3f COLOR_MULTISELECTED = new Vector3f(0.9f, 0.9f, 0.9f);
     static Vector3f[] colors = new Vector3f[] {
         new Vector3f(0.2f, 1f, 1f),
         new Vector3f(0.2f, 1f, 0.5f),
@@ -48,11 +53,22 @@ public class VisualsUtil {
         new Vector3f(0.2f, 0.8f, 1f)
     };
 
-    public static void displayTriggerConnections(World world, Vector3i triggerPos, int colorIndex) {
-        Vector3f color = colors[colorIndex % colors.length];
-        showTriggerOutputArrows(world, triggerPos, color);
-        showOutputWireframes(world, triggerPos, color);
-        showInputWireframe(world, triggerPos, color);
+    public static void displayTriggerConnections(World world, Map<Vector3i, Integer> selectedBlocks) {
+        Map<Vector3i, Vector3f> resolvedOutputColors = new HashMap<>();
+
+        for (Map.Entry<Vector3i, Integer> selection : selectedBlocks.entrySet()) {
+            Vector3i triggerPos = selection.getKey();
+            Vector3f color = colors[selection.getValue() % colors.length];
+
+            showTriggerOutputArrows(world, triggerPos, color);
+            showInputWireframe(world, triggerPos, color);
+            
+            for (Vector3i out : getTriggerOutputs(world, triggerPos)) {
+                resolvedOutputColors.put(out, resolvedOutputColors.containsKey(out) ? COLOR_MULTISELECTED : color);
+            }
+        }
+
+        showOutputWireframes(world, resolvedOutputColors);
     }
 
     public static int getNextColorIndex() {
@@ -66,21 +82,26 @@ public class VisualsUtil {
         }
     }
 
-    private static void showOutputWireframes(World world, Vector3i triggerPos, Vector3f color) {
+    private static Iterable<Vector3i> getTriggerOutputs(World world, Vector3i triggerPos) {
         WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(triggerPos.x, triggerPos.z));
-        if (chunk == null) return;
+        if (chunk == null) return Collections.emptyList();
 
         Ref<ChunkStore> blockRef = chunk.getBlockComponentEntity(triggerPos.x, triggerPos.y, triggerPos.z);
-        if (blockRef == null || !blockRef.isValid()) return;
+        if (blockRef == null || !blockRef.isValid()) return Collections.emptyList();
 
         Store<ChunkStore> store = world.getChunkStore().getStore();
         ArcaneTriggerBlock triggerBlock = store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
-        if (triggerBlock == null || !triggerBlock.hasOutputPositions()) return;
+        if (triggerBlock == null || !triggerBlock.hasOutputPositions()) return Collections.emptyList();
 
-        for (Vector3i out : triggerBlock.getOutputPositions()) {
+        return triggerBlock.getOutputPositions();
+    }
+
+    private static void showOutputWireframes(World world, Map<Vector3i, Vector3f> resolvedOutputColors) {
+        for (Map.Entry<Vector3i, Vector3f> entry : resolvedOutputColors.entrySet()) {
+            Vector3i out = entry.getKey();
             Box box = getEnclosingBoundingHitbox(world, out);
             if (box != null) {
-                DebugVisualsCustomShapes.drawCornerOnlyBoxWireframe(world, box, out, color);
+                DebugVisualsCustomShapes.drawCornerOnlyBoxWireframe(world, box, out, entry.getValue());
             }
         }
     }
