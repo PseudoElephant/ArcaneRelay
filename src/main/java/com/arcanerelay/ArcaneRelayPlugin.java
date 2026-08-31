@@ -18,6 +18,7 @@ import com.arcanerelay.features.config.ArcaneRelayConfig;
 import com.arcanerelay.features.configurator.components.ArcaneConfiguratorComponent;
 import com.arcanerelay.features.configurator.interactions.AddOutputInteraction;
 import com.arcanerelay.features.configurator.interactions.SelectTriggerInteraction;
+import com.arcanerelay.features.configurator.listeners.InventorySetActiveSlotEventHandler;
 import com.arcanerelay.features.configurator.systems.ArcaneConfiguratorAddSystem;
 import com.arcanerelay.features.configurator.systems.VisualSelectionSystem;
 import com.arcanerelay.features.signal.components.ArcaneSection;
@@ -194,6 +195,7 @@ public class ArcaneRelayPlugin extends JavaPlugin {
 
         entityRegistry.registerSystem(new ArcaneConfiguratorAddSystem());
         entityRegistry.registerSystem(new VisualSelectionSystem());
+        entityRegistry.registerSystem(new InventorySetActiveSlotEventHandler());
     }
 
     private void registerResources() {
