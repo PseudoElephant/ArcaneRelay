@@ -18,6 +18,7 @@ public class ArcaneConfiguratorComponent implements Component<EntityStore> {
 
     /** Ordered map of selected block position to its display color index. */
     private final Map<Vector3i, Integer> selectedBlocks = new LinkedHashMap<>();
+    private boolean isConfiguring = false;
 
     public static ComponentType<EntityStore, ArcaneConfiguratorComponent> getComponentType() {
         return ArcaneRelayPlugin.get().getArcaneConfiguratorComponentType();
@@ -48,6 +49,14 @@ public class ArcaneConfiguratorComponent implements Component<EntityStore> {
 
     public void clearConfiguredBlocks() {
         selectedBlocks.clear();
+    }
+
+    public boolean isConfiguring() {
+        return isConfiguring;
+    }
+
+    public void setConfiguring(boolean configuring) {
+        isConfiguring = configuring;
     }
 
     @Nonnull

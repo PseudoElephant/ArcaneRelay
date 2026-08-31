@@ -1,9 +1,5 @@
 package com.arcanerelay.features.configurator.systems;
 
-import org.joml.Vector3i;
-
-import java.util.Map;
-
 import javax.annotation.Nonnull;
 
 import com.arcanerelay.features.configurator.components.ArcaneConfiguratorComponent;
@@ -28,6 +24,11 @@ public class VisualSelectionSystem extends EntityTickingSystem<EntityStore> {
             @Nonnull CommandBuffer<EntityStore> commandBuffer) {
         World world = store.getExternalData().getWorld();
         ArcaneConfiguratorComponent configurator = archetypeChunk.getComponent(index, ArcaneConfiguratorComponent.getComponentType());
+        
+        if (configurator == null || !configurator.isConfiguring()) {
+            return;
+        }
+        
         VisualsUtil.displayTriggerConnections(world, configurator.getSelectedBlocks());
     }
 }
