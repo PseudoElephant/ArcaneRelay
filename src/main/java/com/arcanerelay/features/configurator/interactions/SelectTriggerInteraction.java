@@ -67,11 +67,7 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
 
         if (targetPosition == null) {
             if (!configurator.getSelectedBlocks().isEmpty()) {
-                if (!crouching) {
-                    configurator.clearConfiguredBlocks();
-                    sendRelayNotification(playerRef, "triggerDeselected", NotificationStyle.Default);
-                }
-                setFinished(context);
+                deselectTriggers(configurator, playerRef);
             } else {
                 sendRelayNotification(playerRef, "noBlockInRange", NotificationStyle.Warning);
                 setFailed(context);
@@ -90,9 +86,7 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
 
         if (!isValidArcaneTrigger(world, chunk, target)) {
             if (!configurator.getSelectedBlocks().isEmpty()) {
-                configurator.clearConfiguredBlocks();
-                sendRelayNotification(playerRef, "triggerDeselected", NotificationStyle.Default);
-                setFinished(context);
+                deselectTriggers(configurator, playerRef);
             } else {
                 sendRelayNotification(playerRef, "targetMustBeArcaneTrigger", NotificationStyle.Warning);
                 setFailed(context);
@@ -102,6 +96,18 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
 
         handleTriggerSelection(playerRef, configurator, target, crouching);
         setFinished(context);
+    }
+
+    private void deselectTriggers(ArcaneConfiguratorComponent configurator, PlayerRef playerRef) {
+        int sizeBeforeClear = configurator.getSelectedBlocks().size();
+        configurator.clearConfiguredBlocks();
+
+        if (sizeBeforeClear > 1) {
+            sendRelayNotification(playerRef, "multipleTriggersDeselected", NotificationStyle.Default);
+            return;
+        }
+
+        sendRelayNotification(playerRef, "triggerDeselected", NotificationStyle.Default);
     }
 
     private boolean isCrouching(CommandBuffer<EntityStore> cb, Ref<EntityStore> ref) {
@@ -130,14 +136,15 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
                 return;
             } 
 
-            configurator.addSelectedBlock(target);
-            sendRelayNotification(playerRef, "triggerSelected", NotificationStyle.Success);
+            configurator.addSelectedBlock(target); // Since we add selection here we must check multiselected again below
+            String messageKey = configurator.getSelectedBlocks().size() > 1 ? "triggerAddedToSelection" : "triggerSelected";
+            sendRelayNotification(playerRef, messageKey, NotificationStyle.Success);
+            
             return;
         } 
 
         if (wasPreviouslySelected && !multipleSelected) {
-            configurator.clearConfiguredBlocks();
-            sendRelayNotification(playerRef, "triggerDeselected", NotificationStyle.Default);
+            deselectTriggers(configurator, playerRef);
             return;
         } 
             
