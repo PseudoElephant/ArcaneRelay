@@ -1,3 +1,5 @@
+# === Block Names & Descriptions ===
+
 items.Pseudo_Arcane_Button.name = Button
 items.Pseudo_Arcane_Button.description = Used to trigger other interactions remotely within a certain distance.
 items.Pseudo_Arcane_Toggle_Relay.name = Toggle Relay
@@ -25,7 +27,7 @@ items.Antiquarian_Bench.description = Used to craft ancient mechanism that allow
 items.Pseudo_Arcane_Pixel.name = Pixel
 items.Pseudo_Arcane_Pixel.description = A colorful makeshift light capable of switching colors. \n\nInteract while crouching to switch between the available colors.
 
-# === interactionHints ===
+# === Interaction Hints ===
 
 interactionHints.button = Press [{key}] to press
 interactionHints.toggle = Press [{key}] to toggle
@@ -33,23 +35,27 @@ interactionHints.cycle = Press [{key}] to cycle
 interactionHints.relay = Press [{key}] to relay
 interactionHints.rotate = Press [{key}] to rotate
 
-# === Arcane Relay notifications (interactions / activation) ===
+# === Arcane Relay Notifications ===
 
-arcanerelay.activationExecutor.executed=Activation Executed at [{blockX}],[{blockY}],[{blockZ}] with activation: [{activation}]
-arcanerelay.pusher.displaced=You were moved out of the block by the pusher.
-arcanerelay.pusher.pushed=You were pushed by the pusher.
 arcanerelay.notifications.noBlockInRange = No block in range.
-arcanerelay.notifications.targetMustBeArcaneTrigger = Target must be an Arcane Trigger block.
-arcanerelay.notifications.triggerSelected = Trigger has been selected.
+arcanerelay.notifications.targetMustBeArcaneTrigger = Target must be a relay artifact.
+arcanerelay.notifications.triggerSelected = Relay artifact selected.
+arcanerelay.notifications.triggerAddedToSelection = Relay artifact selected (+1).
+arcanerelay.notifications.triggerDeselected = Relay artifact deselected.
+arcanerelay.notifications.multipleTriggersDeselected = Relay artifacts deselected.
+arcanerelay.notifications.selectTriggerFirst = Select a relay artifact first.
+arcanerelay.notifications.targetSameAsTrigger = Target can't be part of the selection.
+arcanerelay.notifications.targetTooFarFromTrigger = Target is too far from the selected relay.
+arcanerelay.notifications.someTriggersTooFar = Target is too far from one or more selected relays.
+arcanerelay.notifications.outputRemoved = Connection removed.
+arcanerelay.notifications.multipleOutputsRemoved = Connection removed from selected relays. 
+arcanerelay.notifications.outputAdded = Connection added.
+arcanerelay.notifications.multipleOutputsAdded = Connection added to selected relays.
+
 arcanerelay.notifications.noBlockAtTarget = No block at target.
-arcanerelay.notifications.selectTriggerFirst = Select a trigger first (primary click on Arcane Trigger block).
-arcanerelay.notifications.targetSameAsTrigger = Target cannot be the same as the trigger.
-arcanerelay.notifications.targetTooFarFromTrigger = Target is too far from the trigger.
-arcanerelay.notifications.outputRemoved = Output removed.
-arcanerelay.notifications.outputAdded = Output has been added.
 arcanerelay.notifications.signalSentToTrigger = Signal sent to trigger.
 arcanerelay.notifications.blockActivationNotSupported = Block activation not supported for this block.
-arcanerelay.notifications.pullerChainResynced = Puller chain resynced.
+
 arcanerelay.notifications.SettingsSucces = Changes have been saved and applied.
 arcanerelay.notifications.SettingsSuccesNoChange = There were no changes to apply.
 arcanerelay.notifications.SettingsSuccesWithInvalid = Partial Save: Incorrectly formatted values skipped.
@@ -61,22 +67,22 @@ arcanerelay.notifications.ResetSucces = Settings have been reset successfully.
 
 customUI.ArcaneStaffLegend.title = Arcane Staff
 
-customUI.ArcaneStaffLegend.setupSectionTitle = Setting Up Connections
-customUI.ArcaneStaffLegend.setupSectionRightClickDescription = On a Relay block to select it as the active Relay.
-customUI.ArcaneStaffLegend.setupSectionLeftClickDescription = On any block(s) to add their location as a destination.
+customUI.ArcaneStaffLegend.setupSectionTitle = Relay Artifact Selection
+customUI.ArcaneStaffLegend.setupSectionRightClickSelectDescription = On a Relay Artifact to select it as an active Relay.
+customUI.ArcaneStaffLegend.setupSectionLeftClickDeselectDescription = On a selection to deselect it, or elsewhere to deselect all.
+customUI.ArcaneStaffLegend.setupSectionNoteDescription = Note: You can select multiple Relay Artifacts while crouching.
 
-customUI.ArcaneStaffLegend.removeSectionTitle = Removing a Connection
-customUI.ArcaneStaffLegend.removeSectionRightClickDescription = On a Relay block to select it as the active Relay.
-customUI.ArcaneStaffLegend.removeSectionLeftClickDescription = On any existing destination(s) to remove them.
+customUI.ArcaneStaffLegend.addRemoveSectionTitle = Add / Remove Connections
+customUI.ArcaneStaffLegend.addRemoveSectionLeftClickDescription = On any block(s) to add / remove that position as a connection.
 
-customUI.ArcaneStaffLegend.viewSectionTitle = View Connections
-customUI.ArcaneStaffLegend.viewSectionRightClickDescription = On a Relay block to select it and view it's destinations.
+customUI.ArcaneStaffLegend.viewConnectionsSectionTitle = View Connections
+customUI.ArcaneStaffLegend.viewConnectionsSectionRightClickDescription = Select / deselect a Relay Artifact to view / hide it's connections.
 
-customUI.ArcaneStaffLegend.listSectionTitle = Block Settings
-customUI.ArcaneStaffLegend.listSectionDescription = Crouch-interact with an Arcane block for settings.
+customUI.ArcaneStaffLegend.blockSettingSectionTitle = Block Settings
+customUI.ArcaneStaffLegend.blockSettingsSectionDescription = Crouch-interact with an Arcane block for settings.
 
 customUI.ArcaneStaffLegend.dismissSectionTitle = Dismiss Legend 
-customUI.ArcaneStaffLegend.dismissSectionDescription = Hide Arcane Staff legend 
+customUI.ArcaneStaffLegend.dismissSectionDescription = Hide Arcane Staff legend.
 
 customUI.ArcaneTrigger.title = Arcane Trigger
 customUI.ArcaneTrigger.failedToLoadDataMessage = Could not load trigger data.
@@ -107,7 +113,7 @@ customUI.ArcaneRelayConfig.breakerBlockDamageScalarTooltip = Scales the tool's p
 customUI.ArcaneRelayConfig.moveableBlacklistTooltip = List of blocks that can't be moved via Vector Artifacts.
 customUI.ArcaneRelayConfig.rotatableBlacklistTooltip = List of blocks that can't be rotated via Vector Artifacts.
 
-# === Benches ===
+# === Benche Categories ===
 
 benchCategories.relayArtifacts = Relay Artifacts
 benchCategories.vectorArtifacts = Vector Artifacts
@@ -115,7 +121,7 @@ benchCategories.destructiveArtifacts = Destructive Artifacts
 benchCategories.voidArtifacts = Void Artifacts
 benchCategories.experimentalArtifacts = Experimental Artifacts
 
-# === Qualities ===
+# === Item Qualities ===
 
 arcanerelay.qualities.arcaneTool = Arcane Tool
 arcanerelay.qualities.relayArtifact = Relay Artifact
@@ -123,7 +129,7 @@ arcanerelay.qualities.vectorArtifact = Vector Artifact
 arcanerelay.qualities.destructiveArtifact = Destructive Artifact
 arcanerelay.qualities.experimentalArtifact = Experimental Artifact
 
-# === Creative Category ===
+# === Creative Categories ===
 
 ui.arcanerelaycategory.name = Arcane Relay
 ui.arcanerelaycategory.subcategory.tools.name = Arcane Tools

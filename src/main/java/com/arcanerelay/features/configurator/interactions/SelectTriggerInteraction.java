@@ -16,6 +16,7 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
@@ -47,66 +48,124 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
     protected void firstRun(@Nonnull InteractionType type, @Nonnull InteractionContext context, @Nonnull CooldownHandler cooldownHandler) {
         CommandBuffer<EntityStore> cb = context.getCommandBuffer();
         if (cb == null) {
-            context.getState().state = InteractionState.Failed; 
-            return;
-        };
-
-        Ref<EntityStore> ref = context.getEntity();
-        Player player = cb.getComponent(ref, Player.getComponentType());
-
-        PlayerRef playerRef = cb.getComponent(ref, PlayerRef.getComponentType());
-        if (playerRef == null) 
-        {
-            context.getState().state = InteractionState.Failed; 
+            setFailed(context);
             return;
         }
 
+        Ref<EntityStore> ref = context.getEntity();
+        Player player = cb.getComponent(ref, Player.getComponentType());
+        PlayerRef playerRef = cb.getComponent(ref, PlayerRef.getComponentType());
         ArcaneConfiguratorComponent configurator = cb.getComponent(ref, ArcaneConfiguratorComponent.getComponentType());
-        if (player == null || configurator == null) {
-            context.getState().state = InteractionState.Failed; 
-            return;
-        };
 
+        if (player == null || playerRef == null || configurator == null) {
+            setFailed(context);
+            return;
+        }
+
+        boolean crouching = isCrouching(cb, ref);
         BlockPosition targetPosition = context.getTargetBlock();
+
         if (targetPosition == null) {
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.noBlockInRange"), NotificationStyle.Warning);
-            context.getState().state = InteractionState.Failed; 
+            if (!configurator.getSelectedBlocks().isEmpty()) {
+                deselectTriggers(configurator, playerRef);
+            } else {
+                sendRelayNotification(playerRef, "noBlockInRange", NotificationStyle.Warning);
+                setFailed(context);
+            }
             return;
         }
 
         Vector3i target = new Vector3i(targetPosition.x, targetPosition.y, targetPosition.z);
-        
         World world = cb.getExternalData().getWorld();
         WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(target.x, target.z));
+        
         if (chunk == null) {
-            context.getState().state = InteractionState.Failed; 
+            setFailed(context);
             return;
         }
 
+        if (!isValidArcaneTrigger(world, chunk, target)) {
+            if (!configurator.getSelectedBlocks().isEmpty()) {
+                deselectTriggers(configurator, playerRef);
+            } else {
+                sendRelayNotification(playerRef, "targetMustBeArcaneTrigger", NotificationStyle.Warning);
+                setFailed(context);
+            }
+            return;
+        }
+
+        handleTriggerSelection(playerRef, configurator, target, crouching);
+        setFinished(context);
+    }
+
+    private void deselectTriggers(ArcaneConfiguratorComponent configurator, PlayerRef playerRef) {
+        int sizeBeforeClear = configurator.getSelectedBlocks().size();
+        configurator.clearConfiguredBlocks();
+
+        if (sizeBeforeClear > 1) {
+            sendRelayNotification(playerRef, "multipleTriggersDeselected", NotificationStyle.Default);
+            return;
+        }
+
+        sendRelayNotification(playerRef, "triggerDeselected", NotificationStyle.Default);
+    }
+
+    private boolean isCrouching(CommandBuffer<EntityStore> cb, Ref<EntityStore> ref) {
+        MovementStatesComponent states = cb.getComponent(ref, MovementStatesComponent.getComponentType());
+        return states != null && states.getMovementStates().crouching;
+    }
+
+    private boolean isValidArcaneTrigger(World world, WorldChunk chunk, Vector3i target) {
         Ref<ChunkStore> blockRef = chunk.getBlockComponentEntity(target.x, target.y, target.z);
         if (blockRef == null || !blockRef.isValid()) {
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.targetMustBeArcaneTrigger"), NotificationStyle.Warning);
-            context.getState().state = InteractionState.Failed; 
-            return;
+            return false;
         }
-
+        
         Store<ChunkStore> store = world.getChunkStore().getStore();
+        return store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType()) != null;
+    }
 
-        ArcaneTriggerBlock trigger = store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
-        if (trigger == null) {
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.targetMustBeArcaneTrigger"), NotificationStyle.Warning);
-            context.getState().state = InteractionState.Failed; 
+    private void handleTriggerSelection(PlayerRef playerRef, ArcaneConfiguratorComponent configurator, Vector3i target, boolean crouching) {
+        boolean wasPreviouslySelected = configurator.isSelected(target);
+        boolean multipleSelected = configurator.getSelectedBlocks().size() > 1;
+
+        if (crouching) {
+            if (wasPreviouslySelected) {
+                configurator.removeSelectedBlock(target);
+                sendRelayNotification(playerRef, "triggerDeselected", NotificationStyle.Default);
+                return;
+            } 
+
+            configurator.addSelectedBlock(target); // Since we add selection here we must check multiselected again below
+            String messageKey = configurator.getSelectedBlocks().size() > 1 ? "triggerAddedToSelection" : "triggerSelected";
+            sendRelayNotification(playerRef, messageKey, NotificationStyle.Success);
+            
             return;
-        }
+        } 
 
-        ArcaneConfiguratorComponent updated = (ArcaneConfiguratorComponent) configurator.clone();
-        updated.setConfiguredBlock(target);
-        cb.putComponent(ref, ArcaneConfiguratorComponent.getComponentType(), updated);
+        if (wasPreviouslySelected && !multipleSelected) {
+            deselectTriggers(configurator, playerRef);
+            return;
+        } 
+            
+        configurator.clearConfiguredBlocks();
+        configurator.addSelectedBlock(target);
+        sendRelayNotification(playerRef, "triggerSelected", NotificationStyle.Success); 
+    }
 
-        boolean cycleColor = true;
-        VisualsUtil.displayTriggerConnections(world, target, cycleColor);
+    private void sendRelayNotification(PlayerRef playerRef, String messageKey, @Nonnull NotificationStyle style) {
+        NotificationUtil.sendNotification(
+            playerRef.getPacketHandler(), 
+            Message.translation("server.arcanerelay.notifications." + messageKey), 
+            style
+        );
+    }
 
-        NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.triggerSelected"), NotificationStyle.Success);
+    private void setFailed(InteractionContext context) {
+        context.getState().state = InteractionState.Failed;
+    }
+
+    private void setFinished(InteractionContext context) {
         context.getState().state = InteractionState.Finished;
     }
 }

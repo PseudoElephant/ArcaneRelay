@@ -155,7 +155,7 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
             int y = Integer.parseInt(parts[1].trim());
             int z = Integer.parseInt(parts[2].trim());
             
-            if (updated.removeOutputPosition(x, y, z)) {
+            if (updated.removeOutputPosition(new Vector3i(x, y, z))) {
                 chunkStore.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), updated);
                 rebuild();
             }
