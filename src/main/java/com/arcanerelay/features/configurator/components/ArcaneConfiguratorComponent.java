@@ -15,13 +15,18 @@ import javax.annotation.Nonnull;
 
 /** Player component: tracks which Arcane Trigger blocks are being configured. */
 public class ArcaneConfiguratorComponent implements Component<EntityStore> {
+    private static ComponentType<EntityStore, ArcaneConfiguratorComponent> componentType;
 
     /** Ordered map of selected block position to its display color index. */
     private final Map<Vector3i, Integer> selectedBlocks = new LinkedHashMap<>();
     private boolean isConfiguring = false;
 
     public static ComponentType<EntityStore, ArcaneConfiguratorComponent> getComponentType() {
-        return ArcaneRelayPlugin.get().getArcaneConfiguratorComponentType();
+        return ArcaneConfiguratorComponent.componentType;
+    }
+
+    public static void setComponentType(ComponentType<EntityStore, ArcaneConfiguratorComponent> componentType) {
+        ArcaneConfiguratorComponent.componentType = componentType;
     }
 
     public Map<Vector3i, Integer> getSelectedBlocks() {

@@ -23,7 +23,7 @@ public final class ActivationExecutor {
     public static void sendSignals(@Nonnull ComponentAccessor<ChunkStore> accessor, @Nullable Ref<ChunkStore> blockRef, int worldX, int worldY, int worldZ) {
         if (blockRef == null || !blockRef.isValid()) return;
 
-        ArcaneTriggerBlock trigger = accessor.getComponent(blockRef, ArcaneRelayPlugin.get().getArcaneTriggerBlockComponentType());
+        ArcaneTriggerBlock trigger = accessor.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
         if (trigger == null) return;
 
         for (Vector3i out : trigger.getOutputPositions()) {

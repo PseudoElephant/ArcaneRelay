@@ -28,6 +28,7 @@ public abstract class Activation implements JsonAssetWithMap<String, DefaultAsse
 
     public static final String DEFAULT_ACTIVATION_ID = "use_block";
 
+    @Nonnull
     public static final AssetCodecMapCodec<String, Activation> CODEC = new AssetCodecMapCodec<>(
         Codec.STRING,
         (t, k) -> t.id = k,

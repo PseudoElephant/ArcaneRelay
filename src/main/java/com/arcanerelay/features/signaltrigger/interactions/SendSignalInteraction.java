@@ -71,7 +71,7 @@ public class SendSignalInteraction extends SimpleInstantInteraction {
          if (blockRef == null) return;
 
          Store<ChunkStore> chunkStore = world.getChunkStore().getStore();
-         ArcaneTriggerBlock trigger = chunkStore.getComponent(blockRef, ArcaneRelayPlugin.get().getArcaneTriggerBlockComponentType());
+         ArcaneTriggerBlock trigger = chunkStore.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
          if (trigger == null) return;
 
          ArcaneUtil.setTicking(chunkStore, target.x, target.y, target.z);

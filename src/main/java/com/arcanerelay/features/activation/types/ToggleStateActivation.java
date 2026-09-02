@@ -156,13 +156,13 @@ public class ToggleStateActivation extends Activation {
         final ActivationEffects finalEffects = isCurrentlyOff ? onEffects : offEffects;
 
         if (finalEffects != null) {
-        commandBuffer.run((@Nonnull Store<ChunkStore> store) -> {
-            World world = store.getExternalData().getWorld();
+            commandBuffer.run((@Nonnull Store<ChunkStore> store) -> {
+                World world = store.getExternalData().getWorld();
 
-            ActivationEffects effects = finalEffects != null ? finalEffects : getEffects();
-            if (effects != null) {
-                ActivationExecutor.playEffects(world, worldX, worldY, worldZ, effects);
-            }
+                ActivationEffects effects = finalEffects != null ? finalEffects : getEffects();
+                if (effects != null) {
+                    ActivationExecutor.playEffects(world, worldX, worldY, worldZ, effects);
+                }
             });
         }
 

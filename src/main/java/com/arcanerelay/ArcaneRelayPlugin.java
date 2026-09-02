@@ -52,25 +52,7 @@ public class ArcaneRelayPlugin extends JavaPlugin {
     private final Config<ArcaneRelayConfig> config = this.withConfig("ArcaneRelayConfig", ArcaneRelayConfig.CODEC);
 
     private static ArcaneRelayPlugin instance;
-    /** Thread that ran plugin setup(); used to detect main thread for world.execute() etc. */
-    private static Thread mainThread;
     public static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-
-    /** Returns the main/game thread (the one that ran plugin setup()). */
-    public static Thread getMainThread() {
-        return mainThread;
-    }
-
-    /** True if the current thread is the same one that ran plugin setup() (main/game thread). */
-    public static boolean isMainThread() {
-        return mainThread != null && Thread.currentThread() == mainThread;
-    }
-
-    private ComponentType<ChunkStore, ArcaneTriggerBlock> arcaneTriggerBlockComponentType;
-    private ComponentType<ChunkStore, ArcaneSection> arcaneSectionComponentType;
-    private ComponentType<ChunkStore, ArcanePullerBlock> arcanePullerBlockComponentType;
-    private ComponentType<EntityStore, ArcaneConfiguratorComponent> arcaneConfiguratorComponentType;
-    private ResourceType<ChunkStore, ArcaneMoveState> arcaneMoveStateResourceType;
 
     public ArcaneRelayPlugin(@Nonnull JavaPluginInit init) {
         super(init);
@@ -87,7 +69,6 @@ public class ArcaneRelayPlugin extends JavaPlugin {
     @Override
     protected void setup() {
         instance = this;
-        mainThread = Thread.currentThread();
 
         config.save();
 
@@ -117,31 +98,6 @@ public class ArcaneRelayPlugin extends JavaPlugin {
         ArcaneRelayConfig configValues = this.getConfig();
         configValues.resetToDefaults();
         this.config.save();
-    }
-
-    @Nonnull
-    public ComponentType<EntityStore, ArcaneConfiguratorComponent> getArcaneConfiguratorComponentType() {
-        return arcaneConfiguratorComponentType;
-    }
-
-    @Nonnull
-    public ResourceType<ChunkStore, ArcaneMoveState> getArcaneMoveStateResourceType() {
-        return this.arcaneMoveStateResourceType;
-    }
-
-    @Nonnull
-    public ComponentType<ChunkStore, ArcaneTriggerBlock> getArcaneTriggerBlockComponentType() {
-        return this.arcaneTriggerBlockComponentType;
-    }
-
-    @Nonnull
-    public ComponentType<ChunkStore, ArcaneSection> getArcaneSectionComponentType() {
-        return this.arcaneSectionComponentType;
-    }
-
-    @Nonnull
-    public ComponentType<ChunkStore, ArcanePullerBlock> getArcanePullerBlockComponentType() {
-        return this.arcanePullerBlockComponentType;
     }
 
     private void registerInteractions() {
@@ -206,11 +162,12 @@ public class ArcaneRelayPlugin extends JavaPlugin {
     private void registerChunkResources() {
         ComponentRegistryProxy<ChunkStore> chunkRegistry = this.getChunkStoreRegistry();
 
-        this.arcaneMoveStateResourceType = chunkRegistry.registerResource(ArcaneMoveState.class, ArcaneMoveState::new);
+        ResourceType<ChunkStore, ArcaneMoveState> arcaneMoveStateResourceType = chunkRegistry.registerResource(ArcaneMoveState.class, ArcaneMoveState::new);
+        ArcaneMoveState.setResourceType(arcaneMoveStateResourceType);
     }
 
     private void registerEntityResources() {
-        ComponentRegistryProxy<EntityStore> entityRegistry = this.getEntityStoreRegistry();
+        // ComponentRegistryProxy<EntityStore> entityRegistry = this.getEntityStoreRegistry();
     }
 
     private void registerComponents() {
@@ -221,15 +178,21 @@ public class ArcaneRelayPlugin extends JavaPlugin {
     private void registerChunkComponents() {
         ComponentRegistryProxy<ChunkStore> chunkRegistry = this.getChunkStoreRegistry();
 
-        this.arcaneTriggerBlockComponentType = chunkRegistry.registerComponent(ArcaneTriggerBlock.class, "ArcaneTrigger", ArcaneTriggerBlock.CODEC);
-        this.arcaneSectionComponentType = chunkRegistry.registerComponent(ArcaneSection.class, "ArcaneSection", ArcaneSection.CODEC);
-        this.arcanePullerBlockComponentType = chunkRegistry.registerComponent(ArcanePullerBlock.class, "ArcanePuller", ArcanePullerBlock.CODEC);
+        ComponentType<ChunkStore, ArcaneTriggerBlock> arcaneTriggerBlockComponentType = chunkRegistry.registerComponent(ArcaneTriggerBlock.class, "ArcaneTrigger", ArcaneTriggerBlock.CODEC);
+        ArcaneTriggerBlock.setComponentType(arcaneTriggerBlockComponentType);
+
+        ComponentType<ChunkStore, ArcaneSection> arcaneSectionComponentType = chunkRegistry.registerComponent(ArcaneSection.class, "ArcaneSection", ArcaneSection.CODEC);
+        ArcaneSection.setComponentType(arcaneSectionComponentType);
+
+        ComponentType<ChunkStore, ArcanePullerBlock> arcanePullerBlockComponentType = chunkRegistry.registerComponent(ArcanePullerBlock.class, "ArcanePuller", ArcanePullerBlock.CODEC);
+        ArcanePullerBlock.setComponentType(arcanePullerBlockComponentType);
     }
 
     private void registerEntityComponents() {
         ComponentRegistryProxy<EntityStore> entityRegistry = this.getEntityStoreRegistry();
 
-        this.arcaneConfiguratorComponentType = entityRegistry.registerComponent(ArcaneConfiguratorComponent.class, ArcaneConfiguratorComponent::new);
+        ComponentType<EntityStore, ArcaneConfiguratorComponent> arcaneConfiguratorComponentType = entityRegistry.registerComponent(ArcaneConfiguratorComponent.class, ArcaneConfiguratorComponent::new);
+        ArcaneConfiguratorComponent.setComponentType(arcaneConfiguratorComponentType);
     }
 
     private void registerCommands() {

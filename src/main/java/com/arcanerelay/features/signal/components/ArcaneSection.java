@@ -35,9 +35,12 @@ import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
  * (latest only per block). Snapshot at preTick for read during forEachTicking.
  */
 public class ArcaneSection implements Component<ChunkStore> {
+    private static ComponentType<ChunkStore, ArcaneSection> componentType;
+    
     public static final int VERSION = 1;
     private static final int MAX_SOURCE_POOL_SIZE = 256;
 
+    @Nonnull 
     public static final BuilderCodec<ArcaneSection> CODEC = BuilderCodec.builder(ArcaneSection.class, ArcaneSection::new)
         .versioned()
         .codecVersion(VERSION)
@@ -65,9 +68,13 @@ public class ArcaneSection implements Component<ChunkStore> {
         this.tickRequests = new ObjectHeapPriorityQueue<>(TICK_REQUEST_COMPARATOR);
     }
     
-
+    @Nonnull
     public static ComponentType<ChunkStore, ArcaneSection> getComponentType() {
-        return ArcaneRelayPlugin.get().getArcaneSectionComponentType();
+        return ArcaneSection.componentType;
+    }
+
+    public static void setComponentType(ComponentType<ChunkStore, ArcaneSection> componentType) {
+        ArcaneSection.componentType = componentType;
     }
 
     public void scheduleTick(int index, @Nonnull Instant gameTime) {

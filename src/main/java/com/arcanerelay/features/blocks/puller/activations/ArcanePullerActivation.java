@@ -84,7 +84,7 @@ public class ArcanePullerActivation extends Activation {
             return ArcaneSection.BlockTickStrategy.PROCESSED;
         }
 
-        ArcanePullerBlock puller = commandBuffer.ensureAndGetComponent(blockRef, ArcaneRelayPlugin.get().getArcanePullerBlockComponentType());
+        ArcanePullerBlock puller = commandBuffer.ensureAndGetComponent(blockRef, ArcanePullerBlock.getComponentType());
 
         World world = commandBuffer.getExternalData().getWorld();
         WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(worldX, worldZ));
@@ -215,7 +215,7 @@ public class ArcanePullerActivation extends Activation {
                         RotationTuple.get(rotationIndex)
                 );
 
-                pullerHolder.putComponent(ArcaneRelayPlugin.get().getArcanePullerBlockComponentType(), puller);
+                pullerHolder.putComponent(ArcanePullerBlock.getComponentType(), puller);
                 if (pullerHolder != null) {
                     BlockType blockType = pullerChunk.getBlockType(pullerPos.x, pullerPos.y, pullerPos.z);
                     pullerChunk.setState(pullerPos.x, pullerPos.y, pullerPos.z, blockType, rotationIndex, pullerHolder);

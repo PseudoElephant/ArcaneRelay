@@ -19,6 +19,9 @@ import javax.annotation.Nonnull;
 /** Block component for Arcane Trigger: stores multiple output positions to activate, and tracks charge sources. */
 public class ArcaneTriggerBlock implements Component<ChunkStore> {
 
+    private static ComponentType<ChunkStore, ArcaneTriggerBlock> componentType;
+
+    @Nonnull 
     public static final BuilderCodec<ArcaneTriggerBlock> CODEC = BuilderCodec.builder(ArcaneTriggerBlock.class, ArcaneTriggerBlock::new)
         .append(
             new KeyedCodec<>("OutputPositions", new ArrayCodec<>(new Vector3iArrayCodec(), Vector3i[]::new)),
@@ -34,8 +37,12 @@ public class ArcaneTriggerBlock implements Component<ChunkStore> {
     private HashSet<Vector3i> outputPositions = new HashSet<>();
     private HashSet<Vector3i> chargedSources = new HashSet<>();
 
+    public static void setComponentType(ComponentType<ChunkStore, ArcaneTriggerBlock> componentType) {
+        ArcaneTriggerBlock.componentType = componentType;
+    }
+
     public static ComponentType<ChunkStore, ArcaneTriggerBlock> getComponentType() {
-        return ArcaneRelayPlugin.get().getArcaneTriggerBlockComponentType();
+        return ArcaneTriggerBlock.componentType;
     }
 
     /** Positions this trigger will attempt to activate when triggered. */

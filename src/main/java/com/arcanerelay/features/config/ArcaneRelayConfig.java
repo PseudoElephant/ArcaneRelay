@@ -5,12 +5,15 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.validation.validator.RangeValidator;
 
 public class ArcaneRelayConfig {
+    @Nonnull 
     public static final BuilderCodec<ArcaneRelayConfig> CODEC = BuilderCodec
         .builder(ArcaneRelayConfig.class, ArcaneRelayConfig::new)
         .documentation("Configuration file for Arcane Relay.")

@@ -11,14 +11,19 @@ import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import org.joml.Vector3i;
 
 public class ArcaneMoveState implements Resource<ChunkStore> {
+    private static ResourceType<ChunkStore, ArcaneMoveState> resourceType;
     private ConcurrentHashMap<Vector3i, MoveEntry> moveEntries;
-
-    public static ResourceType<ChunkStore, ArcaneMoveState> getResourceType() {
-        return com.arcanerelay.ArcaneRelayPlugin.get().getArcaneMoveStateResourceType();
-    }
 
     public ArcaneMoveState() {
         this.moveEntries = new ConcurrentHashMap<>();
+    }
+
+    public static void setResourceType(ResourceType<ChunkStore, ArcaneMoveState> resourceType) {
+        ArcaneMoveState.resourceType = resourceType;
+    }
+
+    public static ResourceType<ChunkStore, ArcaneMoveState> getResourceType() {
+        return ArcaneMoveState.resourceType;
     }
 
     public void addMoveEntry(Vector3i blockPosition, Vector3i moveDirection, BlockType blockType, int blockId, int blockRotation, int filler, int settings, Holder<ChunkStore> componentHolder) {
