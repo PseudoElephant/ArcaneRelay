@@ -16,17 +16,12 @@ import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.protocol.BlockPosition;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.InteractionState;
-import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
-import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
-import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.meta.MetaKey;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
-import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockComponentSection;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.ChunkSection;
@@ -35,10 +30,13 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import org.joml.Vector3i;
 
 /**
  * Runs the arcane Activation for the target block (from bindings).
@@ -76,94 +74,101 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
         if (cb == null) return;
 
         Ref<EntityStore> ref = context.getEntity();
-        Player player = cb.getComponent(ref, Player.getComponentType());
-        if (player == null) return;
-
         PlayerRef playerRef = cb.getComponent(ref, PlayerRef.getComponentType());
         if (playerRef == null) return;
-
-        TransformComponent playerTransform = cb.getComponent(ref, TransformComponent.getComponentType());
-        if (playerTransform == null) return;
  
-        int blockX, blockY, blockZ;
-        BlockPosition targetRaw = context.getMetaStore().getMetaObject(Interaction.TARGET_BLOCK_RAW);
-        if (targetRaw != null) {
-            blockX = targetRaw.x;
-            blockY = targetRaw.y;
-            blockZ = targetRaw.z;
-        } else {
-            int interactionDistance = ArcaneRelayPlugin.get().getConfig().getRelayDistance();
-            var target = TargetUtil.getTargetBlock(ref, interactionDistance, cb);
-            if (target == null) {
-                NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.noBlockInRange"), NotificationStyle.Warning);
-                context.getState().state = InteractionState.Failed;
-                return;
-            }
-            blockX = target.x;
-            blockY = target.y;
-            blockZ = target.z;
-        }
+        Vector3i coords = getTargetCoordinates(context, cb, ref, playerRef);
+        if (coords == null) return;
 
         World world = cb.getExternalData().getWorld();
-        var blockType = world.getBlockType(blockX, blockY, blockZ);
-        if (blockType == null) {
-            NotificationUtil.sendNotification(playerRef.getPacketHandler(), Message.translation("server.arcanerelay.notifications.noBlockAtTarget"), NotificationStyle.Warning);
-            context.getState().state = InteractionState.Failed;
-            return;
+        Activation activation = resolveActivation(context, world, playerRef, coords);
+        if (activation == null) return;
+
+        executeActivation(cb, world, activation, coords);
+        setFinished(context);
+    }
+
+    private Vector3i getTargetCoordinates(@Nonnull InteractionContext context, @Nonnull CommandBuffer<EntityStore> cb, @Nonnull Ref<EntityStore> ref, @Nonnull PlayerRef playerRef) {
+        MetaKey<BlockPosition> metaKey = Interaction.TARGET_BLOCK_RAW;
+        BlockPosition targetRaw = metaKey != null ? context.getMetaStore().getMetaObject(metaKey) : null;
+        if (targetRaw != null) {
+            return new Vector3i(targetRaw.x, targetRaw.y, targetRaw.z);
+        } 
+
+        int interactionDistance = ArcaneRelayPlugin.get().getConfig().getRelayDistance();
+        var target = TargetUtil.getTargetBlock(ref, interactionDistance, cb);
+
+        if (target == null) {
+            setFailed(context);
+            return null;
         }
 
+        return new Vector3i(target.x, target.y, target.z); 
+    }
+
+    private Activation resolveActivation(@Nonnull InteractionContext context, @Nonnull World world, @Nonnull PlayerRef playerRef, @Nonnull Vector3i coords) {
+        var blockType = world.getBlockType(coords.x, coords.y, coords.z);
+        if (blockType == null) {
+            setFailed(context);
+            return null;
+        }
+
+        String activator = this.activator;
         Activation activation = (activator != null && !activator.isEmpty())
                 ? Activation.getActivation(activator)
                 : ArcaneUtil.getActivationForBlock(blockType);
+        
         if (activation == null) {
-            context.getState().state = InteractionState.Finished;
-            return;
+            setFailed(context);
+            return null;
         }
 
-        long chunkIndex = ChunkUtil.indexChunkFromBlock(blockX, blockZ);
-        WorldChunk chunk = world.getChunk(chunkIndex);
-        if (chunk == null) {
-            context.getState().state = InteractionState.Finished;
-            return;
-        }
+        return activation;
+    }
 
+    private void executeActivation(@Nonnull CommandBuffer<EntityStore> cb, @Nonnull World world, @Nonnull Activation activation, @Nonnull Vector3i coordsBlock) {
         Store<ChunkStore> store = world.getChunkStore().getStore();
         Ref<ChunkStore> sectionRef = world.getChunkStore().getChunkSectionReference(
-            ChunkUtil.chunkCoordinate(blockX),
-            ChunkUtil.chunkCoordinate(blockY),
-            ChunkUtil.chunkCoordinate(blockZ));
-        if (sectionRef == null) {
-            context.getState().state = InteractionState.Finished;
+            ChunkUtil.chunkCoordinate(coordsBlock.x),
+            ChunkUtil.chunkCoordinate(coordsBlock.y),
+            ChunkUtil.chunkCoordinate(coordsBlock.z)
+        );
+
+        if (sectionRef == null) return;
+
+        var chunkSectionComponent = ChunkSection.getComponentType();
+        var arcaneSectionComponent = ArcaneSection.getComponentType();
+        var blockSectionComponent = BlockSection.getComponentType();
+        var blockComponentSectionComponent = BlockComponentSection.getComponentType();
+
+        if (chunkSectionComponent == null || arcaneSectionComponent == null 
+            || blockSectionComponent == null || blockComponentSectionComponent == null) {
             return;
         }
 
-        ChunkSection chunkSection = store.getComponent(sectionRef, ChunkSection.getComponentType());
-        if (chunkSection == null) {
-            context.getState().state = InteractionState.Finished;
-            return;
-        }
+        ChunkSection chunkSection = store.getComponent(sectionRef, chunkSectionComponent);
+        ArcaneSection arcaneSection = store.getComponent(sectionRef, arcaneSectionComponent);
+        BlockSection blockSection = store.getComponent(sectionRef, blockSectionComponent);
+        
+        if (chunkSection == null || arcaneSection == null || blockSection == null) return;
 
-        ArcaneSection arcaneSection = store.getComponent(sectionRef, ArcaneSection.getComponentType());
-        if (arcaneSection == null) {
-            context.getState().state = InteractionState.Finished;
-            return;
-        }
-
-        BlockSection blockSection = store.getComponent(sectionRef, BlockSection.getComponentType());
-        if (blockSection == null) {
-            context.getState().state = InteractionState.Finished;
-            return;
-        }
-
-        BlockComponentSection blockComponentSection = store.getComponent(sectionRef, BlockComponentSection.getComponentType());
+        BlockComponentSection blockComponentSection = store.getComponent(sectionRef, blockComponentSectionComponent);
         Ref<ChunkStore> blockRef = blockComponentSection != null
-            ? blockComponentSection.getBlockReference(ChunkUtil.indexBlock(blockX, blockY, blockZ))
+            ? blockComponentSection.getBlockReference(ChunkUtil.indexBlock(coordsBlock.x, coordsBlock.y, coordsBlock.z))
             : null;
 
         ArcaneCachedAccessor accessor = new ArcaneCachedAccessor();
         accessor.init(new EntityStoreChunkStoreAdapter(cb), arcaneSection, blockSection, chunkSection, 1);
-        activation.execute(accessor, sectionRef, blockRef, blockX, blockY, blockZ, List.of());
 
+        List<int[]> sources = new ArrayList<>();
+        activation.execute(accessor, sectionRef, blockRef, coordsBlock.x, coordsBlock.y, coordsBlock.z, sources);
+    }
+
+    private void setFailed(InteractionContext context) {
+        context.getState().state = InteractionState.Failed;
+    }
+
+    private void setFinished(InteractionContext context) {
         context.getState().state = InteractionState.Finished;
     }
 }
