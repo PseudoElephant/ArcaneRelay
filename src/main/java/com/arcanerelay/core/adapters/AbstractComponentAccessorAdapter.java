@@ -121,12 +121,12 @@ public abstract class AbstractComponentAccessorAdapter<T> implements ComponentAc
     }
 
     @Override
-    public <Event extends EcsEvent> void invoke(Holder<T> holder, Event event) {
+    public <Event extends EcsEvent> void invoke(@Nonnull Holder<T> holder, @Nonnull Event event) {
         delegate.invoke(holder, event);
     }
 
     @Override
-    public <Event extends EcsEvent> void invoke(EntityHolderEventType<T, Event> entityHolderEventType, Holder<T> holder, Event event) {
+    public <Event extends EcsEvent> void invoke(@Nonnull EntityHolderEventType<T, Event> entityHolderEventType, @Nonnull Holder<T> holder, @Nonnull Event event) {
         delegate.invoke(entityHolderEventType, holder, event);
     }
 }
