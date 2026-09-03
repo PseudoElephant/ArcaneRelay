@@ -2,6 +2,7 @@ package com.pseudoelephant.arcanerelay.features.configurator.interactions;
 
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 
@@ -14,7 +15,6 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.pseudoelephant.arcanerelay.ArcaneRelayPlugin;
 import com.pseudoelephant.arcanerelay.features.configurator.components.ArcaneConfiguratorComponent;
-import com.pseudoelephant.arcanerelay.features.configurator.util.VisualsUtil;
 import com.pseudoelephant.arcanerelay.features.signaltrigger.components.ArcaneTriggerBlock;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -58,9 +58,11 @@ public class AddOutputInteraction extends SimpleInstantInteraction {
         Ref<EntityStore> ref = context.getEntity();
         Player player = cb.getComponent(ref, Player.getComponentType());
         PlayerRef playerRef = cb.getComponent(ref, PlayerRef.getComponentType());
-        ArcaneConfiguratorComponent configurator = cb.getComponent(ref, ArcaneConfiguratorComponent.getComponentType());
+        ComponentType<EntityStore, ArcaneConfiguratorComponent> configuratorType = ArcaneConfiguratorComponent.getComponentType();
+        if (player == null || playerRef == null || configuratorType == null) return;
 
-        if (player == null || playerRef == null || configurator == null) return;
+        ArcaneConfiguratorComponent configurator = cb.getComponent(ref, configuratorType);
+        if (configurator == null) return;
 
         Set<Vector3i> selectedTriggers = configurator.getSelectedBlocks().keySet();
         if (selectedTriggers.isEmpty()) {
@@ -117,7 +119,10 @@ public class AddOutputInteraction extends SimpleInstantInteraction {
             Ref<ChunkStore> blockRef = BlockModule.getBlockEntity(world, triggerPos.x, triggerPos.y, triggerPos.z);
             if (blockRef == null || !blockRef.isValid()) return false; 
             
-            ArcaneTriggerBlock comp = store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
+            ComponentType<ChunkStore, ArcaneTriggerBlock> componentType = ArcaneTriggerBlock.getComponentType();
+            if (componentType == null) return false;
+
+            ArcaneTriggerBlock comp = store.getComponent(blockRef, componentType);
             if (comp == null) return false;
             
             validatedTriggers.add(comp);

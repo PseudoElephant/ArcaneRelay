@@ -5,7 +5,6 @@ import com.hypixel.hytale.component.ComponentType;
 
 import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.pseudoelephant.arcanerelay.ArcaneRelayPlugin;
 import com.pseudoelephant.arcanerelay.features.configurator.util.VisualsUtil;
 
 import java.util.Collections;

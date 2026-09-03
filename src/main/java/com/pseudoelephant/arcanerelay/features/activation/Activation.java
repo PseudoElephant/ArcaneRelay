@@ -37,11 +37,10 @@ public abstract class Activation implements JsonAssetWithMap<String, DefaultAsse
         t -> t.data
     );
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("null")
     public static void registerAssetStore() {
         HytaleAssetStore.Builder<String, Activation, DefaultAssetMap<String, Activation>> b =
-            (HytaleAssetStore.Builder<String, Activation, DefaultAssetMap<String, Activation>>)
-                (Object) HytaleAssetStore.builder(Activation.class, new DefaultAssetMap<String, Activation>());
+            HytaleAssetStore.builder(Activation.class, new DefaultAssetMap<String, Activation>());
         AssetRegistry.register(
             b.setPath("Item/Activations")
                 .setCodec(Activation.CODEC)
@@ -63,18 +62,18 @@ public abstract class Activation implements JsonAssetWithMap<String, DefaultAsse
         .add()
         .build();
 
+    @Nullable
+    protected ActivationEffects effects;
+    protected String id;
+    protected AssetExtraInfo.Data data;
+    private static AssetStore<String, Activation, DefaultAssetMap<String, Activation>> ASSET_STORE;
+
     public Activation() {
     }
      
     public Activation(String id) {
         this.id = id;
     }
-    
-    protected String id;
-    protected AssetExtraInfo.Data data;
-    @Nullable
-    protected ActivationEffects effects;
-    private static AssetStore<String, Activation, DefaultAssetMap<String, Activation>> ASSET_STORE;
 
     public static AssetStore<String, Activation, DefaultAssetMap<String, Activation>> getAssetStore() {
         if (ASSET_STORE == null) {
@@ -86,19 +85,22 @@ public abstract class Activation implements JsonAssetWithMap<String, DefaultAsse
 
     public static DefaultAssetMap<String, Activation> getAssetMap() {
         return (DefaultAssetMap<String, Activation>)getAssetStore().getAssetMap();
-     }
+    }
 
     /** Returns the Activation for an id, or null if "use_block" or not found. */
     @Nullable
     public static Activation getActivation(@Nonnull String id) {
         if (DEFAULT_ACTIVATION_ID.equals(id)) return null;
+
         AssetStore<String, Activation, ?> store = getAssetStore();
         if (store == null) return null;
+
         AssetMap<String, Activation> map = store.getAssetMap();
         if (map == null) return null;
+
         return map.getAsset(id);
     }
-
+  
     @Nonnull
     @Override
     public String getId() {
