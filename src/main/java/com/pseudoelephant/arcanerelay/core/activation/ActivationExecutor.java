@@ -1,6 +1,7 @@
 package com.pseudoelephant.arcanerelay.core.activation;
 
 import com.hypixel.hytale.component.ComponentAccessor;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
@@ -9,7 +10,6 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.pseudoelephant.arcanerelay.ArcaneRelayPlugin;
 import com.pseudoelephant.arcanerelay.features.activation.ActivationEffects;
 import com.pseudoelephant.arcanerelay.features.signal.util.ArcaneUtil;
 import com.pseudoelephant.arcanerelay.features.signaltrigger.components.ArcaneTriggerBlock;
@@ -23,7 +23,10 @@ public final class ActivationExecutor {
     public static void sendSignals(@Nonnull ComponentAccessor<ChunkStore> accessor, @Nullable Ref<ChunkStore> blockRef, int worldX, int worldY, int worldZ) {
         if (blockRef == null || !blockRef.isValid()) return;
 
-        ArcaneTriggerBlock trigger = accessor.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
+        ComponentType<ChunkStore, ArcaneTriggerBlock> triggerBlockComponent = ArcaneTriggerBlock.getComponentType();
+        if (triggerBlockComponent == null) return;
+
+        ArcaneTriggerBlock trigger = accessor.getComponent(blockRef, triggerBlockComponent);
         if (trigger == null) return;
 
         for (Vector3i out : trigger.getOutputPositions()) {

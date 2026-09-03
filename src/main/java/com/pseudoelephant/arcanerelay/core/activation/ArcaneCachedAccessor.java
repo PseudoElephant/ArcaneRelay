@@ -17,6 +17,7 @@ import com.pseudoelephant.arcanerelay.features.signal.components.ArcaneSection;
 public final class ArcaneCachedAccessor extends AbstractCachedAccessor implements ArcaneActivationAccessor {
 
     private static final Registry REGISTRY = new Registry();
+
     private static final Key<ArcaneSection> ARCANE = REGISTRY.forSection(ArcaneSection::getComponentType);
     private static final Key<BlockSection> BLOCK = REGISTRY.forSection(BlockSection::getComponentType);
     private static final Key<ChunkSection> CHUNK = REGISTRY.forSection(ChunkSection::getComponentType);
@@ -29,6 +30,7 @@ public final class ArcaneCachedAccessor extends AbstractCachedAccessor implement
         super(REGISTRY);
     }
 
+    @SuppressWarnings("null")
     public void init(
         @Nonnull ChunkStoreCommandBufferLike commandBuffer,
         @Nonnull ArcaneSection section,
@@ -46,25 +48,31 @@ public final class ArcaneCachedAccessor extends AbstractCachedAccessor implement
         insertSectionComponent(CHUNK, chunkSection, chunkSection.getX(), chunkSection.getY(), chunkSection.getZ());
     }
 
-
     @Override
     @Nullable
     public ArcaneSection getArcaneSection(int cx, int cy, int cz) {
-        return getComponentSection(cx, cy, cz, ARCANE);
+        Key<ArcaneSection> arcaneKey = ARCANE;
+        if (arcaneKey == null) return null;
+        return getComponentSection(cx, cy, cz, arcaneKey);
     }
 
     @Override
     @Nullable
     public BlockSection getBlockSection(int cx, int cy, int cz) {
-        return getComponentSection(cx, cy, cz, BLOCK);
+        Key<BlockSection> blockKey = BLOCK;
+        if (blockKey == null) return null;
+        return getComponentSection(cx, cy, cz, blockKey);
     }
 
     @Override
     @Nullable
     public ChunkSection getChunkSection(int cx, int cy, int cz) {
-        return getComponentSection(cx, cy, cz, CHUNK);
+        Key<ChunkSection> chunkKey = CHUNK;
+        if (chunkKey == null) return null;
+        return getComponentSection(cx, cy, cz, chunkKey);
     }
 
+    @SuppressWarnings("null")
     @Override
     @Nonnull
     public ChunkStoreCommandBufferLike getCommandBuffer() {

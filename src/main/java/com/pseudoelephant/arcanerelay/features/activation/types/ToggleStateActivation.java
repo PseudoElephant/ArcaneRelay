@@ -166,7 +166,6 @@ public class ToggleStateActivation extends Activation {
             });
         }
 
-
         if (shouldSendSignal(state, newState)) {
             // MIGHT need to make adjustments here to ensure we are sending the signals to the correct blocks
             commandBuffer.run((@Nonnull Store<ChunkStore> store) -> {
