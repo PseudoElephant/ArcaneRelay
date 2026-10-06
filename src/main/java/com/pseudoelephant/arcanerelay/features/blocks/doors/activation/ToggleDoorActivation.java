@@ -1,0 +1,306 @@
+package com.pseudoelephant.arcanerelay.features.blocks.doors.activation;
+
+import com.hypixel.hytale.codec.Codec;
+import com.hypixel.hytale.codec.KeyedCodec;
+import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.math.util.ChunkUtil;
+import com.hypixel.hytale.math.util.MathUtil;
+import com.hypixel.hytale.math.util.TrigMathUtil;
+import org.joml.Vector3d;
+import org.joml.Vector3i;
+import com.hypixel.hytale.server.core.asset.type.blockhitbox.BlockBoundingBoxes;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.Rotation;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
+import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
+
+import java.util.List;
+import com.hypixel.hytale.server.core.util.FillerBlockUtil;
+import com.pseudoelephant.arcanerelay.core.activation.ActivationExecutor;
+import com.pseudoelephant.arcanerelay.core.activation.ArcaneCachedAccessor;
+import com.pseudoelephant.arcanerelay.core.adapters.ChunkStoreCommandBufferLike;
+import com.pseudoelephant.arcanerelay.features.activation.Activation;
+import com.pseudoelephant.arcanerelay.features.signal.components.ArcaneSection;
+import com.pseudoelephant.arcanerelay.util.BlockUtil;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+public class ToggleDoorActivation extends Activation {
+
+    public static final BuilderCodec<ToggleDoorActivation> CODEC =
+        BuilderCodec.builder(
+            ToggleDoorActivation.class,
+            ToggleDoorActivation::new,
+            Activation.ABSTRACT_CODEC
+        )
+        .documentation("Toggles a door block in front of this block. Uses same state logic as DoorInteraction.")
+        .appendInherited(
+            new KeyedCodec<>("Horizontal", Codec.BOOLEAN),
+            (a, h) -> a.horizontal = h,
+            a -> a.horizontal,
+            (a, p) -> a.horizontal = p.horizontal
+        )
+        .documentation("Whether the door is horizontal (e.g. gate) or vertical (e.g. regular door). Affects forward direction. Default: false.")
+        .add()
+        .appendInherited(
+            new KeyedCodec<>("OpenIn", Codec.BOOLEAN),
+            (a, o) -> a.openIn = o,
+            a -> a.openIn,
+            (a, p) -> a.openIn = p.openIn
+        )
+        .documentation("When opening from closed, open inward (true) or outward (false). Default: true.")
+        .add()
+        .appendInherited(
+            new KeyedCodec<>("IsWall", Codec.BOOLEAN),
+            (a, w) -> a.isWall = w,
+            a -> a.isWall,
+            (a, p) -> a.isWall = p.isWall
+        )
+        .documentation("Whether this block is wall-mounted (affects forward direction). Default: false.")
+        .add()
+        .build();
+
+    private boolean horizontal = false;
+    private boolean openIn = true;
+    private boolean isWall = false;
+
+    public ToggleDoorActivation() {
+    }
+
+    private enum DoorState {
+        CLOSED,
+        OPENED_IN,
+        OPENED_OUT;
+
+        @Nonnull
+        static DoorState fromBlockState(@Nullable String state) {
+            if (state == null) return CLOSED;
+            return switch (state) {
+                case "OpenDoorOut" -> OPENED_IN;
+                case "OpenDoorIn" -> OPENED_OUT;
+                default -> CLOSED;
+            };
+        }
+    }
+
+    @Nonnull
+    private static String getInteractionState(@Nonnull DoorState fromState, @Nonnull DoorState doorState) {
+        if (doorState == DoorState.CLOSED && fromState == DoorState.OPENED_IN) {
+            return "CloseDoorOut";
+        }
+        if (doorState == DoorState.CLOSED && fromState == DoorState.OPENED_OUT) {
+            return "CloseDoorIn";
+        }
+        if (doorState == DoorState.OPENED_IN) {
+            return "OpenDoorOut";
+        }
+        return "OpenDoorIn";
+    }
+
+    @Nonnull
+    private static DoorState getOppositeDoorState(@Nonnull DoorState doorState) {
+        return doorState == DoorState.OPENED_OUT ? DoorState.OPENED_IN
+            : (doorState == DoorState.OPENED_IN ? DoorState.OPENED_OUT : DoorState.CLOSED);
+    }
+
+    private static boolean isSourceInFrontOfDoor(
+        @Nonnull Vector3i doorBlockPosition,
+        @Nullable Rotation doorRotationYaw,
+        int sourceX, int sourceY, int sourceZ
+    ) {
+        double doorRotationRad = Math.toRadians(doorRotationYaw != null ? doorRotationYaw.getDegrees() : 0.0);
+        Vector3d doorRotationVector = new Vector3d(TrigMathUtil.sin(doorRotationRad), 0.0, TrigMathUtil.cos(doorRotationRad));
+        Vector3d sourcePos = new Vector3d(sourceX + 0.5, sourceY + 0.5, sourceZ + 0.5);
+        Vector3d direction = new Vector3d(doorBlockPosition).sub(sourcePos).normalize();
+        return direction.dot(doorRotationVector) < 0.0;
+    }
+
+    private record DoorInfo(
+        @Nonnull BlockType blockType,
+        int filler,
+        @Nonnull Vector3i blockPosition,
+        @Nonnull DoorState doorState
+    ) {}
+
+    @Nullable
+    private static DoorInfo getDoorAtPosition(
+        @Nonnull World world,
+        @Nonnull Store<ChunkStore> store,
+        int x, int y, int z,
+        @Nonnull Rotation rotationToCheck
+    ) {
+        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(x, z));
+        if (chunk == null) return null;
+        BlockType blockType = chunk.getBlockType(x, y, z);
+        if (blockType == null) return null;
+        BlockSection section = BlockUtil.getBlockSection(store, x, y, z);
+        if (section == null) return null;
+        int rotationIndex = BlockUtil.getRotationIndex(section, x, y, z);
+        RotationTuple blockRotation = RotationTuple.get(rotationIndex);
+        String blockState = blockType.getStateForBlock(blockType);
+        DoorState doorState = DoorState.fromBlockState(blockState);
+        Rotation doorRotation = blockRotation.yaw();
+        int filler = BlockUtil.getFiller(section, x, y, z);
+        if (doorRotation != rotationToCheck) return null;
+        return new DoorInfo(blockType, filler, new Vector3i(x, y, z), doorState);
+    }
+
+    @Nullable
+    private static DoorInfo getDoubleDoor(
+        @Nonnull World world,
+        @Nonnull Store<ChunkStore> store,
+        @Nonnull Vector3i worldPosition,
+        @Nonnull BlockType blockType,
+        int rotation,
+        @Nonnull DoorState doorStateToCheck
+    ) {
+        if (blockType.getItem() == null) return null;
+        BlockType baseBlockType = BlockType.getAssetMap().getAsset(blockType.getItem().getId());
+        if (baseBlockType == null) return null;
+        int hitboxTypeIndex = baseBlockType.getHitboxTypeIndex();
+        BlockBoundingBoxes blockBoundingBoxes = BlockBoundingBoxes.getAssetMap().getAsset(hitboxTypeIndex);
+        if (blockBoundingBoxes == null) return null;
+        BlockBoundingBoxes.RotatedVariantBoxes baseBoxes = blockBoundingBoxes.get(Rotation.None, Rotation.None, Rotation.None);
+        if (baseBoxes == null) return null;
+        int offsetX = (int) baseBoxes.getBoundingBox().getMax().x * 2 - 1;
+        Vector3i offset = new Vector3i(offsetX, 0, 0);
+        Rotation rotationToCheck = RotationTuple.get(rotation).yaw();
+        Vector3i otherPos = new Vector3i(worldPosition).add(MathUtil.rotateVectorYAxis(offset, rotationToCheck.getDegrees(), false));
+        DoorInfo matchingDoor = getDoorAtPosition(world, store, otherPos.x, otherPos.y, otherPos.z, rotationToCheck.flip());
+        if (matchingDoor == null || matchingDoor.doorState() != doorStateToCheck || matchingDoor.filler() != 0) return null;
+        BlockType matchingBlockType = matchingDoor.blockType();
+        if (matchingBlockType.getItem() == null) return null;
+        int matchingHitboxIndex = BlockType.getAssetMap().getAsset(matchingBlockType.getItem().getId()).getHitboxTypeIndex();
+        return matchingHitboxIndex == hitboxTypeIndex ? matchingDoor : null;
+    }
+
+    @Nullable
+    private static BlockType activateDoor(
+        @Nonnull World world,
+        @Nonnull Store<ChunkStore> store,
+        @Nonnull BlockType blockType,
+        @Nonnull Vector3i blockPosition,
+        @Nonnull DoorState fromState,
+        @Nonnull DoorState doorState
+    ) {
+        
+        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(blockPosition.x, blockPosition.z));
+        if (chunk == null) return null;
+        BlockSection section = BlockUtil.getBlockSection(store, blockPosition.x, blockPosition.y, blockPosition.z);
+        if (section == null) return null;
+        int rotationIndex = BlockUtil.getRotationIndex(section, blockPosition.x, blockPosition.y, blockPosition.z);
+        BlockBoundingBoxes oldHitbox = BlockBoundingBoxes.getAssetMap().getAsset(blockType.getHitboxTypeIndex());
+        String interactionStateToSend = getInteractionState(fromState, doorState);
+        BlockType blockTypeForState = blockType;
+        if (blockType.getBlockForState(interactionStateToSend) == null && blockType.getItem() != null) {
+            BlockType base = BlockType.getAssetMap().getAsset(blockType.getItem().getId());
+            if (base != null && base.getBlockForState(interactionStateToSend) != null) blockTypeForState = base;
+        }
+        world.setBlockInteractionState(blockPosition, blockTypeForState, interactionStateToSend);
+        BlockType currentBlockType = world.getBlockType(blockPosition);
+        if (currentBlockType == null) return null;
+        BlockType newBlockType = currentBlockType.getBlockForState(interactionStateToSend);
+        if (oldHitbox != null) {
+            BlockBoundingBoxes.RotatedVariantBoxes oldRotated = oldHitbox.get(rotationIndex);
+            if (oldRotated != null) {
+                FillerBlockUtil.forEachFillerBlock(oldRotated, (bx, by, bz) ->
+                    world.performBlockUpdate(blockPosition.x + bx, blockPosition.y + by, blockPosition.z + bz));
+            }
+        }
+        if (newBlockType != null) {
+            BlockBoundingBoxes newHitbox = BlockBoundingBoxes.getAssetMap().getAsset(newBlockType.getHitboxTypeIndex());
+            if (newHitbox != null && newHitbox != oldHitbox) {
+                BlockBoundingBoxes.RotatedVariantBoxes newRotated = newHitbox.get(rotationIndex);
+                if (newRotated != null) {
+                    FillerBlockUtil.forEachFillerBlock(newRotated, (bx, by, bz) ->
+                        world.performBlockUpdate(blockPosition.x + bx, blockPosition.y + by, blockPosition.z + bz));
+                }
+            }
+        }
+        return newBlockType;
+    }
+
+    @Override
+    public ArcaneSection.BlockTickStrategy execute(
+        @Nonnull ArcaneCachedAccessor accessor,
+        @Nullable Ref<ChunkStore> sectionRef,
+        @Nullable Ref<ChunkStore> blockRef,
+        int worldX, int worldY, int worldZ,
+        @Nonnull List<int[]> sources
+    ) {
+        ChunkStoreCommandBufferLike commandBuffer = accessor.getCommandBuffer();
+
+        // This ensures we are enqueing the block interaction state change on the correct thread
+        // I need to review if operations such as retrieving a loaded chunk are thread safe
+        commandBuffer.run((@Nonnull Store<ChunkStore> store) -> {
+            World w = store.getExternalData().getWorld();
+
+            WorldChunk doorChunk = w.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(worldX, worldZ));
+            if (doorChunk == null) return;
+
+            int[] main = BlockUtil.findMainBlock(w, doorChunk, worldX, worldY, worldZ);
+            if (main == null) return;
+
+            int mainX = main[0], mainY = main[1], mainZ = main[2];
+            WorldChunk mainChunk = w.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(mainX, mainZ));
+            if (mainChunk == null) return;
+
+            BlockType mainBlockType = mainChunk.getBlockType(mainX, mainY, mainZ);
+            if (mainBlockType == null) return;
+
+            BlockSection mainSection = BlockUtil.getBlockSection(store, mainX, mainY, mainZ);
+            if (mainSection == null) return;
+
+            Vector3i mainPos = new Vector3i(mainX, mainY, mainZ);
+            String blockState = mainBlockType.getStateForBlock(mainBlockType);
+            DoorState currentState = DoorState.fromBlockState(blockState);
+            int rotation = BlockUtil.getRotationIndex(mainSection, mainX, mainY, mainZ);
+
+            Rotation doorYaw = RotationTuple.get(rotation).yaw();
+
+            DoorState newState;
+            if (currentState == DoorState.CLOSED) {
+                if (horizontal) {
+                    newState = openIn ? DoorState.OPENED_IN : DoorState.OPENED_OUT;
+                } else {
+                    int sourceX = worldX, sourceY = worldY, sourceZ = worldZ;
+                    if (!sources.isEmpty()) {
+                        int[] src = sources.get(0);
+                        if (src != null && src.length >= 3) {
+                            sourceX = src[0];
+                            sourceY = src[1];
+                            sourceZ = src[2];
+                        }
+                    }
+                    newState = isSourceInFrontOfDoor(mainPos, doorYaw, sourceX, sourceY, sourceZ)
+                        ? DoorState.OPENED_OUT
+                        : DoorState.OPENED_IN;
+                }
+            } else {
+                newState = DoorState.CLOSED;
+            }
+
+            BlockType resultType = activateDoor(w, store, mainBlockType, mainPos, currentState, newState);
+            if (resultType != null) {
+                DoorState stateDoubleDoor = getOppositeDoorState(currentState);
+                DoorInfo doubleDoor = getDoubleDoor(w, store, mainPos, mainBlockType, rotation, stateDoubleDoor);
+                if (doubleDoor != null) {
+                    DoorState stateForDoubleDoor = horizontal ? newState : getOppositeDoorState(newState);
+                    activateDoor(w, store, doubleDoor.blockType(), doubleDoor.blockPosition(), doubleDoor.doorState(), stateForDoubleDoor);
+                }
+                ActivationExecutor.playBlockInteractionSound(w, mainX, mainY, mainZ, resultType);
+                ActivationExecutor.playEffects(w, mainX, mainY, mainZ, getEffects());
+            }
+
+            ActivationExecutor.sendSignals(store, blockRef, mainX, mainY, mainZ);
+        });
+
+        return ArcaneSection.BlockTickStrategy.PROCESSED;
+    }
+}

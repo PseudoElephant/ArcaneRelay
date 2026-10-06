@@ -12,6 +12,6 @@
     "Dependencies": {},
     "OptionalDependencies": {},
     "DisabledByDefault": false,
-    "Main": "com.arcanerelay.ArcaneRelayPlugin",
+    "Main": "com.pseudoelephant.arcanerelay.ArcaneRelayPlugin",
     "IncludesAssetPack": true
 }
