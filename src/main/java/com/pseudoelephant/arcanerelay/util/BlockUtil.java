@@ -83,6 +83,30 @@ public final class BlockUtil {
         return store.getComponent(sectionRef, BlockSection.getComponentType());
     }
 
+    /**
+     * Resolves a copy of the block-entity holder for a block position.
+     *
+     * @param store chunk-store component accessor
+     * @param x     block X (world coordinates required)
+     * @param y     block Y (world)
+     * @param z     block Z (world coordinates required)
+     * @return a copy of the holder, or null if the section/component/reference does not exist
+     */
+    @Nullable
+    public static Holder<ChunkStore> getBlockComponentHolder(
+            @Nonnull ComponentAccessor<ChunkStore> store, int x, int y, int z) {
+        Ref<ChunkStore> sectionRef = store.getExternalData().getChunkSectionReferenceAtBlock(x, y, z);
+        if (sectionRef == null || !sectionRef.isValid()) {
+            return null;
+        }
+
+        BlockComponentSection blockComponentSection =
+                store.getComponent(sectionRef, BlockComponentSection.getComponentType());
+        return blockComponentSection != null
+                ? blockComponentSection.copyBlockHolder(ChunkUtil.indexBlock(x, y, z))
+                : null;
+    }
+
     public static int getFiller(@Nonnull BlockSection section, int x, int y, int z) {
         return section.getFiller(x, y, z);
     }

@@ -57,6 +57,7 @@ public class ArcaneRelayEffect extends TriggerEffect {
         Store<EntityStore> store = context.getStore();
         World world = ((EntityStore) store.getExternalData()).getWorld();
         if (world != null) {
+            Store<ChunkStore> chunkStore = world.getChunkStore().getStore();
             Vector3d min = new Vector3d(); Vector3d max = new Vector3d();
             LongOpenHashSet processedBlocks = new LongOpenHashSet();
 
@@ -70,12 +71,7 @@ public class ArcaneRelayEffect extends TriggerEffect {
                 for(int x = minX; x <= maxX; ++x) {
                     for(int y = minY; y <= maxY; ++y) {
                         for(int z = minZ; z <= maxZ; ++z) {
-                            WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(x, z));
-                            if (chunk == null) {
-                                continue;
-                            }
-
-                            BlockType blockType = chunk.getBlockType(x, y, z);
+                            BlockType blockType = com.pseudoelephant.arcanerelay.util.BlockUtil.getBlockType(chunkStore, x, y, z);
                             if (blockType == null) {
                                 continue;
                             }
@@ -85,17 +81,12 @@ public class ArcaneRelayEffect extends TriggerEffect {
                                 continue;
                             }
 
-                            WorldChunk chunkAtAnchor = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(anchor.x, anchor.z));
-                            if (chunkAtAnchor == null) {
-                                continue;
-                            }
-
-                            BlockType typeAtAnchor = chunkAtAnchor.getBlockType(anchor.x, anchor.y, anchor.z);
+                            BlockType typeAtAnchor = com.pseudoelephant.arcanerelay.util.BlockUtil.getBlockType(chunkStore, anchor.x, anchor.y, anchor.z);
                             if (typeAtAnchor == null || !typeAtAnchor.getId().contains("Pseudo")) {
                                continue;
                             }
 
-                            this.sendTrigger(context,world, chunkAtAnchor, typeAtAnchor, anchor.x, anchor.y, anchor.z);
+                            this.sendTrigger(context,world, chunkStore, typeAtAnchor, anchor.x, anchor.y, anchor.z);
                         }
                     }
                 }
@@ -105,20 +96,12 @@ public class ArcaneRelayEffect extends TriggerEffect {
 
     @Nonnull
     private static Vector3i anchorForCell(@Nonnull World world, int x, int y, int z) {
-        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(x, z));
-        if (chunk == null) {
-            return new Vector3i(x, y, z);
-        }
-
         BlockSection section = com.pseudoelephant.arcanerelay.util.BlockUtil.getBlockSection(world.getChunkStore().getStore(), x, y, z);
         int filler = section != null ? com.pseudoelephant.arcanerelay.util.BlockUtil.getFiller(section, x, y, z) : 0;
         return filler == 0 ? new Vector3i(x, y, z) : new Vector3i(x - FillerBlockUtil.unpackX(filler), y - FillerBlockUtil.unpackY(filler), z - FillerBlockUtil.unpackZ(filler));
     }
    
-    private void sendTrigger(@Nonnull TriggerContext context, @Nonnull World world, @Nonnull WorldChunk chunk, @Nonnull BlockType blockType, int x, int y, int z) {
-        Ref<ChunkStore> chunkRef = chunk.getReference();
-        Store<ChunkStore> chunkStore = chunkRef.getStore();
-
+    private void sendTrigger(@Nonnull TriggerContext context, @Nonnull World world, @Nonnull Store<ChunkStore> chunkStore, @Nonnull BlockType blockType, int x, int y, int z) {
         switch(this.triggerTarget) {
             case ALL_ARCANE_BLOCKS_IN_VOLUME:
                 ArcaneRelayPlugin.LOGGER.atInfo().log("VolumeTrigger: Trigger All on block: %s at: %d, %d, %d ", blockType.getId(), x, y, z);

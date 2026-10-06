@@ -3,6 +3,7 @@ package com.pseudoelephant.arcanerelay.features.blockmovement.util;
 import org.joml.Vector3i;
 
 import com.hypixel.hytale.component.ComponentAccessor;
+import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.math.Axis;
 import org.joml.Vector3d;
 import com.hypixel.hytale.protocol.BlockMaterial;
@@ -10,6 +11,8 @@ import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.Rotation;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.ChunkSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.pseudoelephant.arcanerelay.ArcaneRelayPlugin;
 import com.pseudoelephant.arcanerelay.features.config.ArcaneRelayConfig;
@@ -29,11 +32,17 @@ public class BlockVectorUtil {
         return config;
     }
 
-    public static void setTickingAround(@Nonnull WorldChunk chnk, Vector3i pos, int range) {
+    public static void setTickingAround(@Nonnull ComponentAccessor<ChunkStore> store, Vector3i pos, int range) {
         for (int x = -range; x <= range; x++) {
             for (int y = -range; y <= range; y++) {
                 for (int z = -range; z <= range; z++) {
-                    chnk.setTicking(pos.x + x, pos.y + y, pos.z + z, true);
+                    Ref<ChunkStore> sectionRef = store.getExternalData().getChunkSectionReferenceAtBlock(pos.x + x, pos.y + y, pos.z + z);
+                    if (sectionRef == null) continue;
+                    BlockSection bs = store.getComponent(sectionRef, BlockSection.getComponentType());
+                    if (bs != null && bs.setTicking(pos.x + x, pos.y + y, pos.z + z, true)) {
+                        ChunkSection cs = store.getComponent(sectionRef, ChunkSection.getComponentType());
+                        if (cs != null) cs.markNeedsSaving();
+                    }
                 }
             }
         }

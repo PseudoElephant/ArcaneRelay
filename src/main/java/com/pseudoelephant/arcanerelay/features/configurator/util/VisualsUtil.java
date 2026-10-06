@@ -84,13 +84,11 @@ public class VisualsUtil {
     }
 
     private static Iterable<Vector3i> getTriggerOutputs(World world, Vector3i triggerPos) {
-        WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(triggerPos.x, triggerPos.z));
-        if (chunk == null) return Collections.emptyList();
+        Store<ChunkStore> store = world.getChunkStore().getStore();
 
-        Ref<ChunkStore> blockRef = chunk.getBlockComponentEntity(triggerPos.x, triggerPos.y, triggerPos.z);
+        Ref<ChunkStore> blockRef = BlockUtil.getBlockEntityReference(store, triggerPos.x, triggerPos.y, triggerPos.z);
         if (blockRef == null || !blockRef.isValid()) return Collections.emptyList();
 
-        Store<ChunkStore> store = world.getChunkStore().getStore();
         ArcaneTriggerBlock triggerBlock = store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
         if (triggerBlock == null || !triggerBlock.hasOutputPositions()) return Collections.emptyList();
 
@@ -109,13 +107,11 @@ public class VisualsUtil {
 
     /** Draw debug arrows from trigger to each output; call after updating trigger outputs (e.g. from AddOutputInteraction). */
     private static void showTriggerOutputArrows(World world, Vector3i triggerPos, Vector3f color) {
-        WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(triggerPos.x, triggerPos.z));
-        if (chunk == null) return;
+        Store<ChunkStore> store = world.getChunkStore().getStore();
 
-        Ref<ChunkStore> blockRef = chunk.getBlockComponentEntity(triggerPos.x, triggerPos.y, triggerPos.z);
+        Ref<ChunkStore> blockRef = BlockUtil.getBlockEntityReference(store, triggerPos.x, triggerPos.y, triggerPos.z);
         if (blockRef == null || !blockRef.isValid()) return;
 
-        Store<ChunkStore> store = world.getChunkStore().getStore();
         ArcaneTriggerBlock triggerBlock = store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
         if (triggerBlock == null || !triggerBlock.hasOutputPositions()) return;
 
@@ -131,13 +127,12 @@ public class VisualsUtil {
     }
 
     private static Box getEnclosingBoundingHitbox(@Nonnull World world, @Nonnull Vector3i blockPos) {
-        WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(blockPos.x, blockPos.z));
-        if (chunk == null) return null;
+        Store<ChunkStore> store = world.getChunkStore().getStore();
 
-        BlockType blockType = chunk.getBlockType(blockPos.x, blockPos.y, blockPos.z);
+        BlockType blockType = BlockUtil.getBlockType(store, blockPos.x, blockPos.y, blockPos.z);
         if (blockType == null) return null;
 
-        BlockSection section = BlockUtil.getBlockSection(world.getChunkStore().getStore(), blockPos.x, blockPos.y, blockPos.z);
+        BlockSection section = BlockUtil.getBlockSection(store, blockPos.x, blockPos.y, blockPos.z);
         if (section == null) return null;
 
         int rotationIndex = BlockUtil.getRotationIndex(section, blockPos.x, blockPos.y, blockPos.z);

@@ -19,10 +19,6 @@ public class ArcaneUtil {
     
     public static void setTicking(@Nonnull ComponentAccessor<ChunkStore> store, int worldX, int worldY, int worldZ) {
         World world = store.getExternalData().getWorld();
-        long chunkIndex = ChunkUtil.indexChunkFromBlock(worldX, worldZ);
-        WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
-        if (chunk == null) return;
-
         Ref<ChunkStore> sectionRef = world.getChunkStore()
                 .getChunkSectionReference(ChunkUtil.chunkCoordinate(worldX), ChunkUtil.chunkCoordinate(worldY), ChunkUtil.chunkCoordinate(worldZ));
         if (sectionRef == null) return;
@@ -35,10 +31,6 @@ public class ArcaneUtil {
 
     public static void clearTicking(@Nonnull ComponentAccessor<ChunkStore> store, int worldX, int worldY, int worldZ) {
         World world = store.getExternalData().getWorld();
-        long chunkIndex = ChunkUtil.indexChunkFromBlock(worldX, worldZ);
-        WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
-        if (chunk == null) return;
-
         Ref<ChunkStore> sectionRef = world.getChunkStore()
                 .getChunkSectionReference(ChunkUtil.chunkCoordinate(worldX), ChunkUtil.chunkCoordinate(worldY), ChunkUtil.chunkCoordinate(worldZ));
         if (sectionRef == null) return;
@@ -55,10 +47,6 @@ public class ArcaneUtil {
             int worldX, int worldY, int worldZ,
             int sourceX, int sourceY, int sourceZ) {
         World world = accessor.getExternalData().getWorld();
-        long chunkIndex = ChunkUtil.indexChunkFromBlock(worldX, worldZ);
-        WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
-        if (chunk == null) return;
-
         Ref<ChunkStore> sectionRef = world.getChunkStore()
                 .getChunkSectionReference(ChunkUtil.chunkCoordinate(worldX), ChunkUtil.chunkCoordinate(worldY), ChunkUtil.chunkCoordinate(worldZ));
         if (sectionRef == null) return;

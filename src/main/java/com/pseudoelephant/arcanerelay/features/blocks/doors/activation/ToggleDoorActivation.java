@@ -135,9 +135,7 @@ public class ToggleDoorActivation extends Activation {
         int x, int y, int z,
         @Nonnull Rotation rotationToCheck
     ) {
-        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(x, z));
-        if (chunk == null) return null;
-        BlockType blockType = chunk.getBlockType(x, y, z);
+        BlockType blockType = BlockUtil.getBlockType(store, x, y, z);
         if (blockType == null) return null;
         BlockSection section = BlockUtil.getBlockSection(store, x, y, z);
         if (section == null) return null;
@@ -190,8 +188,6 @@ public class ToggleDoorActivation extends Activation {
         @Nonnull DoorState doorState
     ) {
         
-        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(blockPosition.x, blockPosition.z));
-        if (chunk == null) return null;
         BlockSection section = BlockUtil.getBlockSection(store, blockPosition.x, blockPosition.y, blockPosition.z);
         if (section == null) return null;
         int rotationIndex = BlockUtil.getRotationIndex(section, blockPosition.x, blockPosition.y, blockPosition.z);
@@ -241,17 +237,13 @@ public class ToggleDoorActivation extends Activation {
         commandBuffer.run((@Nonnull Store<ChunkStore> store) -> {
             World w = store.getExternalData().getWorld();
 
-            WorldChunk doorChunk = w.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(worldX, worldZ));
-            if (doorChunk == null) return;
+            if (BlockUtil.getBlockSection(store, worldX, worldY, worldZ) == null) return;
 
             int[] main = BlockUtil.findMainBlock(w, worldX, worldY, worldZ);
             if (main == null) return;
 
             int mainX = main[0], mainY = main[1], mainZ = main[2];
-            WorldChunk mainChunk = w.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(mainX, mainZ));
-            if (mainChunk == null) return;
-
-            BlockType mainBlockType = mainChunk.getBlockType(mainX, mainY, mainZ);
+            BlockType mainBlockType = BlockUtil.getBlockType(store, mainX, mainY, mainZ);
             if (mainBlockType == null) return;
 
             BlockSection mainSection = BlockUtil.getBlockSection(store, mainX, mainY, mainZ);

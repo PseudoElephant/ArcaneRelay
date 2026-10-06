@@ -14,6 +14,7 @@ import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.pseudoelephant.arcanerelay.features.configurator.components.ArcaneConfiguratorComponent;
 import com.pseudoelephant.arcanerelay.features.configurator.util.VisualsUtil;
 import com.pseudoelephant.arcanerelay.features.signaltrigger.components.ArcaneTriggerBlock;
+import com.pseudoelephant.arcanerelay.util.BlockUtil;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
@@ -77,14 +78,12 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
 
         Vector3i target = new Vector3i(targetPosition.x, targetPosition.y, targetPosition.z);
         World world = cb.getExternalData().getWorld();
-        WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(target.x, target.z));
-        
-        if (chunk == null) {
+        if (world.getChunkStore().getChunkReference(ChunkUtil.indexChunkFromBlock(target.x, target.z)) == null) {
             setFailed(context);
             return;
         }
 
-        if (!isValidArcaneTrigger(world, chunk, target)) {
+        if (!isValidArcaneTrigger(world, target)) {
             if (!configurator.getSelectedBlocks().isEmpty()) {
                 deselectTriggers(configurator, playerRef);
             } else {
@@ -115,13 +114,13 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
         return states != null && states.getMovementStates().crouching;
     }
 
-    private boolean isValidArcaneTrigger(World world, WorldChunk chunk, Vector3i target) {
-        Ref<ChunkStore> blockRef = chunk.getBlockComponentEntity(target.x, target.y, target.z);
+    private boolean isValidArcaneTrigger(World world, Vector3i target) {
+        Store<ChunkStore> store = world.getChunkStore().getStore();
+        Ref<ChunkStore> blockRef = BlockUtil.getBlockEntityReference(store, target.x, target.y, target.z);
         if (blockRef == null || !blockRef.isValid()) {
             return false;
         }
-        
-        Store<ChunkStore> store = world.getChunkStore().getStore();
+
         return store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType()) != null;
     }
 

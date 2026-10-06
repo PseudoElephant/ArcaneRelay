@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.pseudoelephant.arcanerelay.features.blockmovement.resources.ArcaneMoveState.MoveEntry;
+import com.pseudoelephant.arcanerelay.util.BlockUtil;
 
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -51,22 +52,21 @@ public final class BlockMovementExecutor {
                 int tz = blockPosition.z + moveEntry.moveDirection.z;
 
                 long futureChunkIndex = ChunkUtil.indexChunkFromBlock(tx, tz);
-                WorldChunk futureChunk = world.getChunk(futureChunkIndex);
-                if (futureChunk == null)
+                if (world.getChunkStore().getChunkReference(futureChunkIndex) == null)
                     continue;
 
                 long fromChunkIndex = ChunkUtil.indexChunkFromBlock(blockPosition.x, blockPosition.z);
-                WorldChunk fromChunk = world.getChunk(fromChunkIndex);
-                if (fromChunk == null)
+                if (world.getChunkStore().getChunkReference(fromChunkIndex) == null)
                     continue;
 
                 world.execute(() -> {
+                    Store<ChunkStore> store = world.getChunkStore().getStore();
                     List<Vector3i> targetsAtSource = targetPositionGraph.get(blockPosition);
                     boolean noOneMovingHere = targetsAtSource == null || targetsAtSource.isEmpty();
                     if (noOneMovingHere) {
 
-                        int settings = 0;
-                        fromChunk.breakBlock(
+                        BlockUtil.clearBlock(
+                            store,
                             blockPosition.x,
                             blockPosition.y,
                             blockPosition.z,
@@ -75,7 +75,8 @@ public final class BlockMovementExecutor {
                         dirtyChunks.add(fromChunkIndex);
                     }
 
-                    futureChunk.setBlock(
+                    BlockUtil.setBlock(
+                        store,
                         tx, ty, tz,
                         moveEntry.blockId,
                         moveEntry.blockType,
@@ -84,11 +85,11 @@ public final class BlockMovementExecutor {
                         4
                     );
 
-                    futureChunk.setState(tx, ty, tz, moveEntry.blockType, moveEntry.blockRotation, moveEntry.componentHolder);
+                    BlockUtil.setBlockEntity(store, tx, ty, tz, moveEntry.blockType, moveEntry.blockRotation, moveEntry.componentHolder);
 
                     dirtyChunks.add(futureChunkIndex);
 
-                    setBlockAndNeighboursTicking(world, fromChunk, blockPosition);
+                    BlockUtil.performBlockUpdate(store, blockPosition.x, blockPosition.y, blockPosition.z);
                 });
             }
         }
@@ -96,34 +97,10 @@ public final class BlockMovementExecutor {
         world.execute(() -> {
             dirtyChunks.forEach(idx -> {
                 ChunkStore chunckStore = world.getChunkStore();
-                WorldChunk worldChunk = world.getChunk(idx);
-                world.getChunkLighting().invalidateLightInChunk(chunckStore, worldChunk.getX(), worldChunk.getZ());
+                world.getChunkLighting().invalidateLightInChunkSections(chunckStore, ChunkUtil.xOfChunkIndex(idx), ChunkUtil.zOfChunkIndex(idx), ChunkUtil.MIN_SECTION, ChunkUtil.MIN_SECTION + ChunkUtil.HEIGHT_SECTIONS);
             });
 
             dirtyChunks.forEach(idx -> world.getNotificationHandler().updateChunk(idx));
         });
-    }
-
-    private static void setBlockAndNeighboursTicking(World world, WorldChunk chunk, Vector3i blockPosition) {
-        Store<ChunkStore> store= world.getChunkStore().getStore();
-        BlockChunk blockChunkComponent = store.getComponent(chunk.getReference(), BlockChunk.getComponentType());
-        
-        for (int x = -1; x <= 1; x++) {
-            for (int y = -1; y <= 1; y++) {
-                for (int z = -1; z <= 1; z++) {
-                    if (!ChunkUtil.isSameChunkSection(blockPosition.x, blockPosition.y, blockPosition.z, blockPosition.x + x,blockPosition.y + y, blockPosition.z + z)) {
-                        long fromChunkIndex = ChunkUtil.indexChunkFromBlock(blockPosition.x, blockPosition.z);
-                        WorldChunk newChunk = world.getChunk(fromChunkIndex);
-                        BlockChunk newBlockChunkComponent = store.getComponent(newChunk.getReference(), BlockChunk.getComponentType());
-                        BlockSection section = newBlockChunkComponent.getSectionAtBlockY(blockPosition.y + y);
-                        section.setTicking(blockPosition.x + x, blockPosition.y + y, blockPosition.z + z, true);
-                        continue;
-                    }
-                    
-                    BlockSection section = blockChunkComponent.getSectionAtBlockY(blockPosition.y + y);
-                    section.setTicking(blockPosition.x + x, blockPosition.y + y, blockPosition.z + z, true);
-                }
-            }
-        }
     }
 }

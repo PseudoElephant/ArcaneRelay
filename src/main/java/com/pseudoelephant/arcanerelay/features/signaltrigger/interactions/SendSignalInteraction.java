@@ -14,6 +14,7 @@ import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.pseudoelephant.arcanerelay.ArcaneRelayPlugin;
 import com.pseudoelephant.arcanerelay.features.signal.util.ArcaneUtil;
 import com.pseudoelephant.arcanerelay.features.signaltrigger.components.ArcaneTriggerBlock;
+import com.pseudoelephant.arcanerelay.util.BlockUtil;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
@@ -65,12 +66,10 @@ public class SendSignalInteraction extends SimpleInstantInteraction {
       cb.run((@Nonnull Store<EntityStore> store) -> {
          World world = store.getExternalData().getWorld();
 
-         long chunkIndex = ChunkUtil.indexChunkFromBlock(target.x, target.z);
-         WorldChunk chunk = world.getChunk(chunkIndex);
-         Ref<ChunkStore> blockRef = chunk.getBlockComponentEntity(target.x, target.y, target.z);
+         Store<ChunkStore> chunkStore = world.getChunkStore().getStore();
+         Ref<ChunkStore> blockRef = BlockUtil.getBlockEntityReference(chunkStore, target.x, target.y, target.z);
          if (blockRef == null) return;
 
-         Store<ChunkStore> chunkStore = world.getChunkStore().getStore();
          ArcaneTriggerBlock trigger = chunkStore.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
          if (trigger == null) return;
 

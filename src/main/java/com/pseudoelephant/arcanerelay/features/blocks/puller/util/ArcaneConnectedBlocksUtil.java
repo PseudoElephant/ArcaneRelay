@@ -71,12 +71,7 @@ public final class ArcaneConnectedBlocksUtil {
         @Nonnull Vector3i extendDir,
         @Nonnull RotationTuple rotation
     ) {
-        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(blockPos.x, blockPos.z));
-        if (chunk == null) return;
-
-        BlockChunk blockChunk = store.getComponent(chunk.getReference(), BlockChunk.getComponentType());
-        if (blockChunk == null) return;
-        BlockSection section = blockChunk.getSectionAtBlockY(blockPos.y);
+        BlockSection section = BlockUtil.getBlockSection(store, blockPos.x, blockPos.y, blockPos.z);
         if (section == null) return;
 
         int filler = section.getFiller(blockPos.x, blockPos.y, blockPos.z);
@@ -101,14 +96,13 @@ public final class ArcaneConnectedBlocksUtil {
 
         int newId = BlockType.getAssetMap().getIndex(result.blockTypeKey());
         BlockType newType = BlockType.getAssetMap().getAsset(newId);
-        Holder<ChunkStore> holder = chunk.getBlockComponentHolder(blockPos.x, blockPos.y, blockPos.z);
+        Holder<ChunkStore> holder = BlockUtil.getBlockComponentHolder(store, blockPos.x, blockPos.y, blockPos.z);
 
-        ChunkColumn column = (ChunkColumn)store.getComponent(chunk.getReference(), ChunkColumn.getComponentType());
-        Ref<ChunkStore> sectionRef = column.getSection(ChunkUtil.chunkCoordinate(blockPos.y));
+        Ref<ChunkStore> sectionRef = store.getExternalData().getChunkSectionReferenceAtBlock(blockPos.x, blockPos.y, blockPos.z);
 
-        chunk.setBlock(blockPos.x, blockPos.y, blockPos.z, newId, newType, result.rotationIndex(), 0, SETTINGS);
+        BlockUtil.setBlock(store, blockPos.x, blockPos.y, blockPos.z, newId, newType, result.rotationIndex(), 0, SETTINGS);
         if (holder != null) {
-            chunk.setState(blockPos.x, blockPos.y, blockPos.z, newType, result.rotationIndex(), holder);
+            BlockUtil.setBlockEntity(store, blockPos.x, blockPos.y, blockPos.z, newType, result.rotationIndex(), holder);
         }
 
         if (blockType.hasSupport()) {

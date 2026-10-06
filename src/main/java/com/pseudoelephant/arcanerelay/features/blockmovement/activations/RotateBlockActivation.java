@@ -18,6 +18,7 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.chunk.BlockOperations;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
@@ -161,13 +162,12 @@ public class RotateBlockActivation extends Activation {
         ChunkStoreCommandBufferLike commandBuffer = accessor.getCommandBuffer();
         commandBuffer.run((@Nonnull Store<ChunkStore> store) -> {
             World world = store.getExternalData().getWorld();
-            WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(worldX, worldZ));
-            if (chunk == null) return;
+            if (world.getChunkStore().getChunkReference(ChunkUtil.indexChunkFromBlock(worldX, worldZ)) == null) return;
 
             BlockTypeAssetMap<String, BlockType> assetMap = BlockType.getAssetMap();
 
             // Rotator info
-            BlockType rotatorBlockType = chunk.getBlockType(worldX, worldY, worldZ);
+            BlockType rotatorBlockType = BlockUtil.getBlockType(store, worldX, worldY, worldZ);
             Vector3i rotatorPos = new Vector3i(worldX, worldY, worldZ);
             boolean isClockWise = isClockWise(rotatorBlockType);
             Vector3i rotatorUp = BlockVectorUtil.getUpVector(store, rotatorPos);
@@ -175,7 +175,7 @@ public class RotateBlockActivation extends Activation {
             // Target Info
             Vector3i tempUp = BlockVectorUtil.getUpVector(store, rotatorPos);
             Vector3i targetPos = new Vector3i (rotatorPos.x + tempUp.x, rotatorPos.y + tempUp.y, rotatorPos.z + tempUp.z);
-            BlockType targetBlockType = chunk.getBlockType(targetPos.x, targetPos.y, targetPos.z);
+            BlockType targetBlockType = BlockUtil.getBlockType(store, targetPos.x, targetPos.y, targetPos.z);
             if (targetBlockType == null) return;
             
             String targetID = ArcaneUtil.getOriginalBlockTypeId(targetBlockType);
@@ -185,8 +185,9 @@ public class RotateBlockActivation extends Activation {
             
             boolean blockWasRotated = BlockVectorUtil.isRotatable(targetBlockType);
             if (blockWasRotated) {
-                chunk.setBlock(targetPos.x, targetPos.y, targetPos.z, assetMap.getIndex(targetID), targetBlockType, newRotation.index(), 0, 4);
-                BlockVectorUtil.setTickingAround(chunk,targetPos,1);
+                Ref<ChunkStore> targetSectionRef = store.getExternalData().getChunkSectionReferenceAtBlock(targetPos.x, targetPos.y, targetPos.z);
+                BlockOperations.setBlock(store.getExternalData(), targetSectionRef, targetPos.x, targetPos.y, targetPos.z, assetMap.getIndex(targetID), targetBlockType, newRotation.index(), 0, 4);
+                BlockVectorUtil.setTickingAround(store, targetPos, 1);
             } else {
                 ArcaneRelayPlugin.LOGGER.atInfo().log("Rotator: Block of type: '%s', is not allowed to be rotated", targetBlockType.getId());
             }
