@@ -39,6 +39,7 @@ import com.pseudoelephant.arcanerelay.features.signal.components.ArcaneSection;
 import com.pseudoelephant.arcanerelay.features.signal.components.ArcaneSection.BlockTickStrategy;
 import com.pseudoelephant.arcanerelay.features.signal.util.ArcaneUtil;
 import com.pseudoelephant.arcanerelay.util.BlockFlags;
+import com.pseudoelephant.arcanerelay.util.BlockUtil;
 
 public class HitActivation extends Activation {
     public float damage;
@@ -96,15 +97,8 @@ public class HitActivation extends Activation {
 
         World world = accessor.getCommandBuffer().getExternalData().getWorld();
         ChunkStore chunkStore = world.getChunkStore();
-        long chunkIndex = ChunkUtil.indexChunkFromBlock(worldX, worldZ);
-        Ref<ChunkStore> chunkRef = chunkStore.getChunkReference(chunkIndex);
-        WorldChunk worldChunkComponent = (WorldChunk) chunkStore.getStore().getComponent(chunkRef,
-                WorldChunk.getComponentType());
-        if (worldChunkComponent == null) {
-            return;
-        }
 
-        BlockType currentBlockType = worldChunkComponent.getBlockType(worldX, worldY,
+        BlockType currentBlockType = BlockUtil.getBlockType(chunkStore.getStore(), worldX, worldY,
                 worldZ);
         if (currentBlockType == null) {
             return;
@@ -191,15 +185,8 @@ public class HitActivation extends Activation {
         Vector3i currentPosition = new Vector3i(worldX, worldY, worldZ);
         World world = accessor.getCommandBuffer().getExternalData().getWorld();
         ChunkStore chunkStore = world.getChunkStore();
-        long chunkIndex = ChunkUtil.indexChunkFromBlock(worldX, worldZ);
-        Ref<ChunkStore> chunkRef = chunkStore.getChunkReference(chunkIndex);
-        WorldChunk worldChunkComponent = (WorldChunk) chunkStore.getStore().getComponent(chunkRef,
-                WorldChunk.getComponentType());
-        if (worldChunkComponent == null) {
-            return;
-        }
 
-        BlockType currentBlockType = worldChunkComponent.getBlockType(worldX, worldY,
+        BlockType currentBlockType = BlockUtil.getBlockType(chunkStore.getStore(), worldX, worldY,
                 worldZ);
         if (currentBlockType == null) {
             return;

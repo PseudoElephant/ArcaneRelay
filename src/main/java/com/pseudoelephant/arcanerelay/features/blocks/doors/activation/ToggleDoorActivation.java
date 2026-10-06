@@ -199,7 +199,7 @@ public class ToggleDoorActivation extends Activation {
             if (base != null && base.getBlockForState(interactionStateToSend) != null) blockTypeForState = base;
         }
         world.setBlockInteractionState(blockPosition, blockTypeForState, interactionStateToSend);
-        BlockType currentBlockType = world.getBlockType(blockPosition);
+        BlockType currentBlockType = BlockUtil.getBlockType(store, blockPosition.x, blockPosition.y, blockPosition.z);
         if (currentBlockType == null) return null;
         BlockType newBlockType = currentBlockType.getBlockForState(interactionStateToSend);
         if (oldHitbox != null) {

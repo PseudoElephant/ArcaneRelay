@@ -28,6 +28,7 @@ import com.pseudoelephant.arcanerelay.core.adapters.EntityStoreChunkStoreAdapter
 import com.pseudoelephant.arcanerelay.features.activation.Activation;
 import com.pseudoelephant.arcanerelay.features.signal.components.ArcaneSection;
 import com.pseudoelephant.arcanerelay.features.signal.util.ArcaneUtil;
+import com.pseudoelephant.arcanerelay.util.BlockUtil;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 import java.util.ArrayList;
@@ -107,7 +108,7 @@ public class ArcaneActivatorInteraction extends SimpleInstantInteraction {
     }
 
     private Activation resolveActivation(@Nonnull InteractionContext context, @Nonnull World world, @Nonnull PlayerRef playerRef, @Nonnull Vector3i coords) {
-        var blockType = world.getBlockType(coords.x, coords.y, coords.z);
+        var blockType = BlockUtil.getBlockType(world.getChunkStore().getStore(), coords.x, coords.y, coords.z);
         if (blockType == null) {
             setFailed(context);
             return null;
