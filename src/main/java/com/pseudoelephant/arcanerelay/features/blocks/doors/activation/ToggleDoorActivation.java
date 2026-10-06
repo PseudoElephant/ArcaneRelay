@@ -244,7 +244,7 @@ public class ToggleDoorActivation extends Activation {
             WorldChunk doorChunk = w.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(worldX, worldZ));
             if (doorChunk == null) return;
 
-            int[] main = BlockUtil.findMainBlock(w, doorChunk, worldX, worldY, worldZ);
+            int[] main = BlockUtil.findMainBlock(w, worldX, worldY, worldZ);
             if (main == null) return;
 
             int mainX = main[0], mainY = main[1], mainZ = main[2];
