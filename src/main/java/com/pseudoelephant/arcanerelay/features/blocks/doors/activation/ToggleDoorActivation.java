@@ -15,6 +15,7 @@ import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.universe.world.chunk.BlockOperations;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
@@ -198,7 +199,11 @@ public class ToggleDoorActivation extends Activation {
             BlockType base = BlockType.getAssetMap().getAsset(blockType.getItem().getId());
             if (base != null && base.getBlockForState(interactionStateToSend) != null) blockTypeForState = base;
         }
-        world.setBlockInteractionState(blockPosition, blockTypeForState, interactionStateToSend);
+        ChunkStore cs = store.getExternalData();
+        Ref<ChunkStore> sectionRef = cs.getChunkSectionReferenceAtBlock(blockPosition.x, blockPosition.y, blockPosition.z);
+        if (sectionRef != null) {
+            BlockOperations.setBlockInteractionState(cs, sectionRef, blockPosition.x, blockPosition.y, blockPosition.z, blockTypeForState, interactionStateToSend, false);
+        }
         BlockType currentBlockType = BlockUtil.getBlockType(store, blockPosition.x, blockPosition.y, blockPosition.z);
         if (currentBlockType == null) return null;
         BlockType newBlockType = currentBlockType.getBlockForState(interactionStateToSend);

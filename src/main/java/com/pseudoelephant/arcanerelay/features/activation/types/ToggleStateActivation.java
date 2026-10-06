@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.universe.world.chunk.BlockOperations;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.pseudoelephant.arcanerelay.core.activation.ActivationExecutor;
 import com.pseudoelephant.arcanerelay.core.activation.ArcaneCachedAccessor;
@@ -141,8 +142,11 @@ public class ToggleStateActivation extends Activation {
 
         // This ensures we are enqueing the block interaction state change on the correct thread
         commandBuffer.run((@Nonnull Store<ChunkStore> store) -> {
-            World world = store.getExternalData().getWorld();
-            world.setBlockInteractionState(new Vector3i(worldX, worldY, worldZ), blockType, newState);
+            ChunkStore cs = store.getExternalData();
+            Ref<ChunkStore> sectionRef = cs.getChunkSectionReferenceAtBlock(worldX, worldY, worldZ);
+            if (sectionRef != null) {
+                BlockOperations.setBlockInteractionState(cs, sectionRef, worldX, worldY, worldZ, blockType, newState, false);
+            }
         });
     
         var newBlockType = blockType.getBlockForState(newState);
