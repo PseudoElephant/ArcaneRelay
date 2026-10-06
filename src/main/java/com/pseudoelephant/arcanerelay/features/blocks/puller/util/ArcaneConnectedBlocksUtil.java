@@ -110,6 +110,6 @@ public final class ArcaneConnectedBlocksUtil {
         } else {
             BlockPhysics.clear(store, sectionRef, blockPos.x, blockPos.y, blockPos.z);
         }
-        world.performBlockUpdate(blockPos.x, blockPos.y, blockPos.z, true);
+        BlockUtil.performBlockUpdate(store, blockPos.x, blockPos.y, blockPos.z);
     }
 }

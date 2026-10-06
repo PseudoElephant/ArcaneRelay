@@ -143,9 +143,9 @@ public class ToggleStateActivation extends Activation {
         // This ensures we are enqueing the block interaction state change on the correct thread
         commandBuffer.run((@Nonnull Store<ChunkStore> store) -> {
             ChunkStore cs = store.getExternalData();
-            Ref<ChunkStore> sectionRef = cs.getChunkSectionReferenceAtBlock(worldX, worldY, worldZ);
-            if (sectionRef != null) {
-                BlockOperations.setBlockInteractionState(cs, sectionRef, worldX, worldY, worldZ, blockType, newState, false);
+            Ref<ChunkStore> interactionSectionRef = cs.getChunkSectionReferenceAtBlock(worldX, worldY, worldZ);
+            if (interactionSectionRef != null) {
+                BlockOperations.setBlockInteractionState(cs, interactionSectionRef, worldX, worldY, worldZ, blockType, newState, false);
             }
         });
     

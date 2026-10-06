@@ -211,7 +211,7 @@ public class ToggleDoorActivation extends Activation {
             BlockBoundingBoxes.RotatedVariantBoxes oldRotated = oldHitbox.get(rotationIndex);
             if (oldRotated != null) {
                 FillerBlockUtil.forEachFillerBlock(oldRotated, (bx, by, bz) ->
-                    world.performBlockUpdate(blockPosition.x + bx, blockPosition.y + by, blockPosition.z + bz));
+                    BlockUtil.performBlockUpdate(store, blockPosition.x + bx, blockPosition.y + by, blockPosition.z + bz));
             }
         }
         if (newBlockType != null) {
@@ -220,7 +220,7 @@ public class ToggleDoorActivation extends Activation {
                 BlockBoundingBoxes.RotatedVariantBoxes newRotated = newHitbox.get(rotationIndex);
                 if (newRotated != null) {
                     FillerBlockUtil.forEachFillerBlock(newRotated, (bx, by, bz) ->
-                        world.performBlockUpdate(blockPosition.x + bx, blockPosition.y + by, blockPosition.z + bz));
+                        BlockUtil.performBlockUpdate(store, blockPosition.x + bx, blockPosition.y + by, blockPosition.z + bz));
                 }
             }
         }
