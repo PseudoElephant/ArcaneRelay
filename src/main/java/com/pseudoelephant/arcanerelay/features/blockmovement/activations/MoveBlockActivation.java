@@ -22,7 +22,6 @@ import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.modules.splitvelocity.VelocityConfig;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -74,11 +73,7 @@ public class MoveBlockActivation extends Activation {
         .build();
 
     private boolean isWallPusherVariant(@Nonnull ComponentAccessor<ChunkStore> commandBuffer, @Nonnull Ref<ChunkStore> blockRef, @Nonnull Ref<ChunkStore> sectionRef, int worldX, int worldY, int worldZ) {
-        World world = commandBuffer.getExternalData().getWorld();
-        WorldChunk chunk = world.getChunk(ChunkUtil.indexChunkFromBlock(worldX, worldZ));
-        if (chunk == null) return false;
-
-        BlockType blockType = chunk.getBlockType(worldX, worldY, worldZ);
+        BlockType blockType = BlockUtil.getBlockType(commandBuffer, worldX, worldY, worldZ);
         if (blockType == null) return false;
 
         if (isWall)
@@ -94,8 +89,10 @@ public class MoveBlockActivation extends Activation {
     private Vector3i getGlobalForwardVector(@Nonnull ComponentAccessor<ChunkStore> commandBuffer, @Nonnull Ref<ChunkStore> blockRef, @Nonnull Ref<ChunkStore> sectionRef, int worldX, int worldY, int worldZ, Vector3i pusherPosition) {
         boolean isWallPusher = isWallPusherVariant(commandBuffer, blockRef, sectionRef, worldX, worldY, worldZ);
         
-        WorldChunk pusherChunk = commandBuffer.getExternalData().getWorld().getChunk(ChunkUtil.indexChunkFromBlock(worldX, worldZ));
-        if (pusherChunk == null) return new Vector3i(0, 0, 0);
+        World world = commandBuffer.getExternalData().getWorld();
+        if (world.getChunkStore().getChunkReference(ChunkUtil.indexChunkFromBlock(worldX, worldZ)) == null) {
+            return new Vector3i(0, 0, 0);
+        }
 
         return BlockVectorUtil.getForwardVector(commandBuffer, pusherPosition, isWallPusher);
     }
@@ -103,8 +100,10 @@ public class MoveBlockActivation extends Activation {
     private Vector3i getGlobalUpVector(@Nonnull ComponentAccessor<ChunkStore> commandBuffer, @Nonnull Ref<ChunkStore> blockRef, @Nonnull Ref<ChunkStore> sectionRef, int worldX, int worldY, int worldZ, Vector3i pusherPosition) {
         boolean isWallPusher = isWallPusherVariant(commandBuffer, blockRef, sectionRef, worldX, worldY, worldZ);
                 
-        WorldChunk pusherChunk = commandBuffer.getExternalData().getWorld().getChunk(ChunkUtil.indexChunkFromBlock(worldX, worldZ));
-        if (pusherChunk == null) return new Vector3i(0, 0, 0);
+        World world = commandBuffer.getExternalData().getWorld();
+        if (world.getChunkStore().getChunkReference(ChunkUtil.indexChunkFromBlock(worldX, worldZ)) == null) {
+            return new Vector3i(0, 0, 0);
+        }
 
         return BlockVectorUtil.getUpVector(commandBuffer, pusherPosition, isWallPusher);
     }
@@ -135,8 +134,10 @@ public class MoveBlockActivation extends Activation {
 
             Vector3i frontPusherPosition = new Vector3i(pusherPosition);
            
-            WorldChunk blockChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(worldX, worldZ));
-            int pusherBlockId = blockChunk.getBlock(worldX, worldY, worldZ);
+            BlockSection pusherSection = BlockUtil.getBlockSection(store, worldX, worldY, worldZ);
+            if (pusherSection == null)
+                return;
+            int pusherBlockId = pusherSection.get(worldX, worldY, worldZ);
             BlockType pusherBlockType = BlockType.getAssetMap().getAsset(pusherBlockId);
 
             int maxRange = getMaxRange(pusherBlockType);
@@ -151,22 +152,21 @@ public class MoveBlockActivation extends Activation {
             for (int i = 0; i < maxRange; i++) {
                 Vector3i c = new Vector3i(frontPusherPosition).add(new Vector3i(globalForward).mul(i).add(scaledGlobalUpVector));
 
-                WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(c.x, c.z));
-                if (chunk == null)
+                BlockSection cSection = BlockUtil.getBlockSection(store, c.x, c.y, c.z);
+                if (cSection == null)
                     break;
 
-                int blockId = chunk.getBlock(c.x, c.y, c.z);
+                int blockId = cSection.get(c.x, c.y, c.z);
                 BlockType blockType = BlockType.getAssetMap().getAsset(blockId);
                 if (!BlockVectorUtil.isMoveable(blockType,blockId))
                     break;
 
                 chainBlockIds[chainLength]     = blockId;
-                BlockSection cSection = BlockUtil.getBlockSection(store, c.x, c.y, c.z);
-                chainRotations[chainLength]    = cSection != null ? BlockUtil.getRotationIndex(cSection, c.x, c.y, c.z) : 0;
-                chainFillers[chainLength]      = cSection != null ? BlockUtil.getFiller(cSection, c.x, c.y, c.z) : 0;
+                chainRotations[chainLength]    = BlockUtil.getRotationIndex(cSection, c.x, c.y, c.z);
+                chainFillers[chainLength]      = BlockUtil.getFiller(cSection, c.x, c.y, c.z);
                 chainBlockTypes[chainLength]   = blockType;
 
-                Holder<ChunkStore> stateHolder = chunk.getBlockComponentHolder(c.x, c.y, c.z);
+                Holder<ChunkStore> stateHolder = BlockUtil.getBlockComponentHolder(store, c.x, c.y, c.z);
                 chainHolders[chainLength]      = stateHolder != null ? stateHolder.clone() : null;
 
                 chainLength++;
@@ -174,11 +174,11 @@ public class MoveBlockActivation extends Activation {
 
             Vector3i nextEmptyPosition = new Vector3i(frontPusherPosition).add(new Vector3i(globalForward).mul(chainLength).add(scaledGlobalUpVector));
 
-            WorldChunk emptyChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(nextEmptyPosition.x, nextEmptyPosition.z));
-            if (emptyChunk == null)
+            BlockSection emptySection = BlockUtil.getBlockSection(store, nextEmptyPosition.x, nextEmptyPosition.y, nextEmptyPosition.z);
+            if (emptySection == null)
                 return;
 
-            int emptyBlockId = emptyChunk.getBlock(nextEmptyPosition.x, nextEmptyPosition.y, nextEmptyPosition.z);
+            int emptyBlockId = emptySection.get(nextEmptyPosition.x, nextEmptyPosition.y, nextEmptyPosition.z);
             BlockType emptyBlockType = BlockType.getAssetMap().getAsset(emptyBlockId);
             if (!BlockUtil.isEmpty(emptyBlockType, emptyBlockId))
                 return;
@@ -192,9 +192,8 @@ public class MoveBlockActivation extends Activation {
                 Vector3i fromPosition = new Vector3i(frontPusherPosition).add(new Vector3i(globalForward).mul(j).add(scaledGlobalUpVector));
                 Vector3i toPosition = new Vector3i(frontPusherPosition).add(new Vector3i(globalForward).mul(j + 1).add(scaledGlobalUpVector));
 
-                WorldChunk fromChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(fromPosition.x, fromPosition.z));
-                WorldChunk toChunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(toPosition.x, toPosition.z));
-                if (fromChunk == null || toChunk == null)
+                if (world.getChunkStore().getChunkReference(ChunkUtil.indexChunkFromBlock(fromPosition.x, fromPosition.z)) == null
+                        || world.getChunkStore().getChunkReference(ChunkUtil.indexChunkFromBlock(toPosition.x, toPosition.z)) == null)
                     continue;
 
                 ArcaneMoveState arcaneMoveState = store.getResource(ArcaneMoveState.getResourceType());

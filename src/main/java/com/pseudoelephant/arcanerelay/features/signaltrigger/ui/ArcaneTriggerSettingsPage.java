@@ -6,7 +6,6 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.math.util.ChunkUtil;
 import org.joml.Vector3i;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
@@ -18,11 +17,11 @@ import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.pseudoelephant.arcanerelay.features.signaltrigger.components.ArcaneTriggerBlock;
+import com.pseudoelephant.arcanerelay.util.BlockUtil;
 
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
@@ -113,12 +112,11 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
     private static String getBlockName(@NonNullDecl Store<ChunkStore> chunkStore, @NonNullDecl Vector3i destination) {
         BlockTypeAssetMap<String, BlockType> blockTypeMap = BlockType.getAssetMap();
         
-        long chunkIndex = ChunkUtil.indexChunkFromBlock(destination.x, destination.z);
-        World world = chunkStore.getExternalData().getWorld();
-        WorldChunk chunk = world.getChunk(chunkIndex);
-            
-        int blockId = chunk.getBlock(destination.x, destination.y, destination.z);
-        BlockType blockType = blockTypeMap.getAsset(blockId);
+        BlockSection section = BlockUtil.getBlockSection(chunkStore, destination.x, destination.y, destination.z);
+        if (section == null) return "";
+
+        BlockType blockType = blockTypeMap.getAsset(section.get(destination.x, destination.y, destination.z));
+        if (blockType == null) return "";
 
         Item item = blockType.getItem();
         if (item == null) {

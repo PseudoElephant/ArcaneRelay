@@ -3,7 +3,6 @@ package com.pseudoelephant.arcanerelay.features.blocks.doors.activation;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
-import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.util.MathUtil;
 import com.hypixel.hytale.math.util.TrigMathUtil;
 import org.joml.Vector3d;
@@ -15,7 +14,7 @@ import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.BlockOperations;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 
@@ -135,9 +134,7 @@ public class ToggleDoorActivation extends Activation {
         int x, int y, int z,
         @Nonnull Rotation rotationToCheck
     ) {
-        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(x, z));
-        if (chunk == null) return null;
-        BlockType blockType = chunk.getBlockType(x, y, z);
+        BlockType blockType = BlockUtil.getBlockType(store, x, y, z);
         if (blockType == null) return null;
         BlockSection section = BlockUtil.getBlockSection(store, x, y, z);
         if (section == null) return null;
@@ -190,8 +187,6 @@ public class ToggleDoorActivation extends Activation {
         @Nonnull DoorState doorState
     ) {
         
-        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(blockPosition.x, blockPosition.z));
-        if (chunk == null) return null;
         BlockSection section = BlockUtil.getBlockSection(store, blockPosition.x, blockPosition.y, blockPosition.z);
         if (section == null) return null;
         int rotationIndex = BlockUtil.getRotationIndex(section, blockPosition.x, blockPosition.y, blockPosition.z);
@@ -202,15 +197,19 @@ public class ToggleDoorActivation extends Activation {
             BlockType base = BlockType.getAssetMap().getAsset(blockType.getItem().getId());
             if (base != null && base.getBlockForState(interactionStateToSend) != null) blockTypeForState = base;
         }
-        world.setBlockInteractionState(blockPosition, blockTypeForState, interactionStateToSend);
-        BlockType currentBlockType = world.getBlockType(blockPosition);
+        ChunkStore cs = store.getExternalData();
+        Ref<ChunkStore> sectionRef = cs.getChunkSectionReferenceAtBlock(blockPosition.x, blockPosition.y, blockPosition.z);
+        if (sectionRef != null) {
+            BlockOperations.setBlockInteractionState(cs, sectionRef, blockPosition.x, blockPosition.y, blockPosition.z, blockTypeForState, interactionStateToSend, false);
+        }
+        BlockType currentBlockType = BlockUtil.getBlockType(store, blockPosition.x, blockPosition.y, blockPosition.z);
         if (currentBlockType == null) return null;
         BlockType newBlockType = currentBlockType.getBlockForState(interactionStateToSend);
         if (oldHitbox != null) {
             BlockBoundingBoxes.RotatedVariantBoxes oldRotated = oldHitbox.get(rotationIndex);
             if (oldRotated != null) {
                 FillerBlockUtil.forEachFillerBlock(oldRotated, (bx, by, bz) ->
-                    world.performBlockUpdate(blockPosition.x + bx, blockPosition.y + by, blockPosition.z + bz));
+                    BlockUtil.performBlockUpdate(store, blockPosition.x + bx, blockPosition.y + by, blockPosition.z + bz));
             }
         }
         if (newBlockType != null) {
@@ -219,7 +218,7 @@ public class ToggleDoorActivation extends Activation {
                 BlockBoundingBoxes.RotatedVariantBoxes newRotated = newHitbox.get(rotationIndex);
                 if (newRotated != null) {
                     FillerBlockUtil.forEachFillerBlock(newRotated, (bx, by, bz) ->
-                        world.performBlockUpdate(blockPosition.x + bx, blockPosition.y + by, blockPosition.z + bz));
+                        BlockUtil.performBlockUpdate(store, blockPosition.x + bx, blockPosition.y + by, blockPosition.z + bz));
                 }
             }
         }
@@ -241,17 +240,13 @@ public class ToggleDoorActivation extends Activation {
         commandBuffer.run((@Nonnull Store<ChunkStore> store) -> {
             World w = store.getExternalData().getWorld();
 
-            WorldChunk doorChunk = w.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(worldX, worldZ));
-            if (doorChunk == null) return;
+            if (BlockUtil.getBlockSection(store, worldX, worldY, worldZ) == null) return;
 
-            int[] main = BlockUtil.findMainBlock(w, doorChunk, worldX, worldY, worldZ);
+            int[] main = BlockUtil.findMainBlock(w, worldX, worldY, worldZ);
             if (main == null) return;
 
             int mainX = main[0], mainY = main[1], mainZ = main[2];
-            WorldChunk mainChunk = w.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(mainX, mainZ));
-            if (mainChunk == null) return;
-
-            BlockType mainBlockType = mainChunk.getBlockType(mainX, mainY, mainZ);
+            BlockType mainBlockType = BlockUtil.getBlockType(store, mainX, mainY, mainZ);
             if (mainBlockType == null) return;
 
             BlockSection mainSection = BlockUtil.getBlockSection(store, mainX, mainY, mainZ);

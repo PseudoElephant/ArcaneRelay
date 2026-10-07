@@ -15,15 +15,14 @@ import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.math.util.ChunkUtil;
 import org.joml.Vector3d;
 import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import com.hypixel.hytale.server.core.blocktype.component.BlockPhysics;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.ChunkColumn;
-import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.BlockOperations;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.pseudoelephant.arcanerelay.ArcaneRelayPlugin;
 import com.pseudoelephant.arcanerelay.util.BlockUtil;
@@ -145,22 +144,21 @@ public class ArcanePullerBlock implements Component<ChunkStore> {
         int posY = pullerY + up.y * (chainLen + 1);
         int posZ = pullerZ + up.z * (chainLen + 1);
 
-        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(posX, posZ));
-        if (chunk == null) return false;
+        Store<ChunkStore> store = world.getChunkStore().getStore();
+        BlockSection section = BlockUtil.getBlockSection(store, posX, posY, posZ);
+        if (section == null) return false;
 
-        int existingId = chunk.getBlock(posX, posY, posZ);
+        int existingId = section.get(posX, posY, posZ);
         BlockType existingType = assetMap.getAsset(existingId);
         if (!BlockUtil.isEmpty(existingType, existingId)) return false;
 
         int extensionBlockIndex = BlockType.getAssetMap().getIndex(extensionBlockType.getId());
-        Store<ChunkStore> store = world.getChunkStore().getStore();
 
         int noParticles = 4;
-        chunk.setBlock(posX, posY, posZ, extensionBlockIndex, extensionBlockType, rotationIndex, 0, noParticles);
-        ChunkColumn column = (ChunkColumn)store.getComponent(chunk.getReference(), ChunkColumn.getComponentType());
-        Ref<ChunkStore> section = column.getSection(ChunkUtil.chunkCoordinate(posY));
+        Ref<ChunkStore> sectionRef = store.getExternalData().getChunkSectionReferenceAtBlock(posX, posY, posZ);
+        BlockOperations.setBlock(world.getChunkStore(), sectionRef, posX, posY, posZ, extensionBlockIndex, extensionBlockType, rotationIndex, 0, noParticles);
 
-        BlockPhysics.reset(store, section, posX, posY, posZ);
+        BlockPhysics.reset(store, sectionRef, posX, posY, posZ);
 
         this.extensionPositions.add(chainLen);
 
