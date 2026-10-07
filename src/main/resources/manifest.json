@@ -8,7 +8,7 @@
         {"Name": "Fanzy"}
     ],
     "Website": "",
-    "ServerVersion": ">=0.6.0",
+    "ServerVersion": ">=0.7.0",
     "Dependencies": {},
     "OptionalDependencies": {},
     "DisabledByDefault": false,
