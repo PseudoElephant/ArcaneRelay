@@ -22,13 +22,11 @@ public class BlockMovementSystem extends TickingSystem<ChunkStore> {
         @Nonnull Store<ChunkStore> store
     ) {
         ArcaneMoveState moveState = store.getResource(ArcaneMoveState.getResourceType());
-        if (moveState == null) return;
 
         var entries = moveState.getMoveEntries();
         if (entries.isEmpty()) return;
 
         var world = store.getExternalData().getWorld();
-        if (world == null) return;
 
         // here it's safe to use world.execute() as we are not using the command buffer because it's running on the main thread
         BlockMovementExecutor.execute(world, entries);

@@ -306,7 +306,6 @@ public class ArcanePullerActivation extends Activation {
 
             if (BlockVectorUtil.isPullable(tipBlockType, tipBlockId)) {
                 ArcaneMoveState moveState = s.getResource(ArcaneMoveState.getResourceType());
-                if (moveState == null) return;
                 moveState.addMoveEntry(tipPos, new Vector3i(globalUp).mul(-1), tipBlockType, tipBlockId,
                         rotation, filler, 0, holder);
             }

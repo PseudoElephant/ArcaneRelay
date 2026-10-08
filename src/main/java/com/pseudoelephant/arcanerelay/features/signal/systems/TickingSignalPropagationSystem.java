@@ -118,7 +118,7 @@ public class TickingSignalPropagationSystem extends EntityTickingSystem<ChunkSto
         long tick = world.getTick();
         long rateLimitTicks = 10L; // process each block every 10 ticks
 
-        int arcaneTicksProcessed = arcaneSection.forEachTicking(cachedAccessor, commandBuffer, blockSection,
+        arcaneSection.forEachTicking(cachedAccessor, commandBuffer, blockSection,
                 chunkSection.getY(),
                 (commandBuffer1, arcaneSection1, x, y, z, blockId) -> {
                     int worldX = ChunkUtil.worldCoordFromLocalCoord(chunkSection.getX(), x);

@@ -8,7 +8,6 @@ import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.math.codec.Vector3iArrayCodec;
 import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
-import com.pseudoelephant.arcanerelay.ArcaneRelayPlugin;
 
 import java.util.ArrayList;
 import java.util.Collections;

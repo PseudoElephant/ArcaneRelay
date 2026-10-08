@@ -32,7 +32,7 @@ public class ArcaneTriggerPageSupplier implements OpenCustomUIInteraction.Custom
     @Override
     public CustomUIPage tryCreate(
             @Nonnull Ref<EntityStore> ref,
-            ComponentAccessor<EntityStore> componentAccessor,
+            @Nonnull ComponentAccessor<EntityStore> componentAccessor,
             @Nonnull PlayerRef playerRef,
             @Nonnull InteractionContext context) {
         BlockPosition targetBlock = context.getTargetBlock();

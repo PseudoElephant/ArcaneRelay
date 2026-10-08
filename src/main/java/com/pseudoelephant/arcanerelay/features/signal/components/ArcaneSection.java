@@ -23,7 +23,6 @@ import com.hypixel.hytale.function.predicate.ObjectPositionBlockFunction;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
-import com.pseudoelephant.arcanerelay.ArcaneRelayPlugin;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;

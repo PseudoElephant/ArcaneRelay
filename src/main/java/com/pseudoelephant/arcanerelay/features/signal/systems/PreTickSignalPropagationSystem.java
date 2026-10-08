@@ -57,7 +57,6 @@ public class PreTickSignalPropagationSystem extends EntityTickingSystem<ChunkSto
             Instant time = commandBuffer.getExternalData().getWorld().getEntityStore().getStore().getResource(WorldTimeResource.getResourceType()).getGameTime();
 
             Ref<ChunkStore> sectionRef = archetypeChunk.getReferenceTo(index);
-            if (sectionRef == null) return;
 
             ComponentType<ChunkStore, ArcaneSection> arcaneSectionType = ArcaneSection.getComponentType();
             if (arcaneSectionType == null) return;
