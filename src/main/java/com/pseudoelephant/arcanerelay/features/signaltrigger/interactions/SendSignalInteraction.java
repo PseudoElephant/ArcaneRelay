@@ -2,6 +2,7 @@ package com.pseudoelephant.arcanerelay.features.signaltrigger.interactions;
 
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.InteractionType;
@@ -67,7 +68,10 @@ public class SendSignalInteraction extends SimpleInstantInteraction {
          Ref<ChunkStore> blockRef = BlockUtil.getBlockEntityReference(chunkStore, target.x, target.y, target.z);
          if (blockRef == null) return;
 
-         ArcaneTriggerBlock trigger = chunkStore.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
+         ComponentType<ChunkStore, ArcaneTriggerBlock> triggerType = ArcaneTriggerBlock.getComponentType();
+         if (triggerType == null) return;
+
+         ArcaneTriggerBlock trigger = chunkStore.getComponent(blockRef, triggerType);
          if (trigger == null) return;
 
          ArcaneUtil.setTicking(chunkStore, target.x, target.y, target.z);

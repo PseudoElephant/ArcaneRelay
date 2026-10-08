@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 
 import com.hypixel.hytale.component.AddReason;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.RemoveReason;
 import com.hypixel.hytale.component.Store;
@@ -22,12 +23,18 @@ public class EnsureArcaneSectionSystem extends HolderSystem<ChunkStore> {
 
     @Override
     public void onEntityAdd(@Nonnull Holder<ChunkStore> holder, @Nonnull AddReason reason, @Nonnull Store<ChunkStore> store) {
-        holder.ensureComponent(ArcaneSection.getComponentType());
+        ComponentType<ChunkStore, ArcaneSection> arcaneSectionType = ArcaneSection.getComponentType();
+        if (arcaneSectionType == null) return;
+
+        holder.ensureComponent(arcaneSectionType);
     }
 
     @Override
     public void onEntityRemoved(@Nonnull Holder<ChunkStore> holder, @Nonnull RemoveReason reason, @Nonnull Store<ChunkStore> store) {
-        holder.removeComponent(ArcaneSection.getComponentType());
+        ComponentType<ChunkStore, ArcaneSection> arcaneSectionType = ArcaneSection.getComponentType();
+        if (arcaneSectionType == null) return;
+
+        holder.removeComponent(arcaneSectionType);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.pseudoelephant.arcanerelay.features.blockmovement.util;
 import org.joml.Vector3i;
 
 import com.hypixel.hytale.component.ComponentAccessor;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.math.Axis;
 import org.joml.Vector3d;
@@ -32,14 +33,18 @@ public class BlockVectorUtil {
     }
 
     public static void setTickingAround(@Nonnull ComponentAccessor<ChunkStore> store, Vector3i pos, int range) {
+        ComponentType<ChunkStore, BlockSection> blockSectionType = BlockSection.getComponentType();
+        ComponentType<ChunkStore, ChunkSection> chunkSectionType = ChunkSection.getComponentType();
+        if (blockSectionType == null || chunkSectionType == null) return;
+
         for (int x = -range; x <= range; x++) {
             for (int y = -range; y <= range; y++) {
                 for (int z = -range; z <= range; z++) {
                     Ref<ChunkStore> sectionRef = store.getExternalData().getChunkSectionReferenceAtBlock(pos.x + x, pos.y + y, pos.z + z);
                     if (sectionRef == null) continue;
-                    BlockSection bs = store.getComponent(sectionRef, BlockSection.getComponentType());
+                    BlockSection bs = store.getComponent(sectionRef, blockSectionType);
                     if (bs != null && bs.setTicking(pos.x + x, pos.y + y, pos.z + z, true)) {
-                        ChunkSection cs = store.getComponent(sectionRef, ChunkSection.getComponentType());
+                        ChunkSection cs = store.getComponent(sectionRef, chunkSectionType);
                         if (cs != null) cs.markNeedsSaving();
                     }
                 }

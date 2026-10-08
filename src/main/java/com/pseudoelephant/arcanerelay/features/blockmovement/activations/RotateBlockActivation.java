@@ -5,6 +5,7 @@ import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.ChunkUtil;
@@ -70,13 +71,16 @@ public class RotateBlockActivation extends Activation {
         Store<EntityStore> entityStore = world.getEntityStore().getStore();
         if (entityStore == null) return;
 
+        ComponentType<EntityStore, TransformComponent> transformType = TransformComponent.getComponentType();
+        if (transformType == null) return;
+
         Set<Ref<EntityStore>> entitiesOnRotator = new HashSet<>();
         BlockUtil.collectEntitiesOnTopOfBlock(entityStore, rotatorPos, entitiesOnRotator);
 
         for (Ref<EntityStore> ref : entitiesOnRotator) {
             if (ref == null || !ref.isValid()) continue;
 
-            TransformComponent transform = entityStore.getComponent(ref, TransformComponent.getComponentType());
+            TransformComponent transform = entityStore.getComponent(ref, transformType);
             if (transform == null) continue;
 
             rotateEntity(world, entityStore, ref, transform, isClockWise);
@@ -89,7 +93,7 @@ public class RotateBlockActivation extends Activation {
             for (Ref<EntityStore> ref : entitiesOnTarget) {
                 if (ref == null || !ref.isValid()) continue;
 
-                TransformComponent transform = entityStore.getComponent(ref, TransformComponent.getComponentType());
+                TransformComponent transform = entityStore.getComponent(ref, transformType);
                 if (transform == null) continue;
 
                 rotateEntity(world, entityStore, ref, transform, isClockWise);
@@ -138,7 +142,12 @@ public class RotateBlockActivation extends Activation {
                 rotation.z
         );
 
-        HeadRotation headComp = entityStore.getComponent(ref, HeadRotation.getComponentType());
+        ComponentType<EntityStore, HeadRotation> headRotationType = HeadRotation.getComponentType();
+        if (headRotationType == null) {
+            return;
+        }
+
+        HeadRotation headComp = entityStore.getComponent(ref, headRotationType);
         Rotation3f headRot = headComp != null ? new Rotation3f(headComp.getRotation()) : new Rotation3f(transform.getRotation());
         Rotation3f newHeadRot = new Rotation3f(
                 headRot.x,

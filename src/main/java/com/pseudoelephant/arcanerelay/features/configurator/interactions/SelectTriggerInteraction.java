@@ -2,6 +2,7 @@ package com.pseudoelephant.arcanerelay.features.configurator.interactions;
 
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import org.joml.Vector3i;
@@ -54,7 +55,14 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
         Ref<EntityStore> ref = context.getEntity();
         Player player = cb.getComponent(ref, Player.getComponentType());
         PlayerRef playerRef = cb.getComponent(ref, PlayerRef.getComponentType());
-        ArcaneConfiguratorComponent configurator = cb.getComponent(ref, ArcaneConfiguratorComponent.getComponentType());
+
+        ComponentType<EntityStore, ArcaneConfiguratorComponent> configuratorType = ArcaneConfiguratorComponent.getComponentType();
+        if (configuratorType == null) {
+            setFailed(context);
+            return;
+        }
+
+        ArcaneConfiguratorComponent configurator = cb.getComponent(ref, configuratorType);
 
         if (player == null || playerRef == null || configurator == null) {
             setFailed(context);
@@ -108,7 +116,10 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
     }
 
     private boolean isCrouching(CommandBuffer<EntityStore> cb, Ref<EntityStore> ref) {
-        MovementStatesComponent states = cb.getComponent(ref, MovementStatesComponent.getComponentType());
+        ComponentType<EntityStore, MovementStatesComponent> statesType = MovementStatesComponent.getComponentType();
+        if (statesType == null) return false;
+        
+        MovementStatesComponent states = cb.getComponent(ref, statesType);
         return states != null && states.getMovementStates().crouching;
     }
 
@@ -119,7 +130,10 @@ public class SelectTriggerInteraction extends SimpleInstantInteraction {
             return false;
         }
 
-        return store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType()) != null;
+        ComponentType<ChunkStore, ArcaneTriggerBlock> triggerType = ArcaneTriggerBlock.getComponentType();
+        if (triggerType == null) return false;
+
+        return store.getComponent(blockRef, triggerType) != null;
     }
 
     private void handleTriggerSelection(PlayerRef playerRef, ArcaneConfiguratorComponent configurator, Vector3i target, boolean crouching) {

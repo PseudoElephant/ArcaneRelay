@@ -68,7 +68,6 @@ public class ArcaneSection implements Component<ChunkStore> {
         this.tickRequests = new ObjectHeapPriorityQueue<>(TICK_REQUEST_COMPARATOR);
     }
     
-    @Nonnull
     public static ComponentType<ChunkStore, ArcaneSection> getComponentType() {
         return ArcaneSection.componentType;
     }

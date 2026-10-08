@@ -4,6 +4,7 @@ import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.ComponentAccessor;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.Ref;
@@ -236,11 +237,14 @@ public class MoveBlockActivation extends Activation {
 
         final List<Ref<EntityStore>> entitiesOnTopList = new ArrayList<>(entitiesOnTop);
 
+        ComponentType<EntityStore, TransformComponent> transformType = TransformComponent.getComponentType();
+        if (transformType == null) return;
+
         for (Ref<EntityStore> ref : entitiesOnTopList) {
             if (ref == null || !ref.isValid())
                 continue;
 
-            TransformComponent transform = entityStore.getComponent(ref, TransformComponent.getComponentType());
+            TransformComponent transform = entityStore.getComponent(ref, transformType);
             if (transform == null)
                 continue;
 
@@ -259,7 +263,10 @@ public class MoveBlockActivation extends Activation {
         Vector3d velocity = new Vector3d(direction).normalize();
         velocity.mul(KNOCKBACK_MAX_SPEED);
 
-        KnockbackComponent knockback = entityStore.ensureAndGetComponent(ref, KnockbackComponent.getComponentType());
+        ComponentType<EntityStore, KnockbackComponent> knockbackType = KnockbackComponent.getComponentType();
+        if (knockbackType == null) return;
+
+        KnockbackComponent knockback = entityStore.ensureAndGetComponent(ref, knockbackType);
         knockback.setVelocity(velocity);
         knockback.setVelocityType(ChangeVelocityType.Set);
         knockback.setVelocityConfig(new VelocityConfig());
@@ -290,7 +297,10 @@ public class MoveBlockActivation extends Activation {
         Vector3d pos = new Vector3d(transform.getPosition());
         Vector3d newPos = pos.add(new Vector3d(direction));
 
-        HeadRotation headComp = entityStore.getComponent(ref, HeadRotation.getComponentType());
+        ComponentType<EntityStore, HeadRotation> headRotationType = HeadRotation.getComponentType();
+        if (headRotationType == null) return;
+
+        HeadRotation headComp = entityStore.getComponent(ref, headRotationType);
         Rotation3f headRot = headComp != null ? new Rotation3f(headComp.getRotation()) : new Rotation3f(transform.getRotation());
 
         Teleport teleport = Teleport.createForPlayer(world, newPos, transform.getRotation()).setHeadRotation(headRot);
