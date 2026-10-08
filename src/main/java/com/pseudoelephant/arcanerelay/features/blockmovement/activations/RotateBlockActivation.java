@@ -194,7 +194,9 @@ public class RotateBlockActivation extends Activation {
             boolean blockWasRotated = BlockVectorUtil.isRotatable(targetBlockType);
             if (blockWasRotated) {
                 Ref<ChunkStore> targetSectionRef = store.getExternalData().getChunkSectionReferenceAtBlock(targetPos.x, targetPos.y, targetPos.z);
-                BlockOperations.setBlock(store.getExternalData(), targetSectionRef, targetPos.x, targetPos.y, targetPos.z, assetMap.getIndex(targetID), targetBlockType, newRotation.index(), 0, 4);
+                if (targetSectionRef != null) {
+                    BlockOperations.setBlock(store.getExternalData(), targetSectionRef, targetPos.x, targetPos.y, targetPos.z, assetMap.getIndex(targetID), targetBlockType, newRotation.index(), 0, 4);
+                }
                 BlockVectorUtil.setTickingAround(store, targetPos, 1);
             } else {
                 ArcaneRelayPlugin.LOGGER.atInfo().log("Rotator: Block of type: '%s', is not allowed to be rotated", targetBlockType.getId());

@@ -73,7 +73,7 @@ public class MoveBlockActivation extends Activation {
         .add()
         .build();
 
-    private boolean isWallPusherVariant(@Nonnull ComponentAccessor<ChunkStore> commandBuffer, @Nonnull Ref<ChunkStore> blockRef, @Nonnull Ref<ChunkStore> sectionRef, int worldX, int worldY, int worldZ) {
+    private boolean isWallPusherVariant(@Nonnull ComponentAccessor<ChunkStore> commandBuffer, @Nullable Ref<ChunkStore> blockRef, @Nullable Ref<ChunkStore> sectionRef, int worldX, int worldY, int worldZ) {
         BlockType blockType = BlockUtil.getBlockType(commandBuffer, worldX, worldY, worldZ);
         if (blockType == null) return false;
 
@@ -87,7 +87,7 @@ public class MoveBlockActivation extends Activation {
         return id != null && id.toLowerCase().contains("wall");
     }
 
-    private Vector3i getGlobalForwardVector(@Nonnull ComponentAccessor<ChunkStore> commandBuffer, @Nonnull Ref<ChunkStore> blockRef, @Nonnull Ref<ChunkStore> sectionRef, int worldX, int worldY, int worldZ, Vector3i pusherPosition) {
+    private Vector3i getGlobalForwardVector(@Nonnull ComponentAccessor<ChunkStore> commandBuffer, @Nullable Ref<ChunkStore> blockRef, @Nullable Ref<ChunkStore> sectionRef, int worldX, int worldY, int worldZ, Vector3i pusherPosition) {
         boolean isWallPusher = isWallPusherVariant(commandBuffer, blockRef, sectionRef, worldX, worldY, worldZ);
         
         World world = commandBuffer.getExternalData().getWorld();
@@ -98,7 +98,7 @@ public class MoveBlockActivation extends Activation {
         return BlockVectorUtil.getForwardVector(commandBuffer, pusherPosition, isWallPusher);
     }
 
-    private Vector3i getGlobalUpVector(@Nonnull ComponentAccessor<ChunkStore> commandBuffer, @Nonnull Ref<ChunkStore> blockRef, @Nonnull Ref<ChunkStore> sectionRef, int worldX, int worldY, int worldZ, Vector3i pusherPosition) {
+    private Vector3i getGlobalUpVector(@Nonnull ComponentAccessor<ChunkStore> commandBuffer, @Nullable Ref<ChunkStore> blockRef, @Nullable Ref<ChunkStore> sectionRef, int worldX, int worldY, int worldZ, Vector3i pusherPosition) {
         boolean isWallPusher = isWallPusherVariant(commandBuffer, blockRef, sectionRef, worldX, worldY, worldZ);
                 
         World world = commandBuffer.getExternalData().getWorld();

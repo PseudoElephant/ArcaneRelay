@@ -226,7 +226,9 @@ public class ArcanePullerActivation extends Activation {
                 if (pullerHolder != null) {
                     pullerHolder.putComponent(pullerType, puller);
                     BlockType blockType = BlockUtil.getBlockType(s, pullerPos.x, pullerPos.y, pullerPos.z);
-                    BlockUtil.setBlockEntity(s, pullerPos.x, pullerPos.y, pullerPos.z, blockType, rotationIndex, pullerHolder);
+                    if (blockType != null) {
+                        BlockUtil.setBlockEntity(s, pullerPos.x, pullerPos.y, pullerPos.z, blockType, rotationIndex, pullerHolder);
+                    }
                 }
             });
 
@@ -446,7 +448,9 @@ public class ArcanePullerActivation extends Activation {
 
         if (pullerHolder != null) {
             BlockType blockType = BlockUtil.getBlockType(store, pullerPos.x, pullerPos.y, pullerPos.z);
-            BlockUtil.setBlockEntity(store, pullerPos.x, pullerPos.y, pullerPos.z, blockType, rotationIndex, pullerHolder);
+            if (blockType != null) {
+                BlockUtil.setBlockEntity(store, pullerPos.x, pullerPos.y, pullerPos.z, blockType, rotationIndex, pullerHolder);
+            }
         }
     }
 

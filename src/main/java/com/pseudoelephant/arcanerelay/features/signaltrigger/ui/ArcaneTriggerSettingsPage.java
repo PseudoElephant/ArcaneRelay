@@ -124,7 +124,8 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
             return blockType.getId();
         }
 
-        return Message.translation(item.getTranslationProperties().getName()).getAnsiMessage();
+        String ansiMessage = Message.translation(item.getTranslationProperties().getName()).getAnsiMessage();
+        return ansiMessage != null ? ansiMessage : "";
     }
 
     @Override
