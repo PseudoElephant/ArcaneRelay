@@ -223,8 +223,8 @@ public class ArcanePullerActivation extends Activation {
                 ComponentType<ChunkStore, ArcanePullerBlock> pullerType = ArcanePullerBlock.getComponentType();
                 if (pullerType == null) return;
 
-                pullerHolder.putComponent(pullerType, puller);
                 if (pullerHolder != null) {
+                    pullerHolder.putComponent(pullerType, puller);
                     BlockType blockType = BlockUtil.getBlockType(s, pullerPos.x, pullerPos.y, pullerPos.z);
                     BlockUtil.setBlockEntity(s, pullerPos.x, pullerPos.y, pullerPos.z, blockType, rotationIndex, pullerHolder);
                 }

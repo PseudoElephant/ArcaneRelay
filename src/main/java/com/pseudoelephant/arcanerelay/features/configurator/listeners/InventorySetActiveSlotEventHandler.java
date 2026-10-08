@@ -48,7 +48,7 @@ public class InventorySetActiveSlotEventHandler extends EntityEventSystem<Entity
         }
 
         ItemStack activeItem = hotbar != null ? hotbar.getActiveItem() : null;
-        boolean holdingStaff = !ItemStack.isEmpty(activeItem) && ARCANE_STAFF_ITEM_ID.equals(activeItem.getItem().getId());
+        boolean holdingStaff = activeItem != null && !activeItem.isEmpty() && ARCANE_STAFF_ITEM_ID.equals(activeItem.getItem().getId());
         configurator.setConfiguring(holdingStaff);
     }
 

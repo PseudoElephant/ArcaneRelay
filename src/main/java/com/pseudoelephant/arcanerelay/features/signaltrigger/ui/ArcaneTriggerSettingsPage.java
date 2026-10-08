@@ -55,11 +55,10 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         ComponentType<ChunkStore, ArcaneTriggerBlock> triggerType = ArcaneTriggerBlock.getComponentType();
         ArcaneTriggerBlock trigger = triggerType != null ? chunkStore.getComponent(blockRef, triggerType) : null;
         
-        boolean isTriggerBlock = trigger != null;
-        commandBuilder.set("#ErrorScreen.Visible", !isTriggerBlock);
-        commandBuilder.set("#MainContent.Visible", isTriggerBlock);
+        commandBuilder.set("#ErrorScreen.Visible", trigger == null);
+        commandBuilder.set("#MainContent.Visible", trigger != null);
 
-        if (!isTriggerBlock) return;
+        if (trigger == null) return;
         
         List<Vector3i> outputs = trigger.getOutputPositions();
         addOutputDestinationList(chunkStore, commandBuilder, eventBuilder, trigger, outputs);

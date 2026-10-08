@@ -9,6 +9,7 @@ import org.joml.Vector3d;
 import org.joml.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blockhitbox.BlockBoundingBoxes;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.Rotation;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -157,8 +158,9 @@ public class ToggleDoorActivation extends Activation {
         int rotation,
         @Nonnull DoorState doorStateToCheck
     ) {
-        if (blockType.getItem() == null) return null;
-        BlockType baseBlockType = BlockType.getAssetMap().getAsset(blockType.getItem().getId());
+        Item item = blockType.getItem();
+        if (item == null) return null;
+        BlockType baseBlockType = BlockType.getAssetMap().getAsset(item.getId());
         if (baseBlockType == null) return null;
         int hitboxTypeIndex = baseBlockType.getHitboxTypeIndex();
         BlockBoundingBoxes blockBoundingBoxes = BlockBoundingBoxes.getAssetMap().getAsset(hitboxTypeIndex);
@@ -172,8 +174,11 @@ public class ToggleDoorActivation extends Activation {
         DoorInfo matchingDoor = getDoorAtPosition(world, store, otherPos.x, otherPos.y, otherPos.z, rotationToCheck.flip());
         if (matchingDoor == null || matchingDoor.doorState() != doorStateToCheck || matchingDoor.filler() != 0) return null;
         BlockType matchingBlockType = matchingDoor.blockType();
-        if (matchingBlockType.getItem() == null) return null;
-        int matchingHitboxIndex = BlockType.getAssetMap().getAsset(matchingBlockType.getItem().getId()).getHitboxTypeIndex();
+        Item matchingItem = matchingBlockType.getItem();
+        if (matchingItem == null) return null;
+        BlockType matchingBaseBlockType = BlockType.getAssetMap().getAsset(matchingItem.getId());
+        if (matchingBaseBlockType == null) return null;
+        int matchingHitboxIndex = matchingBaseBlockType.getHitboxTypeIndex();
         return matchingHitboxIndex == hitboxTypeIndex ? matchingDoor : null;
     }
 
@@ -193,8 +198,9 @@ public class ToggleDoorActivation extends Activation {
         BlockBoundingBoxes oldHitbox = BlockBoundingBoxes.getAssetMap().getAsset(blockType.getHitboxTypeIndex());
         String interactionStateToSend = getInteractionState(fromState, doorState);
         BlockType blockTypeForState = blockType;
-        if (blockType.getBlockForState(interactionStateToSend) == null && blockType.getItem() != null) {
-            BlockType base = BlockType.getAssetMap().getAsset(blockType.getItem().getId());
+        Item item = blockType.getItem();
+        if (blockType.getBlockForState(interactionStateToSend) == null && item != null) {
+            BlockType base = BlockType.getAssetMap().getAsset(item.getId());
             if (base != null && base.getBlockForState(interactionStateToSend) != null) blockTypeForState = base;
         }
         ChunkStore cs = store.getExternalData();
