@@ -3,6 +3,7 @@ package com.pseudoelephant.arcanerelay.features.blocks.puller.activations;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.Ref;
@@ -83,7 +84,12 @@ public class ArcanePullerActivation extends Activation {
             return ArcaneSection.BlockTickStrategy.PROCESSED;
         }
 
-        ArcanePullerBlock puller = commandBuffer.ensureAndGetComponent(blockRef, ArcanePullerBlock.getComponentType());
+        ComponentType<ChunkStore, ArcanePullerBlock> pullerType = ArcanePullerBlock.getComponentType();
+        if (pullerType == null) {
+            return ArcaneSection.BlockTickStrategy.PROCESSED;
+        }
+
+        ArcanePullerBlock puller = commandBuffer.ensureAndGetComponent(blockRef, pullerType);
 
         World world = commandBuffer.getExternalData().getWorld();
         if (world.getChunkStore().getChunkReference(ChunkUtil.indexChunkFromBlock(worldX, worldZ)) == null) {
@@ -214,10 +220,15 @@ public class ArcanePullerActivation extends Activation {
                         RotationTuple.get(rotationIndex)
                 );
 
-                pullerHolder.putComponent(ArcanePullerBlock.getComponentType(), puller);
+                ComponentType<ChunkStore, ArcanePullerBlock> pullerType = ArcanePullerBlock.getComponentType();
+                if (pullerType == null) return;
+
                 if (pullerHolder != null) {
+                    pullerHolder.putComponent(pullerType, puller);
                     BlockType blockType = BlockUtil.getBlockType(s, pullerPos.x, pullerPos.y, pullerPos.z);
-                    BlockUtil.setBlockEntity(s, pullerPos.x, pullerPos.y, pullerPos.z, blockType, rotationIndex, pullerHolder);
+                    if (blockType != null) {
+                        BlockUtil.setBlockEntity(s, pullerPos.x, pullerPos.y, pullerPos.z, blockType, rotationIndex, pullerHolder);
+                    }
                 }
             });
 
@@ -297,7 +308,6 @@ public class ArcanePullerActivation extends Activation {
 
             if (BlockVectorUtil.isPullable(tipBlockType, tipBlockId)) {
                 ArcaneMoveState moveState = s.getResource(ArcaneMoveState.getResourceType());
-                if (moveState == null) return;
                 moveState.addMoveEntry(tipPos, new Vector3i(globalUp).mul(-1), tipBlockType, tipBlockId,
                         rotation, filler, 0, holder);
             }
@@ -438,14 +448,19 @@ public class ArcanePullerActivation extends Activation {
 
         if (pullerHolder != null) {
             BlockType blockType = BlockUtil.getBlockType(store, pullerPos.x, pullerPos.y, pullerPos.z);
-            BlockUtil.setBlockEntity(store, pullerPos.x, pullerPos.y, pullerPos.z, blockType, rotationIndex, pullerHolder);
+            if (blockType != null) {
+                BlockUtil.setBlockEntity(store, pullerPos.x, pullerPos.y, pullerPos.z, blockType, rotationIndex, pullerHolder);
+            }
         }
     }
 
     private static void applyKnockbackToward(Store<EntityStore> entityStore, Ref<EntityStore> ref, Vector3i direction, float duration) {
         Vector3d velocity = new Vector3d(direction).normalize();
         velocity.mul(KNOCKBACK_MAX_SPEED);
-        KnockbackComponent knockback = entityStore.ensureAndGetComponent(ref, KnockbackComponent.getComponentType());
+        ComponentType<EntityStore, KnockbackComponent> knockbackType = KnockbackComponent.getComponentType();
+        if (knockbackType == null) return;
+
+        KnockbackComponent knockback = entityStore.ensureAndGetComponent(ref, knockbackType);
         knockback.setVelocity(velocity);
         knockback.setVelocityType(ChangeVelocityType.Set);
         knockback.setVelocityConfig(new VelocityConfig());
@@ -453,7 +468,10 @@ public class ArcanePullerActivation extends Activation {
     }
 
     private static float computePullDuration(Store<EntityStore> entityStore, Ref<EntityStore> ref, Vector3i targetPos) {
-        TransformComponent transform = entityStore.getComponent(ref, TransformComponent.getComponentType());
+        ComponentType<EntityStore, TransformComponent> transformType = TransformComponent.getComponentType();
+        if (transformType == null) return KNOCKBACK_DURATION;
+        TransformComponent transform = entityStore.getComponent(ref, transformType);
+        
         if (transform == null) return KNOCKBACK_DURATION;
         Vector3d current = transform.getPosition();
         Vector3d target = new Vector3d(targetPos.x + 0.5, targetPos.y + 0.5, targetPos.z + 0.5);

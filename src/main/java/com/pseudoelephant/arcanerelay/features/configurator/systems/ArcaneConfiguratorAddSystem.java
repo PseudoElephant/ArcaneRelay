@@ -1,6 +1,7 @@
 package com.pseudoelephant.arcanerelay.features.configurator.systems;
 
 import com.hypixel.hytale.component.AddReason;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.RemoveReason;
 import com.hypixel.hytale.component.Store;
@@ -16,7 +17,12 @@ import javax.annotation.Nonnull;
 public class ArcaneConfiguratorAddSystem extends HolderSystem<EntityStore> {
     @Override
     public void onEntityAdd(@Nonnull Holder<EntityStore> holder, @Nonnull AddReason reason, @Nonnull Store<EntityStore> store) {
-        holder.ensureComponent(ArcaneConfiguratorComponent.getComponentType());
+        ComponentType<EntityStore, ArcaneConfiguratorComponent> configuratorType = ArcaneConfiguratorComponent.getComponentType();
+        if (configuratorType == null) {
+            return;
+        }
+
+        holder.ensureComponent(configuratorType);
     }
 
     @Override

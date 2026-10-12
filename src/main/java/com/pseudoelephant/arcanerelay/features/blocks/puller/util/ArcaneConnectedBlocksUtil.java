@@ -92,9 +92,12 @@ public final class ArcaneConnectedBlocksUtil {
 
         int newId = BlockType.getAssetMap().getIndex(result.blockTypeKey());
         BlockType newType = BlockType.getAssetMap().getAsset(newId);
+        if (newType == null) return;
+
         Holder<ChunkStore> holder = BlockUtil.getBlockComponentHolder(store, blockPos.x, blockPos.y, blockPos.z);
 
         Ref<ChunkStore> sectionRef = store.getExternalData().getChunkSectionReferenceAtBlock(blockPos.x, blockPos.y, blockPos.z);
+        if (sectionRef == null) return;
 
         BlockUtil.setBlock(store, blockPos.x, blockPos.y, blockPos.z, newId, newType, result.rotationIndex(), 0, SETTINGS);
         if (holder != null) {

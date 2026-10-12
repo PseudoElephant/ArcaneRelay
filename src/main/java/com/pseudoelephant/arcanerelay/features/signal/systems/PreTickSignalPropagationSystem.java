@@ -1,6 +1,7 @@
 package com.pseudoelephant.arcanerelay.features.signal.systems;
 
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.ChunkSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.pseudoelephant.arcanerelay.features.signal.components.ArcaneSection;
@@ -56,9 +57,11 @@ public class PreTickSignalPropagationSystem extends EntityTickingSystem<ChunkSto
             Instant time = commandBuffer.getExternalData().getWorld().getEntityStore().getStore().getResource(WorldTimeResource.getResourceType()).getGameTime();
 
             Ref<ChunkStore> sectionRef = archetypeChunk.getReferenceTo(index);
-            if (sectionRef == null) return;
-            
-            ArcaneSection arcaneSection = commandBuffer.getComponent(sectionRef, ArcaneSection.getComponentType());
+
+            ComponentType<ChunkStore, ArcaneSection> arcaneSectionType = ArcaneSection.getComponentType();
+            if (arcaneSectionType == null) return;
+
+            ArcaneSection arcaneSection = commandBuffer.getComponent(sectionRef, arcaneSectionType);
             if (arcaneSection == null) return;
 
             arcaneSection.preTick(time);

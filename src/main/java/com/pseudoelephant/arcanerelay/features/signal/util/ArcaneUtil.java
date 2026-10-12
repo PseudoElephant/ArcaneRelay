@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.hypixel.hytale.component.ComponentAccessor;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.math.util.ChunkUtil;
@@ -22,7 +23,10 @@ public class ArcaneUtil {
                 .getChunkSectionReference(ChunkUtil.chunkCoordinate(worldX), ChunkUtil.chunkCoordinate(worldY), ChunkUtil.chunkCoordinate(worldZ));
         if (sectionRef == null) return;
 
-        ArcaneSection arcaneSection = store.getComponent(sectionRef, ArcaneSection.getComponentType());
+        ComponentType<ChunkStore, ArcaneSection> arcaneSectionType = ArcaneSection.getComponentType();
+        if (arcaneSectionType == null) return;
+
+        ArcaneSection arcaneSection = store.getComponent(sectionRef, arcaneSectionType);
         if (arcaneSection == null) return;
 
         arcaneSection.setTicking(worldX, worldY, worldZ, true);
@@ -34,7 +38,10 @@ public class ArcaneUtil {
                 .getChunkSectionReference(ChunkUtil.chunkCoordinate(worldX), ChunkUtil.chunkCoordinate(worldY), ChunkUtil.chunkCoordinate(worldZ));
         if (sectionRef == null) return;
 
-        ArcaneSection arcaneSection = store.getComponent(sectionRef, ArcaneSection.getComponentType());
+        ComponentType<ChunkStore, ArcaneSection> arcaneSectionType = ArcaneSection.getComponentType();
+        if (arcaneSectionType == null) return;
+
+        ArcaneSection arcaneSection = store.getComponent(sectionRef, arcaneSectionType);
         if (arcaneSection == null) return;
 
         ArcaneRelayPlugin.LOGGER.atInfo().log("Clearing ticking at %d,%d,%d", worldX, worldY, worldZ);
@@ -50,7 +57,10 @@ public class ArcaneUtil {
                 .getChunkSectionReference(ChunkUtil.chunkCoordinate(worldX), ChunkUtil.chunkCoordinate(worldY), ChunkUtil.chunkCoordinate(worldZ));
         if (sectionRef == null) return;
 
-        ArcaneSection arcaneSection = accessor.getComponent(sectionRef, ArcaneSection.getComponentType());
+        ComponentType<ChunkStore, ArcaneSection> arcaneSectionType = ArcaneSection.getComponentType();
+        if (arcaneSectionType == null) return;
+
+        ArcaneSection arcaneSection = accessor.getComponent(sectionRef, arcaneSectionType);
         if (arcaneSection == null) return;
 
         arcaneSection.setTicking(worldX, worldY, worldZ, true, sourceX, sourceY, sourceZ);

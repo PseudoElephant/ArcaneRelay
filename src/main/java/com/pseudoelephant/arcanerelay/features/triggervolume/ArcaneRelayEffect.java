@@ -4,6 +4,7 @@ import com.hypixel.hytale.builtin.triggervolumes.effect.TriggerContext;
 import com.hypixel.hytale.builtin.triggervolumes.effect.TriggerEffect;
 import com.hypixel.hytale.builtin.triggervolumes.manager.VolumeEntry;
 import com.hypixel.hytale.builtin.triggervolumes.shape.TriggerVolumeShape;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.math.block.BlockUtil;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -110,7 +111,10 @@ public class ArcaneRelayEffect extends TriggerEffect {
                 Ref<ChunkStore> blockRef = com.pseudoelephant.arcanerelay.util.BlockUtil.getBlockEntityReference(chunkStore, x, y, z);
                 if (blockRef == null || !blockRef.isValid()) break;
 
-                ArcaneTriggerBlock trigger = chunkStore.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
+                ComponentType<ChunkStore, ArcaneTriggerBlock> triggerType = ArcaneTriggerBlock.getComponentType();
+                if (triggerType == null) break;
+
+                ArcaneTriggerBlock trigger = chunkStore.getComponent(blockRef, triggerType);
                 if (trigger != null) {
                     ArcaneUtil.setTicking(chunkStore, x, y, z);
                     ArcaneRelayPlugin.LOGGER.atInfo().log("VolumeTrigger: Trigger Relays on block: %s at: %d, %d, %d ", blockType.getId(), x, y, z);

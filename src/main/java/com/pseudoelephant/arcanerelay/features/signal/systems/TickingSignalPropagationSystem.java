@@ -19,6 +19,7 @@ import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.builtin.blocktick.system.ChunkBlockTickSystem;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.dependency.Dependency;
@@ -69,25 +70,44 @@ public class TickingSignalPropagationSystem extends EntityTickingSystem<ChunkSto
             @Nonnull CommandBuffer<ChunkStore> commandBuffer) {
         Ref<ChunkStore> sectionRef = archetypeChunk.getReferenceTo(index);
 
-        BlockSection blockSection = commandBuffer.getComponent(sectionRef, BlockSection.getComponentType());
+        ComponentType<ChunkStore, BlockSection> blockSectionType = BlockSection.getComponentType();
+        if (blockSectionType == null)
+            return;
+
+        BlockSection blockSection = commandBuffer.getComponent(sectionRef, blockSectionType);
         if (blockSection == null)
             return;
 
-        ChunkSection chunkSection = commandBuffer.getComponent(sectionRef, ChunkSection.getComponentType());
+        ComponentType<ChunkStore, ChunkSection> chunkSectionType = ChunkSection.getComponentType();
+        if (chunkSectionType == null)
+            return;
+
+        ChunkSection chunkSection = commandBuffer.getComponent(sectionRef, chunkSectionType);
         if (chunkSection == null)
             return;
 
-        ArcaneSection arcaneSection = commandBuffer.getComponent(sectionRef, ArcaneSection.getComponentType());
+        ComponentType<ChunkStore, ArcaneSection> arcaneSectionType = ArcaneSection.getComponentType();
+        if (arcaneSectionType == null)
+            return;
+
+        ArcaneSection arcaneSection = commandBuffer.getComponent(sectionRef, arcaneSectionType);
         if (arcaneSection == null)
             return;
 
-        BlockComponentSection blockComponentSection = commandBuffer.getComponent(sectionRef,
-                BlockComponentSection.getComponentType());
+        ComponentType<ChunkStore, BlockComponentSection> blockComponentSectionType = BlockComponentSection.getComponentType();
+        if (blockComponentSectionType == null)
+            return;
+
+        BlockComponentSection blockComponentSection = commandBuffer.getComponent(sectionRef, blockComponentSectionType);
         if (blockComponentSection == null)
             return;
 
+        ComponentType<ChunkStore, WorldChunk> worldChunkType = WorldChunk.getComponentType();
+        if (worldChunkType == null)
+            return;
+
         WorldChunk worldChunkComponent = commandBuffer.getComponent(chunkSection.getChunkColumnReference(),
-                WorldChunk.getComponentType());
+                worldChunkType);
         if (worldChunkComponent == null)
             return;
 
@@ -98,7 +118,7 @@ public class TickingSignalPropagationSystem extends EntityTickingSystem<ChunkSto
         long tick = world.getTick();
         long rateLimitTicks = 10L; // process each block every 10 ticks
 
-        int arcaneTicksProcessed = arcaneSection.forEachTicking(cachedAccessor, commandBuffer, blockSection,
+        arcaneSection.forEachTicking(cachedAccessor, commandBuffer, blockSection,
                 chunkSection.getY(),
                 (commandBuffer1, arcaneSection1, x, y, z, blockId) -> {
                     int worldX = ChunkUtil.worldCoordFromLocalCoord(chunkSection.getX(), x);

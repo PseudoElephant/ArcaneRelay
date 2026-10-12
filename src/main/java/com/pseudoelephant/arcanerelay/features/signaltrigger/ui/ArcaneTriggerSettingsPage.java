@@ -4,6 +4,7 @@ import com.hypixel.hytale.assetstore.map.BlockTypeAssetMap;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import org.joml.Vector3i;
@@ -51,13 +52,13 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         commandBuilder.append("Pages/ArcaneTrigger.ui");
         
         Store<ChunkStore> chunkStore = blockRef.getStore();
-        ArcaneTriggerBlock trigger = chunkStore.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
+        ComponentType<ChunkStore, ArcaneTriggerBlock> triggerType = ArcaneTriggerBlock.getComponentType();
+        ArcaneTriggerBlock trigger = triggerType != null ? chunkStore.getComponent(blockRef, triggerType) : null;
         
-        boolean isTriggerBlock = trigger != null;
-        commandBuilder.set("#ErrorScreen.Visible", !isTriggerBlock);
-        commandBuilder.set("#MainContent.Visible", isTriggerBlock);
+        commandBuilder.set("#ErrorScreen.Visible", trigger == null);
+        commandBuilder.set("#MainContent.Visible", trigger != null);
 
-        if (!isTriggerBlock) return;
+        if (trigger == null) return;
         
         List<Vector3i> outputs = trigger.getOutputPositions();
         addOutputDestinationList(chunkStore, commandBuilder, eventBuilder, trigger, outputs);
@@ -123,7 +124,8 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
             return blockType.getId();
         }
 
-        return Message.translation(item.getTranslationProperties().getName()).getAnsiMessage();
+        String ansiMessage = Message.translation(item.getTranslationProperties().getName()).getAnsiMessage();
+        return ansiMessage != null ? ansiMessage : "";
     }
 
     @Override
@@ -131,14 +133,17 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
         if (!blockRef.isValid()) return;
 
         Store<ChunkStore> chunkStore = blockRef.getStore();
-        ArcaneTriggerBlock comp = chunkStore.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
+        ComponentType<ChunkStore, ArcaneTriggerBlock> triggerType = ArcaneTriggerBlock.getComponentType();
+        if (triggerType == null) return;
+
+        ArcaneTriggerBlock comp = chunkStore.getComponent(blockRef, triggerType);
         if (comp == null) return;
 
         ArcaneTriggerBlock updated = (ArcaneTriggerBlock) comp.clone();
 
         if ("Clear".equals(data.action)) {
             updated.clearOutputPositions();
-            chunkStore.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), updated);
+            chunkStore.putComponent(blockRef, triggerType, updated);
             rebuild();
             
             return;
@@ -155,7 +160,7 @@ public class ArcaneTriggerSettingsPage extends InteractiveCustomUIPage<ArcaneTri
             int z = Integer.parseInt(parts[2].trim());
             
             if (updated.removeOutputPosition(new Vector3i(x, y, z))) {
-                chunkStore.putComponent(blockRef, ArcaneTriggerBlock.getComponentType(), updated);
+                chunkStore.putComponent(blockRef, triggerType, updated);
                 rebuild();
             }
         } catch (NumberFormatException ignored) { }

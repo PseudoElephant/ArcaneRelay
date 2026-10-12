@@ -2,6 +2,7 @@ package com.pseudoelephant.arcanerelay.features.signaltrigger.ui;
 
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.ComponentAccessor;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.protocol.BlockPosition;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
@@ -31,7 +32,7 @@ public class ArcaneTriggerPageSupplier implements OpenCustomUIInteraction.Custom
     @Override
     public CustomUIPage tryCreate(
             @Nonnull Ref<EntityStore> ref,
-            ComponentAccessor<EntityStore> componentAccessor,
+            @Nonnull ComponentAccessor<EntityStore> componentAccessor,
             @Nonnull PlayerRef playerRef,
             @Nonnull InteractionContext context) {
         BlockPosition targetBlock = context.getTargetBlock();
@@ -45,7 +46,10 @@ public class ArcaneTriggerPageSupplier implements OpenCustomUIInteraction.Custom
         Ref<ChunkStore> blockRef = BlockUtil.getBlockEntityReference(chunkAccesor, targetBlock.x, targetBlock.y, targetBlock.z);
         if (blockRef == null || !blockRef.isValid()) return null;
 
-        ArcaneTriggerBlock trigger = chunkAccesor.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
+        ComponentType<ChunkStore, ArcaneTriggerBlock> triggerType = ArcaneTriggerBlock.getComponentType();
+        if (triggerType == null) return null;
+
+        ArcaneTriggerBlock trigger = chunkAccesor.getComponent(blockRef, triggerType);
         if (trigger == null) return null;
 
         return new ArcaneTriggerSettingsPage(playerRef, blockRef);

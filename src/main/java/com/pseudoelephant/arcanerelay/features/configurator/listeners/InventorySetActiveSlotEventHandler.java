@@ -2,6 +2,7 @@ package com.pseudoelephant.arcanerelay.features.configurator.listeners;
 
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
@@ -34,14 +35,20 @@ public class InventorySetActiveSlotEventHandler extends EntityEventSystem<Entity
             return;
         }
 
-        InventoryComponent.Hotbar hotbar = archetypeChunk.getComponent(index, InventoryComponent.Hotbar.getComponentType());
-        ArcaneConfiguratorComponent configurator = archetypeChunk.getComponent(index, ArcaneConfiguratorComponent.getComponentType());
+        ComponentType<EntityStore, InventoryComponent.Hotbar> hotbarType = InventoryComponent.Hotbar.getComponentType();
+        ComponentType<EntityStore, ArcaneConfiguratorComponent> configuratorType = ArcaneConfiguratorComponent.getComponentType();
+        if (hotbarType == null || configuratorType == null) {
+            return;
+        }
+
+        InventoryComponent.Hotbar hotbar = archetypeChunk.getComponent(index, hotbarType);
+        ArcaneConfiguratorComponent configurator = archetypeChunk.getComponent(index, configuratorType);
         if (configurator == null) {
             return;
         }
 
         ItemStack activeItem = hotbar != null ? hotbar.getActiveItem() : null;
-        boolean holdingStaff = !ItemStack.isEmpty(activeItem) && ARCANE_STAFF_ITEM_ID.equals(activeItem.getItem().getId());
+        boolean holdingStaff = activeItem != null && !activeItem.isEmpty() && ARCANE_STAFF_ITEM_ID.equals(activeItem.getItem().getId());
         configurator.setConfiguring(holdingStaff);
     }
 

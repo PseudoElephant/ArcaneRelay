@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
@@ -23,7 +24,12 @@ public class VisualSelectionSystem extends EntityTickingSystem<EntityStore> {
     public void tick(float dt, int index, @Nonnull ArchetypeChunk<EntityStore> archetypeChunk, @Nonnull Store<EntityStore> store,
             @Nonnull CommandBuffer<EntityStore> commandBuffer) {
         World world = store.getExternalData().getWorld();
-        ArcaneConfiguratorComponent configurator = archetypeChunk.getComponent(index, ArcaneConfiguratorComponent.getComponentType());
+        ComponentType<EntityStore, ArcaneConfiguratorComponent> configuratorType = ArcaneConfiguratorComponent.getComponentType();
+        if (configuratorType == null) {
+            return;
+        }
+
+        ArcaneConfiguratorComponent configurator = archetypeChunk.getComponent(index, configuratorType);
         
         if (configurator == null || !configurator.isConfiguring()) {
             return;

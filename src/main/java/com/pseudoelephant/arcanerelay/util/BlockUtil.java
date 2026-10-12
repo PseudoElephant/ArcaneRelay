@@ -1,6 +1,7 @@
 package com.pseudoelephant.arcanerelay.util;
 
 import com.hypixel.hytale.component.ComponentAccessor;
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -54,8 +55,14 @@ public final class BlockUtil {
             return null;
         }
 
+        ComponentType<ChunkStore, BlockComponentSection> blockComponentSectionType =
+                BlockComponentSection.getComponentType();
+        if (blockComponentSectionType == null) {
+            return null;
+        }
+
         BlockComponentSection blockComponentSection =
-                store.getComponent(sectionRef, BlockComponentSection.getComponentType());
+                store.getComponent(sectionRef, blockComponentSectionType);
         if (blockComponentSection == null) {
             return null;
         }
@@ -80,7 +87,12 @@ public final class BlockUtil {
             return null;
         }
 
-        return store.getComponent(sectionRef, BlockSection.getComponentType());
+        ComponentType<ChunkStore, BlockSection> blockSectionType = BlockSection.getComponentType();
+        if (blockSectionType == null) {
+            return null;
+        }
+
+        return store.getComponent(sectionRef, blockSectionType);
     }
 
     /**
@@ -100,8 +112,14 @@ public final class BlockUtil {
             return null;
         }
 
+        ComponentType<ChunkStore, BlockComponentSection> blockComponentSectionType =
+                BlockComponentSection.getComponentType();
+        if (blockComponentSectionType == null) {
+            return null;
+        }
+
         BlockComponentSection blockComponentSection =
-                store.getComponent(sectionRef, BlockComponentSection.getComponentType());
+                store.getComponent(sectionRef, blockComponentSectionType);
         return blockComponentSection != null
                 ? blockComponentSection.copyBlockHolder(ChunkUtil.indexBlock(x, y, z))
                 : null;
@@ -193,8 +211,14 @@ public final class BlockUtil {
             return;
         }
 
+        ComponentType<ChunkStore, BlockComponentSection> blockComponentSectionType =
+                BlockComponentSection.getComponentType();
+        if (blockComponentSectionType == null) {
+            return;
+        }
+
         BlockComponentSection blockComponentSection =
-                store.getComponent(sectionRef, BlockComponentSection.getComponentType());
+                store.getComponent(sectionRef, blockComponentSectionType);
         if (blockComponentSection == null) {
             return;
         }
@@ -218,8 +242,14 @@ public final class BlockUtil {
             return false;
         }
 
-        ChunkSection chunkSection = store.getComponent(sectionRef, ChunkSection.getComponentType());
-        BlockSection blockSection = store.getComponent(sectionRef, BlockSection.getComponentType());
+        ComponentType<ChunkStore, ChunkSection> chunkSectionType = ChunkSection.getComponentType();
+        ComponentType<ChunkStore, BlockSection> blockSectionType = BlockSection.getComponentType();
+        if (chunkSectionType == null || blockSectionType == null) {
+            return false;
+        }
+
+        ChunkSection chunkSection = store.getComponent(sectionRef, chunkSectionType);
+        BlockSection blockSection = store.getComponent(sectionRef, blockSectionType);
         if (chunkSection == null || blockSection == null) {
             return false;
         }
@@ -335,15 +365,21 @@ public final class BlockUtil {
         Vector3d min = new Vector3d(blockPosition.x - 0.1, blockPosition.y + 0.9, blockPosition.z - 0.1);
         Vector3d max = new Vector3d(blockPosition.x + 1.1, blockPosition.y + 2.1, blockPosition.z + 1.1);
 
+        ComponentType<EntityStore, TransformComponent> transformType = TransformComponent.getComponentType();
+        ComponentType<EntityStore, BoundingBox> boundingBoxType = BoundingBox.getComponentType();
+        if (transformType == null || boundingBoxType == null) {
+            return;
+        }
+
         for (var ref : TargetUtil.getAllEntitiesInBox(min, max, entityStore)) {
             if (ref == null || !ref.isValid())
                 continue;
 
-            TransformComponent transform = entityStore.getComponent(ref, TransformComponent.getComponentType());
+            TransformComponent transform = entityStore.getComponent(ref, transformType);
             if (transform == null)
                 continue;
 
-            BoundingBox boundingBox = entityStore.getComponent(ref, BoundingBox.getComponentType());
+            BoundingBox boundingBox = entityStore.getComponent(ref, boundingBoxType);
             Vector3d feet = getFeetPosition(transform, boundingBox);
 
             if (isFeetOnTopOfBlock(feet, blockPosition))

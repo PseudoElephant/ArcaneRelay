@@ -23,7 +23,6 @@ import com.hypixel.hytale.function.predicate.ObjectPositionBlockFunction;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
-import com.pseudoelephant.arcanerelay.ArcaneRelayPlugin;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -68,7 +67,6 @@ public class ArcaneSection implements Component<ChunkStore> {
         this.tickRequests = new ObjectHeapPriorityQueue<>(TICK_REQUEST_COMPARATOR);
     }
     
-    @Nonnull
     public static ComponentType<ChunkStore, ArcaneSection> getComponentType() {
         return ArcaneSection.componentType;
     }

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
+import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import org.joml.Matrix4d;
@@ -87,7 +88,10 @@ public class VisualsUtil {
         Ref<ChunkStore> blockRef = BlockUtil.getBlockEntityReference(store, triggerPos.x, triggerPos.y, triggerPos.z);
         if (blockRef == null || !blockRef.isValid()) return Collections.emptyList();
 
-        ArcaneTriggerBlock triggerBlock = store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
+        ComponentType<ChunkStore, ArcaneTriggerBlock> triggerType = ArcaneTriggerBlock.getComponentType();
+        if (triggerType == null) return Collections.emptyList();
+
+        ArcaneTriggerBlock triggerBlock = store.getComponent(blockRef, triggerType);
         if (triggerBlock == null || !triggerBlock.hasOutputPositions()) return Collections.emptyList();
 
         return triggerBlock.getOutputPositions();
@@ -110,7 +114,10 @@ public class VisualsUtil {
         Ref<ChunkStore> blockRef = BlockUtil.getBlockEntityReference(store, triggerPos.x, triggerPos.y, triggerPos.z);
         if (blockRef == null || !blockRef.isValid()) return;
 
-        ArcaneTriggerBlock triggerBlock = store.getComponent(blockRef, ArcaneTriggerBlock.getComponentType());
+        ComponentType<ChunkStore, ArcaneTriggerBlock> triggerType = ArcaneTriggerBlock.getComponentType();
+        if (triggerType == null) return;
+
+        ArcaneTriggerBlock triggerBlock = store.getComponent(blockRef, triggerType);
         if (triggerBlock == null || !triggerBlock.hasOutputPositions()) return;
 
         Vector3d from = new Vector3d(triggerPos.x + 0.5, triggerPos.y + 0.5, triggerPos.z + 0.5);

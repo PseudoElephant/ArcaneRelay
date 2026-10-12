@@ -156,6 +156,7 @@ public class ArcanePullerBlock implements Component<ChunkStore> {
 
         int noParticles = 4;
         Ref<ChunkStore> sectionRef = store.getExternalData().getChunkSectionReferenceAtBlock(posX, posY, posZ);
+        if (sectionRef == null) return false;
         BlockOperations.setBlock(world.getChunkStore(), sectionRef, posX, posY, posZ, extensionBlockIndex, extensionBlockType, rotationIndex, 0, noParticles);
 
         BlockPhysics.reset(store, sectionRef, posX, posY, posZ);

@@ -43,7 +43,6 @@ public final class BlockMovementGraph {
         Map<Vector3i, List<Vector3i>> graph = new HashMap<>();
 
         for (Map.Entry<Vector3i, MoveEntry> entry : moveEntries.entrySet()) {
-            Vector3i blockPosition = entry.getKey();
             MoveEntry moveEntry = entry.getValue();
             if (!graph.containsKey(moveEntry.blockPosition)) {
                 graph.put(moveEntry.blockPosition, new ArrayList<>());
