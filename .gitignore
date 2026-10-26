@@ -1,3 +1,8 @@
+# Gradle
+.gradle/
+build/
+run/
+
 # Maven
 target/
 pom.xml.tag
@@ -117,3 +122,4 @@ hs_err_pid*
 
 # Configuration
 .env
+key.properties

@@ -2,92 +2,29 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Deploy ArcaneRelay",
+            "label": "Hytale: Run Server",
             "type": "shell",
-            "command": "./scripts/deploy.sh",
-            "windows": {
-                "type": "process",
-                "command": "cmd",
-                "args": ["/c", "scripts\\deploy.bat"]
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "Launch Hytale Server",
-            "type": "shell",
-            "command": "./scripts/launch-server.sh",
-            "windows": {
-                "type": "process",
-                "command": "cmd",
-                "args": ["/c", "scripts\\launch-server.bat"]
-            },
+            "command": "./gradlew",
+            "args": ["runServer", "-Ddebug=true", "-Dhotswap=true"],
             "isBackground": true,
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
             "problemMatcher": {
                 "pattern": {
-                    "regexp": "^\\[ERROR\\]\\s+(.*)$",
-                    "severity": "error",
-                    "message": 1
+                    "regexp": "^.*$"
                 },
                 "background": {
                     "activeOnStart": true,
-                    "beginsPattern": "^\\[INFO\\] Starting Hytale Server",
-                    "endsPattern": "^\\[INFO\\] Server is waiting for debugger connection"
+                    "beginsPattern": "^.*$",
+                    "endsPattern": "^.*Hytale Server Booted!.*$"
                 }
-            }
+            },
+            "group": "none"
         },
         {
-            "label": "Wait for Server Ready",
+            "label": "Hytale: Setup Dev Environment",
             "type": "shell",
-            "windows": {
-                "command": "cmd",
-                "args": ["/c", "timeout /t 3 /nobreak"]
-            },
-            "osx": {
-                "command": "/bin/sleep",
-                "args": ["3"]
-            },
-            "linux": {
-                "command": "/bin/sleep",
-                "args": ["3"]
-            },
-            "presentation": {
-                "echo": false,
-                "reveal": "silent"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "Deploy and Debug Hytale Mod",
-            "dependsOn": ["Deploy ArcaneRelay", "Launch Hytale Server", "Wait for Server Ready"],
-            "dependsOrder": "sequence",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
+            "command": "./gradlew",
+            "args": ["setupHytaleDev", "prepareDecompiledSourcesForIde"],
+            "group": "none",
             "problemMatcher": []
         }
     ]
