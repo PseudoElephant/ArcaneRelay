@@ -7,3 +7,5 @@ All notable changes to the current version of the project will be documented in 
 - Started using [HytaleTools](https://github.com/AzureDoom/Hytale-Gradle-Plugin)
 - Modified README.md to have up to date instruction on the project setup.
 - Added two changelog files. `changlog-full.md` and `changlog.md` and updated them accordingly.
+- Added Hytale Publisher build properties and setup.
+- Added github workflow for enforcing a changelog.md file change on merge with master. 
