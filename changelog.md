@@ -9,3 +9,4 @@ All notable changes to the current version of the project will be documented in 
 - Added two changelog files. `changlog-full.md` and `changlog.md` and updated them accordingly.
 - Added Hytale Publisher build properties and setup.
 - Added github workflow for enforcing a changelog.md file change on merge with master. 
+- Added gradle-wrapper.jar to the project for easier setup
