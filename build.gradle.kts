@@ -54,6 +54,10 @@ idea {
 
 
 hytalePublisher {
+    version = property("version").toString()
+    releaseType = "release"
+    changelogFile = "changelog.md"
+
     modtale {
         enabled = true
         projectId = property("modtale_project_id").toString()
@@ -64,8 +68,9 @@ hytalePublisher {
         projectId = property("curseforge_project_id").toString()
     }
 
-    modifold {
+    github {
         enabled = true
-        projectId = property("modifold_project_slug").toString()
+        tagPrefix = "v"
+        includeJar = true
     }
 }
