@@ -2,34 +2,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Attach to Hytale Server",
             "type": "java",
+            "name": "Hytale Server (Hot Swap Debug)",
             "request": "attach",
             "hostName": "localhost",
             "port": 5005,
-            "preLaunchTask": "Deploy and Debug Hytale Mod",
-            "presentation": {
-                "hidden": false,
-                "group": "hytale",
-                "order": 1
-            },
-            "cwd": "${workspaceFolder}",
-            "sourceRoot": "${workspaceFolder}/src/main/java",
-            "pathMapping": {
-                "/src/main/java": "${workspaceFolder}/src/main/java"
-            }
-        }
-    ],
-    "compounds": [
-        {
-            "name": "Debug Hytale Mod (Full Workflow)",
-            "configurations": ["Attach to Hytale Server"],
-            "stopOnEntry": false,
-            "presentation": {
-                "hidden": false,
-                "group": "hytale",
-                "order": 2
-            }
+            "preLaunchTask": "Hytale: Run Server"
         }
     ]
 }

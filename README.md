@@ -173,114 +173,33 @@ Example – **inline activation** (Type + params, no separate asset):
 }
 ```
 
-
 ## Building the Project
-You will need to have Maven installed on your machine.
+The following are the necessary steps required to get the project running.
 
 ### Prerequisites
 - Java 25 (or compatible)
-- Maven 3.x
-- Hytale server installed
+- Gradle
 
-### Dependencies
-To build the project make sure to go to `./pom.xml` and under dependencies ensure that the com.hypixel.hytale `<version>{hytale_version}</version>` has the latest release version of the game.
-
-Then you can run the following:
-```
-mvn -U -X dependency:resolve
-```
-
-### Building Locally
-Run the following command to generate the `arcanerelay-X.Y.Z.jar` file:
-```
-mvn clean install
-```
-
-### Maven Build Profiles
-
-This project includes two Maven profiles for different build types:
-
-- **`debug` profile (default)** – Includes full debug symbols for breakpoint debugging
-- **`release` profile** – Optimized for production, no debug information
-
-**Build with debug profile (default):**
+### Installing and Running the Project
+Once you downloaded the repository locally you can run the following command for a quick check:
 ```bash
-mvn clean install
-# or explicitly:
-mvn clean install -P debug
+.gradlew hytaleDoctor
 ```
 
-**Build with release profile:**
+This should show the location of some files and caches. Ensure this are correct. 
+
+If you want to move the Gradle cached location you can do so by specifying a new environment variable called `GRADLE_USER_HOME` and setting it your correspending path. Remember to restart VSCode in case the registry variable value was cached.
+
+Once you are happy with the locations run the following commands and follow the instructions given in them if necessary:
 ```bash
-mvn clean install -P release
+./gradlew setupHytaleDev
+./gradlew runServer
 ```
 
-### Deploy to Hytale Server
-1. Copy `.env.template` to `.env` and update the following paths:
-   ```
-   HYTALE_BUILD_TYPE=RELEASE              # or PRERELEASE
-   HYTALE_SERVER_PATH=<your server path>
-   HYTALE_SERVER_MODS_PATH=<your mods path>
-   HYTALE_SERVER_ASSETS_PATH=<path to Assets.zip>
-   MAVEN_PROFILE=debug                    # or release
-   HYTALE_DEBUG_PORT=5005
-   ```
+The `setupHytaleDev` command should install all necessary dependencies to build and run the project.
+Then `runServer` should bootup a locally hosted Hytale server with the mod included for testing.
 
-2. Run the deploy script:
-   - Windows: `scripts\deploy.bat`
-   - macOS/Linux: `./scripts/deploy.sh`
+If you are running into issues please reference the [HytaleTools Wiki](https://github.com/AzureDoom/Hytale-Gradle-Plugin/wiki).
 
-You can also specify the profile on the command line:
-```bash
-# Windows - deploy with release profile
-scripts\deploy.bat release
-
-# macOS/Linux - deploy with debug profile
-./scripts/deploy.sh debug
-```
-
-### VS Code Launch Configuration
-
-To set up VS Code for running and debugging, create or update `.vscode/launch.json`:
-
-```json
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Attach to Hytale Server",
-            "type": "java",
-            "request": "attach",
-            "hostName": "localhost",
-            "port": 5005,
-            "preLaunchTask": "Deploy and Debug Hytale Mod",
-            "presentation": {
-                "hidden": false,
-                "group": "hytale",
-                "order": 1
-            },
-            "cwd": "${workspaceFolder}",
-            "sourceRoot": "${workspaceFolder}/src/main/java",
-            "pathMapping": {
-                "/src/main/java": "${workspaceFolder}/src/main/java"
-            }
-        }
-    ],
-    "compounds": [
-        {
-            "name": "Debug Hytale Mod (Full Workflow)",
-            "configurations": ["Attach to Hytale Server"],
-            "stopOnEntry": false,
-            "presentation": {
-                "hidden": false,
-                "group": "hytale",
-                "order": 2
-            }
-        }
-    ]
-}
-```
-
-Then use `Ctrl+Shift+D` (or `Cmd+Shift+D` on macOS) to open the Run and Debug panel, select "Debug Hytale Mod (Full Workflow)", and press F5 to run.
-
-For more detailed information, see [DEBUGGING.md](DEBUGGING.md).
+### If Using VSCode
+We have added a `launch.json` and `tasks.json` under `/.vscode`. These let you run a debuggable version of the hytale server with the mod installed by pressing F5 or going under the `Run and Debug` tab.  

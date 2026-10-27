@@ -1,17 +1,29 @@
 {
-    "Group": "PseudoElephant",
-    "Name": "ArcaneRelay",
+    "Group": "com.pseudoelephant",
+    "Name": "arcanerelay",
     "Version": "1.3.6",
-    "Description": "Arcane Relay allows you to create and play with a magical automation and logic system in Hytale. Craft weird machines and try to figure out how you can use them to make a bunch of cool stuff. Activate interactions from a distance, move blocks, create circuits, or try anything else you might think of.",
+    "Description": "Arcane Relay allows you to create and play with a magical automation and logic system in Hytale.",
     "Authors": [
-        {"Name": "PseudoAle"},
-        {"Name": "Fanzy"}
+        {
+            "Name": "PseudoAle"
+        },
+        {
+            "Name": "Fanzy"
+        }
     ],
-    "Website": "",
-    "ServerVersion": ">=0.7.0",
-    "Dependencies": {},
-    "OptionalDependencies": {},
+    "Website": "https://github.com/PseudoElephant/ArcaneRelay",
+    "ServerVersion": ">=0.7.0 <0.8.0",
+    "Dependencies": {
+        "Hytale:AssetModule": "*",
+        "Hytale:EntityModule": "*"
+    },
+    "OptionalDependencies": {
+        
+    },
     "DisabledByDefault": false,
     "Main": "com.pseudoelephant.arcanerelay.ArcaneRelayPlugin",
-    "IncludesAssetPack": true
+    "IncludesAssetPack": true,
+    "UpdateChecker": {
+        "CurseForge": ""
+    }
 }
